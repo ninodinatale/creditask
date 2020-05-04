@@ -1,0 +1,10 @@
+query otherUsers($userEmail: String!) {
+    otherUsers(userEmail: $userEmail) {
+        ...otherUsers
+    }
+}
+
+fragment otherUsers on UserType {
+    email
+    publicName
+}

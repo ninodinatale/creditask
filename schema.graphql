@@ -1,0 +1,99 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+scalar CustomFloat
+
+scalar CustomString
+
+scalar Date
+
+scalar DateTime
+
+scalar GenericScalar
+
+type Mutation {
+  saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
+  tokenAuth(email: String!, password: String!): ObtainJSONWebToken
+  verifyToken(token: String!): Verify
+  refreshToken(token: String!): Refresh
+}
+
+type ObtainJSONWebToken {
+  token: String
+  user: UserType
+}
+
+type Query {
+  task(taskId: Int!): TaskType
+  todoTasksOfUser(userEmail: String!): [TaskType!]
+  user(id: Int!): UserType
+  otherUsers(userEmail: String!): [UserType!]
+}
+
+type Refresh {
+  token: String
+  payload: GenericScalar
+}
+
+type SaveTask {
+  task: TaskType
+}
+
+input TaskInputCreate {
+  name: CustomString!
+  factor: CustomFloat!
+  userId: Int
+  periodStart: Date
+  periodEnd: Date
+}
+
+input TaskInputUpdate {
+  name: CustomString
+  factor: CustomFloat
+  userId: Int
+  periodStart: Date
+  periodEnd: Date
+}
+
+enum TaskState {
+  UNKNOWN
+  TO_DO
+  TO_APPROVE
+  DECLINED
+  UNDER_CONDITIONS
+  APPROVED
+}
+
+type TaskType {
+  id: ID!
+  createdAt: DateTime!
+  createdBy: UserType
+  isDeleted: Boolean!
+  name: String!
+  neededTimeSeconds: Int!
+  state: TaskState!
+  factor: Int!
+  user: UserType
+  periodStart: Date!
+  periodEnd: Date!
+  done: Boolean!
+}
+
+type UserType {
+  id: ID!
+  password: String!
+  lastLogin: DateTime
+  email: String!
+  publicName: String!
+  credits: Int!
+  isStaff: Boolean!
+  isSuperuser: Boolean!
+  isActive: Boolean!
+  taskSet: [TaskType!]!
+}
+
+type Verify {
+  payload: GenericScalar
+}

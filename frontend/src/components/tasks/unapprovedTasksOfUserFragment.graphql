@@ -1,0 +1,6 @@
+fragment unapprovedTasksOfUser on TaskType {
+    id
+    name
+    done
+    periodEnd
+}

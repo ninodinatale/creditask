@@ -1,0 +1,95 @@
+from django.db import DataError
+
+from creditask.models import Task, User
+from .models_test_base import ModelsTestBase
+
+
+class TestTaskModel(ModelsTestBase):
+    _user_email = 'user@TestTaskModel.com'
+
+    def setUp(self) -> None:
+        self.entity_under_test = Task
+        user = User.objects.create(email=TestTaskModel._user_email,
+                                   public_name='user', password='password')
+        task_dict = dict(
+            name='Task name',
+            user_id=user.id,
+            needed_time_seconds=10, state=Task.State.UNKNOWN,
+            factor=1, period_start='2020-01-01',
+            period_end='2020-01-01', done=False)
+
+        self.valid_entity_dict = task_dict
+        super().setUp()
+
+    def tearDown(self) -> None:
+        User.objects.get(email=TestTaskModel._user_email).delete()
+        super().tearDown()
+
+    '''name
+    '''
+
+    def test_name_should_have_default_value(self):
+        del self.valid_entity_dict['name']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual('Unnamed task', created_task.name)
+
+    def test_name_should_have_max_length_30(self):
+        with self.assertRaises(DataError):
+            self.valid_entity_dict['name'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+            Task.objects.create(**self.valid_entity_dict)
+
+    '''needed_time_seconds
+    '''
+
+    def test_needed_time_seconds_should_have_default_value(self):
+        del self.valid_entity_dict['needed_time_seconds']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual(0, created_task.needed_time_seconds)
+
+    '''state
+    '''
+
+    def test_state_should_have_default_value(self):
+        del self.valid_entity_dict['state']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual(Task.State.TO_DO, created_task.state)
+
+    '''factor
+    '''
+
+    def test_factor_should_have_default_value(self):
+        del self.valid_entity_dict['factor']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual(0, created_task.factor)
+
+    '''user
+    '''
+
+    def test_user_should_be_nullable(self):
+        del self.valid_entity_dict['user_id']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual(None, created_task.user)
+
+    '''period_start
+    '''
+
+    def test_period_start_should_have_default_value_of_now(self):
+        del self.valid_entity_dict['period_start']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertIsNotNone(created_task.period_start)
+
+    '''period_start
+    '''
+
+    def test_period_end_should_have_default_value_of_now(self):
+        del self.valid_entity_dict['period_end']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertIsNotNone(created_task.period_end)
+
+    '''done
+    '''
+
+    def test_done_should_have_default_value(self):
+        del self.valid_entity_dict['done']
+        created_task = Task.objects.create(**self.valid_entity_dict)
+        self.assertEqual(False, created_task.done)
