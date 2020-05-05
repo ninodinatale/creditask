@@ -1,6 +1,6 @@
 import React from 'react';
 import { Avatar, List } from 'react-native-paper';
-import { UnapprovedTasksOfUserFragment } from '../../../../graphql/graphql';
+import { UnapprovedTasksOfUserFragment } from '../../../../graphql/types';
 import { View } from 'react-native';
 import { ISODateStringToLocaleDateString } from '../../../../utils/transformer';
 

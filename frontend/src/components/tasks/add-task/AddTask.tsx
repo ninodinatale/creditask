@@ -6,7 +6,7 @@ import {
   TaskInputCreate,
   UnapprovedTasksOfUserFragment,
   useOtherUsersQuery
-} from '../../../graphql/graphql';
+} from '../../../graphql/types';
 import { useAuth } from '../../../hooks/auth/use-auth';
 import LoadingSpinner from '../../_shared/LoadingSpinner';
 import PickerInput, { PickerChoices } from '../../_shared/PickerInput';

@@ -9,99 +9,16 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /**
-   * The `DateTime` scalar type represents a DateTime
-   * value as specified by
-   * [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-   */
-  DateTime: Date;
-  /**
-   * The `Date` scalar type represents a Date
-   * value as specified by
-   * [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-   */
-  Date: any;
-  CustomString: string;
   CustomFloat: number;
-  /**
-   * The `GenericScalar` scalar type represents a generic
-   * GraphQL scalar value that could be:
-   * String, Boolean, Int, Float, List or Object.
-   */
+  CustomString: string;
+  Date: any;
+  DateTime: Date;
   GenericScalar: any;
 };
 
-export type Query = {
-  task: TaskType;
-  todoTasksOfUser: Maybe<Array<TaskType>>;
-  user: Maybe<UserType>;
-  otherUsers: Maybe<Array<UserType>>;
-};
 
 
-export type QueryTaskArgs = {
-  taskId: Scalars['Int'];
-};
 
-
-export type QueryTodoTasksOfUserArgs = {
-  userEmail: Scalars['String'];
-};
-
-
-export type QueryUserArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type QueryOtherUsersArgs = {
-  userEmail: Scalars['String'];
-};
-
-export type TaskType = {
-  id: Scalars['ID'];
-  createdAt: Scalars['DateTime'];
-  createdBy: Maybe<UserType>;
-  isDeleted: Scalars['Boolean'];
-  name: Scalars['String'];
-  neededTimeSeconds: Scalars['Int'];
-  state: TaskState;
-  factor: Scalars['Int'];
-  user: Maybe<UserType>;
-  periodStart: Scalars['Date'];
-  periodEnd: Scalars['Date'];
-  done: Scalars['Boolean'];
-};
-
-
-export type UserType = {
-  id: Scalars['ID'];
-  password: Scalars['String'];
-  lastLogin: Maybe<Scalars['DateTime']>;
-  email: Scalars['String'];
-  publicName: Scalars['String'];
-  credits: Scalars['Int'];
-  isStaff: Scalars['Boolean'];
-  isSuperuser: Scalars['Boolean'];
-  isActive: Scalars['Boolean'];
-  taskSet: Array<TaskType>;
-};
-
-/** An enumeration. */
-export enum TaskState {
-  /** Unknown */
-  Unknown = 'UNKNOWN',
-  /** To Do */
-  ToDo = 'TO_DO',
-  /** To Approve */
-  ToApprove = 'TO_APPROVE',
-  /** Declined */
-  Declined = 'DECLINED',
-  /** Under Conditions */
-  UnderConditions = 'UNDER_CONDITIONS',
-  /** Approved */
-  Approved = 'APPROVED'
-}
 
 
 export type Mutation = {
@@ -133,6 +50,43 @@ export type MutationRefreshTokenArgs = {
   token: Scalars['String'];
 };
 
+export type ObtainJsonWebToken = {
+  token: Maybe<Scalars['String']>;
+  user: Maybe<UserType>;
+};
+
+export type Query = {
+  task: TaskType;
+  todoTasksOfUser: Maybe<Array<TaskType>>;
+  user: Maybe<UserType>;
+  otherUsers: Maybe<Array<UserType>>;
+};
+
+
+export type QueryTaskArgs = {
+  taskId: Scalars['Int'];
+};
+
+
+export type QueryTodoTasksOfUserArgs = {
+  userEmail: Scalars['String'];
+};
+
+
+export type QueryUserArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryOtherUsersArgs = {
+  userEmail: Scalars['String'];
+};
+
+export type Refresh = {
+  token: Maybe<Scalars['String']>;
+  payload: Maybe<Scalars['GenericScalar']>;
+};
+
 export type SaveTask = {
   task: TaskType;
 };
@@ -145,8 +99,6 @@ export type TaskInputCreate = {
   periodEnd: Maybe<Scalars['Date']>;
 };
 
-
-
 export type TaskInputUpdate = {
   name: Maybe<Scalars['CustomString']>;
   factor: Maybe<Scalars['CustomFloat']>;
@@ -155,18 +107,44 @@ export type TaskInputUpdate = {
   periodEnd: Maybe<Scalars['Date']>;
 };
 
-export type ObtainJsonWebToken = {
-  token: Maybe<Scalars['String']>;
+export enum TaskState {
+  Unknown = 'UNKNOWN',
+  ToDo = 'TO_DO',
+  ToApprove = 'TO_APPROVE',
+  Declined = 'DECLINED',
+  UnderConditions = 'UNDER_CONDITIONS',
+  Approved = 'APPROVED'
+}
+
+export type TaskType = {
+  id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  createdBy: Maybe<UserType>;
+  isDeleted: Scalars['Boolean'];
+  name: Scalars['String'];
+  neededTimeSeconds: Scalars['Int'];
+  state: TaskState;
+  factor: Scalars['Int'];
   user: Maybe<UserType>;
+  periodStart: Scalars['Date'];
+  periodEnd: Scalars['Date'];
+  done: Scalars['Boolean'];
+};
+
+export type UserType = {
+  id: Scalars['ID'];
+  password: Scalars['String'];
+  lastLogin: Maybe<Scalars['DateTime']>;
+  email: Scalars['String'];
+  publicName: Scalars['String'];
+  credits: Scalars['Int'];
+  isStaff: Scalars['Boolean'];
+  isSuperuser: Scalars['Boolean'];
+  isActive: Scalars['Boolean'];
+  taskSet: Array<TaskType>;
 };
 
 export type Verify = {
-  payload: Maybe<Scalars['GenericScalar']>;
-};
-
-
-export type Refresh = {
-  token: Maybe<Scalars['String']>;
   payload: Maybe<Scalars['GenericScalar']>;
 };
 

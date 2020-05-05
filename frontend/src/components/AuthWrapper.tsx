@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import Login from './login/Login';
 import { useAuth } from '../hooks/auth/use-auth';
 import SplashScreen from './_shared/SplashScreen';
-import { RefreshTokenDocument, RefreshTokenMutation } from '../graphql/graphql';
+import { RefreshTokenDocument, RefreshTokenMutation } from '../graphql/types';
 import { useApolloClient } from '@apollo/react-hooks';
 import NavigationWrapper from './NavigationWrapper';
+import LoadingSpinner from './_shared/LoadingSpinner';
 
 export default function AuthWrapper() {
   const {mutate} = useApolloClient();
   const {getJwt, logout, login} = useAuth();
 
-  const [state, setState] = useState({isLoading: false, hasToken: false});
+  const [state, setState] = useState({isLoading: true, hasToken: false});
 
   useEffect(() => {
-    determineIfJwtExists().catch(console.error)
+    determineIfJwtExists().catch(_ => setUserHasNoToken())
   }, []);
 
   async function determineIfJwtExists() {
@@ -61,7 +62,7 @@ export default function AuthWrapper() {
 
 
   if (state.isLoading) {
-    return <SplashScreen/>
+    return <LoadingSpinner/>
   }
 
   if (!state.hasToken) {

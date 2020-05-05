@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../../hooks/auth/use-auth';
 import LoadingSpinner from '../../_shared/LoadingSpinner';
-import { useTodoTasksOfUserQuery } from '../../../graphql/graphql';
+import { useTodoTasksOfUserQuery } from '../../../graphql/types';
 import UserAssignedTasksView from './view/UserAssignedTasksView'
 
 export default function UserAssignedTasks() {
