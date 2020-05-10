@@ -18,3 +18,4 @@ config:
   withComponent: false
   skipTypename: true
   avoidOptionals: true
+

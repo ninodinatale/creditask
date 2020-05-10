@@ -4,7 +4,7 @@ from graphql_jwt.decorators import login_required
 
 from creditask.models import User
 
-from creditask.services.user_service import get_other_users
+from creditask.services.user_service import get_other_users, get_users
 
 
 #
@@ -17,7 +17,13 @@ class UserType(DjangoObjectType):
 
 class UserQuery:
     user = Field(UserType, id=NonNull(Int))
+    users = List(NonNull(UserType))
     other_users = List(NonNull(UserType), user_email=NonNull(String))
+
+    @staticmethod
+    @login_required
+    def resolve_users(self, info, **kwargs):
+        return get_users(info.context.user.group_id)
 
     @staticmethod
     @login_required

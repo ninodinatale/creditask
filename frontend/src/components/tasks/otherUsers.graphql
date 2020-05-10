@@ -5,6 +5,6 @@ query otherUsers($userEmail: String!) {
 }
 
 fragment otherUsers on UserType {
-    email
+    id
     publicName
 }

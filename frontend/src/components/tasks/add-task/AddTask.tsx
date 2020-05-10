@@ -5,7 +5,7 @@ import {
   SaveTaskMutationVariables,
   TaskInputCreate,
   UnapprovedTasksOfUserFragment,
-  useOtherUsersQuery
+  useUsersQuery
 } from '../../../graphql/types';
 import { useAuth } from '../../../hooks/auth/use-auth';
 import LoadingSpinner from '../../_shared/LoadingSpinner';
@@ -29,7 +29,7 @@ interface AddTaskProps {
 export default function AddTask(props: AddTaskProps) {
   const apolloClient = useApolloClient();
   const auth = useAuth();
-  const {loading, error, data} = useOtherUsersQuery({
+  const {loading, error, data} = useUsersQuery({
     variables: {
       userEmail: auth.user.email
     }
@@ -41,7 +41,7 @@ export default function AddTask(props: AddTaskProps) {
 
   const initialValues: AddTaskValues & DatePickerState = {
     name: '',
-    assignedUser: NO_USER_ASSIGNMENT,
+    assignedUserId: NO_USER_ASSIGNMENT,
     factor: '1',
     periodStart: dateToLocaleDateString(new Date()),
     periodEnd: dateToLocaleDateString(new Date()),
@@ -90,7 +90,7 @@ export default function AddTask(props: AddTaskProps) {
     const createInput: TaskInputCreate = {
       name: values.name,
       factor: +values.factor,
-      userId: values.assignedUser == NO_USER_ASSIGNMENT ? null : values.assignedUser,
+      userId: values.assignedUserId == NO_USER_ASSIGNMENT ? null : +values.assignedUserId,
       periodStart: localeDateStringToISOString(values.periodStart),
       periodEnd: localeDateStringToISOString(values.periodEnd)
     };
@@ -113,12 +113,20 @@ export default function AddTask(props: AddTaskProps) {
       {
         label: 'Keine Zuweisung',
         value: NO_USER_ASSIGNMENT
-      }
+      },
+      {
+        label: 'Mir',
+        value: ''+auth.user.id
+      },
     ];
 
-    const otherUsersChoices: PickerChoices = data.otherUsers?.map(u => ({
+    const otherUsersChoices: PickerChoices = data.users
+    ?.filter(u => {
+      return u.id != auth.user.id
+    })
+    .map(u => ({
       label: u.publicName,
-      value: u.email
+      value: u.id
     })) || [];
 
     assignUserChoices.push(...otherUsersChoices);
@@ -148,11 +156,10 @@ export default function AddTask(props: AddTaskProps) {
                     <HelperText type="error"
                                 visible={!!formik.errors.name}>{formik.errors.name}</HelperText>
                     <PickerInput
-                        value={formik.values.assignedUser}
-                        onBlur={formik.handleBlur('assignedUser')}
-
-                        selectedValue={formik.values.assignedUser}
-                        onValueChange={formik.handleChange('assignedUser')}
+                        value={formik.values.assignedUserId}
+                        onBlur={formik.handleBlur('assignedUserId')}
+                        selectedValue={formik.values.assignedUserId}
+                        onValueChange={formik.handleChange('assignedUserId')}
                         choices={assignUserChoices}
                         style={styles.afterHelperText}
                     />
@@ -242,7 +249,7 @@ export default function AddTask(props: AddTaskProps) {
 
 export interface AddTaskValues {
   name: string
-  assignedUser: string
+  assignedUserId: string
   factor: string
   periodStart: string
   periodEnd: string
@@ -251,16 +258,6 @@ export interface AddTaskValues {
 export interface DatePickerState {
   showPeriodStartDatePicker?: boolean
   showPeriodEndDatePicker?: boolean
-}
-
-export interface InputState<T> {
-  value: T
-  error: InputError,
-}
-
-export interface InputError {
-  isError: boolean,
-  reason: string
 }
 
 const styles = StyleSheet.create({

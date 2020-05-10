@@ -24,9 +24,9 @@ type AuthContext = {
 
 // @ts-ignore
 const authContext: React.Context<AuthContext> = createContext({
-  user: {email: '', publicName: ''},
+  user: {id: '', email: '', publicName: ''},
   isLoggedIn: false,
-  login: (jwt, user) => {
+  login: (jwat, user) => {
     console.error('Authentication context is not defined yet')
     return Promise.resolve()
   },
@@ -50,6 +50,10 @@ function useProvideAuth(): AuthContext {
 
   const login = async (jwt: string, user: CurrentUser) => {
     await CreditaskStorage.setItem('creditask_jwt', jwt);
+
+    // TODO make sure the ID is a string. It should be delivered as string from the backend since
+    //  JS does not have big numbers, but it's okay for now.
+    user.id = ''+user.id;
     setUser(user)
   };
 

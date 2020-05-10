@@ -41,7 +41,7 @@ class TaskQuery:
 #
 task_input_type_name = custom_string(min_len=3, max_len=30)
 task_input_type_factor = custom_float(min_value=1)
-task_input_type_user_id = String
+task_input_type_user_id = Int
 task_input_type_period_start = Date
 task_input_type_period_end = Date
 

@@ -81,6 +81,7 @@ def jwt_payload_handler(user, context=None):
     if user.group is not None:
         group_id = user.group.id
     payload = {
+        'id': user.id,
         user.USERNAME_FIELD: username,
         'publicName': user.public_name,
         'groupId': group_id,

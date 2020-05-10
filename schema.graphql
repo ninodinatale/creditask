@@ -29,6 +29,7 @@ type Query {
   task(taskId: Int!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]
   user(id: Int!): UserType
+  users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
 }
 
@@ -44,7 +45,7 @@ type SaveTask {
 input TaskInputCreate {
   name: CustomString!
   factor: CustomFloat!
-  userId: String
+  userId: Int
   periodStart: Date
   periodEnd: Date
 }
@@ -52,7 +53,7 @@ input TaskInputCreate {
 input TaskInputUpdate {
   name: CustomString
   factor: CustomFloat
-  userId: String
+  userId: Int
   periodStart: Date
   periodEnd: Date
 }

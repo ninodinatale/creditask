@@ -27,7 +27,7 @@ export default function AuthWrapper() {
   }
 
   async function refreshJwt(jwt: string): Promise<void> {
-    const response = await mutate({
+    const response = await mutate<RefreshTokenMutation>({
       mutation: RefreshTokenDocument,
       variables: {
         token: jwt
@@ -38,9 +38,8 @@ export default function AuthWrapper() {
       await logout();
       setUserHasNoToken()
     } else {
-      const data: RefreshTokenMutation = response.data;
-      if (data?.refreshToken?.token) {
-        await login(data.refreshToken.token, data.refreshToken.payload);
+      if (response.data?.refreshToken?.token) {
+        await login(response.data.refreshToken.token, response.data.refreshToken.payload);
         setUserHasToken()
       }
     }

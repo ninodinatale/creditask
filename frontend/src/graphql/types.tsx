@@ -59,6 +59,7 @@ export type Query = {
   task: TaskType;
   todoTasksOfUser: Maybe<Array<TaskType>>;
   user: Maybe<UserType>;
+  users: Maybe<Array<UserType>>;
   otherUsers: Maybe<Array<UserType>>;
 };
 
@@ -94,7 +95,7 @@ export type SaveTask = {
 export type TaskInputCreate = {
   name: Scalars['CustomString'];
   factor: Scalars['CustomFloat'];
-  userId: Maybe<Scalars['String']>;
+  userId: Maybe<Scalars['Int']>;
   periodStart: Maybe<Scalars['Date']>;
   periodEnd: Maybe<Scalars['Date']>;
 };
@@ -102,7 +103,7 @@ export type TaskInputCreate = {
 export type TaskInputUpdate = {
   name: Maybe<Scalars['CustomString']>;
   factor: Maybe<Scalars['CustomFloat']>;
-  userId: Maybe<Scalars['String']>;
+  userId: Maybe<Scalars['Int']>;
   periodStart: Maybe<Scalars['Date']>;
   periodEnd: Maybe<Scalars['Date']>;
 };
@@ -156,7 +157,7 @@ export type TokenAuthMutationVariables = {
 
 export type TokenAuthMutation = { tokenAuth: Maybe<(
     Pick<ObtainJsonWebToken, 'token'>
-    & { user: Maybe<Pick<UserType, 'email' | 'publicName'>> }
+    & { user: Maybe<Pick<UserType, 'id' | 'email' | 'publicName'>> }
   )> };
 
 export type SaveTaskMutationVariables = {
@@ -174,7 +175,7 @@ export type OtherUsersQueryVariables = {
 
 export type OtherUsersQuery = { otherUsers: Maybe<Array<OtherUsersFragment>> };
 
-export type OtherUsersFragment = Pick<UserType, 'email' | 'publicName'>;
+export type OtherUsersFragment = Pick<UserType, 'id' | 'publicName'>;
 
 export type UnapprovedTasksOfUserFragment = Pick<TaskType, 'id' | 'name' | 'done' | 'periodEnd'>;
 
@@ -185,6 +186,13 @@ export type TodoTasksOfUserQueryVariables = {
 
 export type TodoTasksOfUserQuery = { todoTasksOfUser: Maybe<Array<UnapprovedTasksOfUserFragment>> };
 
+export type UsersQueryVariables = {};
+
+
+export type UsersQuery = { users: Maybe<Array<UsersFragment>> };
+
+export type UsersFragment = Pick<UserType, 'id' | 'email' | 'publicName'>;
+
 export type RefreshTokenMutationVariables = {
   token: Scalars['String'];
 };
@@ -194,7 +202,7 @@ export type RefreshTokenMutation = { refreshToken: Maybe<Pick<Refresh, 'token' |
 
 export const OtherUsersFragmentDoc = gql`
     fragment otherUsers on UserType {
-  email
+  id
   publicName
 }
     `;
@@ -206,11 +214,19 @@ export const UnapprovedTasksOfUserFragmentDoc = gql`
   periodEnd
 }
     `;
+export const UsersFragmentDoc = gql`
+    fragment users on UserType {
+  id
+  email
+  publicName
+}
+    `;
 export const TokenAuthDocument = gql`
     mutation tokenAuth($email: String!, $password: String!) {
   tokenAuth(email: $email, password: $password) {
     token
     user {
+      id
       email
       publicName
     }
@@ -344,6 +360,38 @@ export function useTodoTasksOfUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type TodoTasksOfUserQueryHookResult = ReturnType<typeof useTodoTasksOfUserQuery>;
 export type TodoTasksOfUserLazyQueryHookResult = ReturnType<typeof useTodoTasksOfUserLazyQuery>;
 export type TodoTasksOfUserQueryResult = ApolloReactCommon.QueryResult<TodoTasksOfUserQuery, TodoTasksOfUserQueryVariables>;
+export const UsersDocument = gql`
+    query users {
+  users {
+    ...users
+  }
+}
+    ${UsersFragmentDoc}`;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        return ApolloReactHooks.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, baseOptions);
+      }
+export function useUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, baseOptions);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersQueryResult = ApolloReactCommon.QueryResult<UsersQuery, UsersQueryVariables>;
 export const RefreshTokenDocument = gql`
     mutation refreshToken($token: String!) {
   refreshToken(token: $token) {
