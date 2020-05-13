@@ -26,7 +26,7 @@ type ObtainJSONWebToken {
 }
 
 type Query {
-  task(taskId: Int!): TaskType!
+  task(taskId: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]
   user(id: Int!): UserType
   users: [UserType!]
@@ -45,7 +45,7 @@ type SaveTask {
 input TaskInputCreate {
   name: CustomString!
   factor: CustomFloat!
-  userId: Int
+  userId: ID
   periodStart: Date
   periodEnd: Date
 }
@@ -53,7 +53,7 @@ input TaskInputCreate {
 input TaskInputUpdate {
   name: CustomString
   factor: CustomFloat
-  userId: Int
+  userId: ID
   periodStart: Date
   periodEnd: Date
 }

@@ -1,0 +1,19 @@
+query detailTask($taskId: ID!) {
+    task(taskId: $taskId) {
+        ...detailTask
+    }
+}
+
+fragment detailTask on TaskType {
+    id
+    done
+    factor
+    name
+    neededTimeSeconds
+    periodStart
+    periodEnd
+    state
+    user {
+        publicName
+    }
+}

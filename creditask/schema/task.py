@@ -1,5 +1,5 @@
 from graphene import Field, NonNull, InputObjectType, \
-    String, Mutation as GrapheneMutation, Int, Date, List
+    String, Mutation as GrapheneMutation, Int, Date, List, ID
 from graphene_django.types import DjangoObjectType
 from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
@@ -22,7 +22,7 @@ class TaskType(DjangoObjectType):
 # Query
 #
 class TaskQuery:
-    task = NonNull(TaskType, task_id=NonNull(Int))
+    task = NonNull(TaskType, task_id=NonNull(ID))
     todo_tasks_of_user = List(NonNull(TaskType), user_email=NonNull(String))
 
     @staticmethod
@@ -41,7 +41,7 @@ class TaskQuery:
 #
 task_input_type_name = custom_string(min_len=3, max_len=30)
 task_input_type_factor = custom_float(min_value=1)
-task_input_type_user_id = Int
+task_input_type_user_id = ID
 task_input_type_period_start = Date
 task_input_type_period_end = Date
 

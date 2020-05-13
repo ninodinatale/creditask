@@ -65,7 +65,7 @@ export type Query = {
 
 
 export type QueryTaskArgs = {
-  taskId: Scalars['Int'];
+  taskId: Scalars['ID'];
 };
 
 
@@ -95,7 +95,7 @@ export type SaveTask = {
 export type TaskInputCreate = {
   name: Scalars['CustomString'];
   factor: Scalars['CustomFloat'];
-  userId: Maybe<Scalars['Int']>;
+  userId: Maybe<Scalars['ID']>;
   periodStart: Maybe<Scalars['Date']>;
   periodEnd: Maybe<Scalars['Date']>;
 };
@@ -103,7 +103,7 @@ export type TaskInputCreate = {
 export type TaskInputUpdate = {
   name: Maybe<Scalars['CustomString']>;
   factor: Maybe<Scalars['CustomFloat']>;
-  userId: Maybe<Scalars['Int']>;
+  userId: Maybe<Scalars['ID']>;
   periodStart: Maybe<Scalars['Date']>;
   periodEnd: Maybe<Scalars['Date']>;
 };
@@ -168,6 +168,18 @@ export type SaveTaskMutationVariables = {
 
 export type SaveTaskMutation = { saveTask: Maybe<{ task: UnapprovedTasksOfUserFragment }> };
 
+export type DetailTaskQueryVariables = {
+  taskId: Scalars['ID'];
+};
+
+
+export type DetailTaskQuery = { task: DetailTaskFragment };
+
+export type DetailTaskFragment = (
+  Pick<TaskType, 'id' | 'done' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
+  & { user: Maybe<Pick<UserType, 'publicName'>> }
+);
+
 export type OtherUsersQueryVariables = {
   userEmail: Scalars['String'];
 };
@@ -200,6 +212,21 @@ export type RefreshTokenMutationVariables = {
 
 export type RefreshTokenMutation = { refreshToken: Maybe<Pick<Refresh, 'token' | 'payload'>> };
 
+export const DetailTaskFragmentDoc = gql`
+    fragment detailTask on TaskType {
+  id
+  done
+  factor
+  name
+  neededTimeSeconds
+  periodStart
+  periodEnd
+  state
+  user {
+    publicName
+  }
+}
+    `;
 export const OtherUsersFragmentDoc = gql`
     fragment otherUsers on UserType {
   id
@@ -294,6 +321,39 @@ export function useSaveTaskMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type SaveTaskMutationHookResult = ReturnType<typeof useSaveTaskMutation>;
 export type SaveTaskMutationResult = ApolloReactCommon.MutationResult<SaveTaskMutation>;
 export type SaveTaskMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveTaskMutation, SaveTaskMutationVariables>;
+export const DetailTaskDocument = gql`
+    query detailTask($taskId: ID!) {
+  task(taskId: $taskId) {
+    ...detailTask
+  }
+}
+    ${DetailTaskFragmentDoc}`;
+
+/**
+ * __useDetailTaskQuery__
+ *
+ * To run a query within a React component, call `useDetailTaskQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDetailTaskQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDetailTaskQuery({
+ *   variables: {
+ *      taskId: // value for 'taskId'
+ *   },
+ * });
+ */
+export function useDetailTaskQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<DetailTaskQuery, DetailTaskQueryVariables>) {
+        return ApolloReactHooks.useQuery<DetailTaskQuery, DetailTaskQueryVariables>(DetailTaskDocument, baseOptions);
+      }
+export function useDetailTaskLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<DetailTaskQuery, DetailTaskQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<DetailTaskQuery, DetailTaskQueryVariables>(DetailTaskDocument, baseOptions);
+        }
+export type DetailTaskQueryHookResult = ReturnType<typeof useDetailTaskQuery>;
+export type DetailTaskLazyQueryHookResult = ReturnType<typeof useDetailTaskLazyQuery>;
+export type DetailTaskQueryResult = ApolloReactCommon.QueryResult<DetailTaskQuery, DetailTaskQueryVariables>;
 export const OtherUsersDocument = gql`
     query otherUsers($userEmail: String!) {
   otherUsers(userEmail: $userEmail) {

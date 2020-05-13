@@ -8,9 +8,12 @@ import {
 } from '../../../../utils/transformer';
 import moment from 'moment';
 
-export type UserAssignedTasksProps = { tasks?: UnapprovedTasksOfUserFragment[] }
+export type UserAssignedTasksProps = {
+  tasks?: UnapprovedTasksOfUserFragment[]
+  onTaskPress: (taskId: string, taskName: string) => void
+}
 
-export default function UserAssignedTasksView({tasks}: UserAssignedTasksProps) {
+export default function UserAssignedTasksView({tasks, onTaskPress}: UserAssignedTasksProps) {
 
   const theme = useTheme();
 
@@ -53,7 +56,7 @@ export default function UserAssignedTasksView({tasks}: UserAssignedTasksProps) {
         <View key={task.id}>
           {index == 0 ? <List.Subheader>{headerText}</List.Subheader> : null}
           <TouchableRipple
-              onPress={() => console.log('Pressed')}
+              onPress={() => onTaskPress(task.id, task.name)}
               key={task.id}
           >
             <List.Item

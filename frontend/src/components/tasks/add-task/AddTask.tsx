@@ -21,9 +21,10 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../NavigationWrapper';
 
 interface AddTaskProps {
-  navigation: StackNavigationProp<any>
+  navigation: StackNavigationProp<RootStackParamList, 'taskAdd'>
 }
 
 export default function AddTask(props: AddTaskProps) {
@@ -90,7 +91,7 @@ export default function AddTask(props: AddTaskProps) {
     const createInput: TaskInputCreate = {
       name: values.name,
       factor: +values.factor,
-      userId: values.assignedUserId == NO_USER_ASSIGNMENT ? null : +values.assignedUserId,
+      userId: values.assignedUserId == NO_USER_ASSIGNMENT ? null : values.assignedUserId,
       periodStart: localeDateStringToISOString(values.periodStart),
       periodEnd: localeDateStringToISOString(values.periodEnd)
     };
@@ -116,7 +117,7 @@ export default function AddTask(props: AddTaskProps) {
       },
       {
         label: 'Mir',
-        value: ''+auth.user.id
+        value: '' + auth.user.id
       },
     ];
 
