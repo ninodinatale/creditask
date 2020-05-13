@@ -19,6 +19,6 @@ export default function UserAssignedTasks() {
   }
 
   if (data) {
-    return <UserAssignedTasksView tasks={data?.todoTasksOfUser}/>
+    return <UserAssignedTasksView tasks={data?.todoTasksOfUser || []}/>
   }
 }

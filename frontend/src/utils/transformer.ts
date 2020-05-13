@@ -19,3 +19,7 @@ export function localeDateStringToISOString(dateString: string): string {
 export function dateToLocaleDateString(date: Date): string {
   return moment(date).format('DD.MM.YYYY')
 }
+
+export function ISODateStringToMoment(dateString: string): moment.Moment {
+  return moment(dateString, 'YYYY-MM-DD');
+}
