@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { DefaultTheme, Provider as PaperProvider, Colors, Theme } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { ProvideAuth } from './src/hooks/auth/use-auth';
 import AuthWrapper from './src/components/AuthWrapper';
@@ -9,7 +9,7 @@ import { ApolloProvider } from '@apollo/react-hooks';
 import * as CreditaskStorage from './src/utils/storage'
 
 // TODO implement toggle for light/dark theme
-const theme = {
+const theme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
@@ -19,7 +19,7 @@ const theme = {
 };
 
 const apolloClient = new ApolloClient({
-  uri: 'http://e9e221f3.ngrok.io/graphql', // TODO env var,
+  uri: 'http://cd8ad2d4.ngrok.io/graphql', // TODO env var,
   request: async (operation) => {
       const token = await CreditaskStorage.getItem('creditask_jwt');
       operation.setContext({

@@ -4,7 +4,7 @@ import { UnapprovedTasksOfUserFragment } from '../../../../graphql/types';
 import { Text, View } from 'react-native';
 import {
   ISODateStringToLocaleDateString,
-  ISODateStringToMoment
+  ISODateStringToMoment, relativeDateString
 } from '../../../../utils/transformer';
 import moment from 'moment';
 
@@ -65,9 +65,9 @@ export default function UserAssignedTasksView({tasks, onTaskPress}: UserAssigned
                 left={props => <Avatar.Image {...props}
                                              source={require('../../../../../assets/dummy.jpg')}/>} // TODO image source
                 right={props => overdue ?
-                    <List.Icon color={theme.colors.error} icon="calendar-clock"/> : null}
+                    <List.Icon {...props} color={theme.colors.error} icon="calendar-clock"/> : null}
                 description={<Text style={overdue ? {color: theme.colors.error} : undefined}>
-                  {`Fällig am ${ISODateStringToLocaleDateString(task.periodEnd)}`}</Text>}
+                  {`Fällig am ${ISODateStringToLocaleDateString(task.periodEnd)} (${relativeDateString(task.periodEnd)})`}</Text>}
             />
           </TouchableRipple>
         </View>
