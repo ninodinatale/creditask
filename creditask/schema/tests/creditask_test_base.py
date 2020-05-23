@@ -97,8 +97,8 @@ class CreditaskTestBase(GraphQLTestCase):
         errors: List = response_content.get('errors')
 
         self.assertIsNotNone(errors)
-        self.assertEqual('You do not have permission to perform this'
-                         ' action', errors[0].get('message'))
+        self.assertEqual(errors[0].get('message'), 'You do not have permission '
+                                                   'to perform this action')
 
         self.login(self.last_login_credentials.get('user_email'),
                    self.last_login_credentials.get('password'))
