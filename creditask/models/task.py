@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 
+from .task_group import TaskGroup
 from .approval import Approval
 from .base import BaseModel
 from .user import User
@@ -16,6 +17,7 @@ class Task(BaseModel):
         UNDER_CONDITIONS = 'UNDER_CONDITIONS'
         APPROVED = 'APPROVED'
 
+    task_group = models.ForeignKey(TaskGroup, on_delete=models.CASCADE)
     name: str = models.CharField(max_length=30, default='Unnamed task')
     needed_time_seconds: int = models.IntegerField(default=0)
     state = models.CharField(choices=State.choices,

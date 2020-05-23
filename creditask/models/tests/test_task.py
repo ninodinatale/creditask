@@ -1,6 +1,6 @@
 from django.db import DataError
 
-from creditask.models import Task, User
+from creditask.models import Task, User, TaskGroup
 from .models_test_base import ModelsTestBase
 
 
@@ -9,9 +9,11 @@ class TestTaskModel(ModelsTestBase):
 
     def setUp(self) -> None:
         self.entity_under_test = Task
+        task_group = TaskGroup.objects.create()
         user = User.objects.create(email=TestTaskModel._user_email,
                                    public_name='user', password='password')
         task_dict = dict(
+            task_group=task_group,
             name='Task name',
             user_id=user.id,
             needed_time_seconds=10, state=Task.State.UNKNOWN,
@@ -24,6 +26,14 @@ class TestTaskModel(ModelsTestBase):
     def tearDown(self) -> None:
         User.objects.get(email=TestTaskModel._user_email).delete()
         super().tearDown()
+
+    '''task_group
+    '''
+
+    def test_task_group_should_not_be_nunllable(self):
+        with self.assertRaises(DataError):
+            self.valid_entity_dict['task_group'] = None
+            Task.objects.create(**self.valid_entity_dict)
 
     '''name
     '''
