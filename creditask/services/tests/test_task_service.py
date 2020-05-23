@@ -64,6 +64,16 @@ class TestTaskService(TestCase):
             with self.assertRaises(ValidationError) as e:
                 save_task(None, **args)
 
+        with self.subTest('should validate with period_end not before '
+                          'period_start'):
+            with self.assertRaises(ValidationError):
+                invalid_args = {
+                    **args,
+                    'period_end': '2020-01-10',
+                    'period_start': '2020-01-11'
+                }
+                save_task(mock_user, **invalid_args)
+
         with self.subTest('should validate with MinLenValidator'):
             save_task(mock_user, **args)
             self.assertEquals(mock_MinLenValidator.call_args[0][0], 3,
@@ -74,22 +84,26 @@ class TestTaskService(TestCase):
                               'MinLeneValidator needs to be called with '
                               'task name')
 
-        with self.subTest('should validate state'):
-            try:
-                save_task(mock_user, **args)
-            except ValidationError:
-                self.fail('If state is None, no validation should be performed')
+        with self.subTest('if is existing task'):
+            pass # TODO test needs to be written
+            # with self.subTest('should validate state'):
+            #     try:
+            #         save_task(mock_user, **args)
+            #     except ValidationError:
+            #         self.fail('If state is None, no validation should be performed')
+            #     try:
+            #
+            #         save_task(mock_user, **{**{'state': Task.State.TO_DO},
+            #                                 **args})
+            #     except ValidationError:
+            #         self.fail('Should not fail if state is valid')
+            #
+            #     with self.assertRaises(ValidationError):
+            #         save_task(mock_user,
+            #                   **{**dict(state='SOME_INVALID_STATE'), **args})
 
-            try:
-
-                save_task(mock_user, **{**{'state': Task.State.TO_DO},
-                                          **args})
-            except ValidationError:
-                self.fail('Should not fail if state is valid')
-
-            with self.assertRaises(ValidationError):
-                save_task(mock_user,
-                            **{**dict(state='SOME_INVALID_STATE'), **args})
+        with self.subTest('if is new task'):
+            pass # TODO test needs to be written
 
         with self.subTest('save should be called'):
             mock_save.call_count = 0

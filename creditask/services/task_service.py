@@ -16,17 +16,74 @@ def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
                                state=Task.State.TO_DO)
 
 
+# TODO function is not tested entirely yet
 def save_task(created_by: User, **kwargs) -> Task:
     if created_by is None:
         raise ValidationError('created_by may not be None')
 
-    task_to_save = Task(created_by=created_by, **kwargs)
+    def validate(task: Task):
+        if task.period_end is not None and \
+                task.period_start is not None and \
+                task.period_end < task.period_start:
+            raise ValidationError(
+                f'period_start [{task.period_start}] may not be after '
+                f'period_end [{task.period_end}]')
 
-    MinLenValidator(3)(task_to_save.name)
-    if task_to_save.state is not None:
-        if not hasattr(Task.State, task_to_save.state):
-            raise ValidationError(f'"{task_to_save.state}" is an invalid '
-                                  'type of task state')
+        MinLenValidator(3)(task.name)
+        if task.state is not None:
+            if not hasattr(Task.State, task.state):
+                raise ValidationError(f'"{task.state}" is an invalid '
+                                      'type of task state')
 
-    task_to_save.save()
-    return task_to_save
+    def validate_state_change(task: Task):
+        if hasattr(kwargs, 'state'):
+            new_state = kwargs.get('state')
+            if new_state is None:
+                raise ValidationError('Task state may not be None')
+            if (task.state == Task.State.TO_DO and
+                    new_state != Task.State.TO_APPROVE):
+                raise ValidationError(f'Task state after [{Task.State.TO_DO}] '
+                                      f'needs to be [{Task.State.TO_APPROVE}],'
+                                      f'but was [{new_state}]')
+            if task.state == Task.State.TO_APPROVE:
+                if (new_state != Task.State.APPROVED or
+                        new_state != Task.State.UNDER_CONDITIONS or
+                        Task.State.DECLINED):
+                    raise ValidationError(
+                        f'Task state after [{Task.State.TO_APPROVE}] '
+                        f'needs to be [{Task.State.APPROVED}], '
+                        f'[{Task.State.UNDER_CONDITIONS}] or '
+                        f'[{Task.State.DECLINED}],'
+                        f'but was [{new_state}]')
+
+    if hasattr(kwargs, 'id'):
+        task_to_save = Task.objects.get(id=kwargs.get('id'))
+
+        validate_state_change(task_to_save)
+
+        if task_to_save.state == Task.State.TO_DO:
+            # everything may be changed
+            validate(task_to_save)
+        else:
+            if hasattr(kwargs, 'period_start'):
+                raise ValidationError(
+                    f'period_start may not be changed if task has'
+                    f' state [{kwargs.get("state")}]')
+            if hasattr(kwargs, 'end'):
+                raise ValidationError(
+                    f'period_end may not be changed if task has'
+                    f' state [{kwargs.get("state")}]')
+
+            for key, value in kwargs:
+                if key is not 'id' and key is not 'state':
+                    if value != task_to_save[key]:
+                        raise ValidationError(
+                            f'Column [{key}] of Task with state '
+                            f'[{task_to_save.state}] may not be changed')
+        task_to_save.save()
+        return task_to_save
+    else:
+        task_to_create = Task(created_by=created_by, **kwargs)
+        validate(task_to_create)
+        task_to_create.save()
+        return task_to_create

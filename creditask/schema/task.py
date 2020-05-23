@@ -42,6 +42,7 @@ class TaskQuery:
 task_input_type_name = custom_string(min_len=3, max_len=30)
 task_input_type_factor = custom_float(min_value=1)
 task_input_type_user_id = ID
+task_input_type_needed_time_seconds = Int
 task_input_type_period_start = Date
 task_input_type_period_end = Date
 
@@ -58,6 +59,7 @@ class TaskInputUpdate(InputObjectType):
     name = task_input_type_name()
     factor = task_input_type_factor()
     user_id = task_input_type_user_id()
+    needed_time_seconds = task_input_type_needed_time_seconds()
     period_start = task_input_type_period_start()
     period_end = task_input_type_period_end()
 

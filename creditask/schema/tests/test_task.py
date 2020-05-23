@@ -4,8 +4,6 @@ from typing import List
 from unittest import mock
 from unittest.mock import MagicMock
 
-from django.core.exceptions import ValidationError
-
 from creditask.models import User, Task
 from creditask.schema import schema
 from creditask.schema.tests.creditask_test_base import CreditaskTestBase
@@ -17,7 +15,7 @@ class ResolveTaskTest(CreditaskTestBase):
     def setUp(self):
         self.query_under_test = \
             '''
-            query task($taskId: Int!) {
+            query task($taskId: ID!) {
                 task(taskId: $taskId) {
                     id
                     name
@@ -39,7 +37,7 @@ class ResolveTaskTest(CreditaskTestBase):
 
     def test_should_require_login(self):
         self.should_require_login(self.query_under_test, op_name=self.op_name,
-                                  variables={'taskId': 1})
+                                  variables={'taskId': '1'})
 
     def test_should_require_task_id(self):
         response = self.gql(self.query_under_test,
@@ -55,7 +53,7 @@ class ResolveTaskTest(CreditaskTestBase):
 
         response = self.gql(self.query_under_test,
                             op_name=self.op_name,
-                            variables={'taskId': mock_task.id})
+                            variables={'taskId': str(mock_task.id)})
 
         self.assertResponseNoErrors(response)
 
@@ -174,8 +172,8 @@ class TaskMutationTests(CreditaskTestBase):
     def test_should_require_login(self, mock_fn):
         self.should_require_login(self.query_under_test, op_name=self.op_name,
                                   variables={'createInput':
-                                             dict(name='Task Name',
-                                                  factor=1)})
+                                                 dict(name='Task Name',
+                                                      factor=1)})
 
     def test_validation(self, mock_fn):
         with self.subTest('should require only createInput or updateInput, '
@@ -197,10 +195,10 @@ class TaskMutationTests(CreditaskTestBase):
                                 op_name=self.op_name,
                                 variables={'createInput':
                                                dict(name='Task Name',
-                                                   factor=1),
+                                                    factor=1),
                                            'updateInput':
                                                dict(name='Task Name',
-                                                   factor=1)})
+                                                    factor=1)})
 
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')
@@ -211,7 +209,6 @@ class TaskMutationTests(CreditaskTestBase):
                               'set')
 
     def test_create_input(self, mock_fn):
-
         with self.subTest('test_name_should_have_min_len_of_3'):
             create_input = dict(name='na', factor=1)
 
@@ -229,7 +226,8 @@ class TaskMutationTests(CreditaskTestBase):
                               "length (3)']")
 
         with self.subTest('test_name_should_have_max_len_of_30'):
-            create_input = dict(name='Very long task name, way too long', factor=1)
+            create_input = dict(name='Very long task name, way too long',
+                                factor=1)
 
             response = self.gql(self.query_under_test,
                                 op_name=self.op_name,
@@ -304,20 +302,14 @@ class TaskMutationTests(CreditaskTestBase):
             self.assertIn("Expected \"CustomFloat!\", found null.",
                           errors[0].get('message'))
 
-        with self.subTest('test_user_id_should_be_int'):
-            create_input = dict(name='Task Name', factor=1, userId='abc')
+        with self.subTest('test_user_id_can_be_string'):
+            create_input = dict(name='Task Name', factor=1, userId='1')
 
             response = self.gql(self.query_under_test,
                                 op_name=self.op_name,
                                 variables={'createInput': create_input})
 
-            response_content: dict = json.loads(response.content)
-            errors: List = response_content.get('errors')
-
-            self.assertEquals(response.status_code, 400)
-            self.assertIsNotNone(errors)
-            self.assertIn("could not convert string to float: 'abc'",
-                          errors[0].get('message'))
+            self.assertResponseNoErrors(response)
 
         with self.subTest('test_period_start_should_be_date'):
             create_input = dict(name='Task Name', factor=1, periodStart='abc')
@@ -354,6 +346,7 @@ class TaskMutationTests(CreditaskTestBase):
 
             mock_task = Task(id=random.randint(1, 9999), **create_input)
             mock_fn.return_value = mock_task
+            mock_fn.call_count = 0
 
             response = self.gql(self.query_under_test,
                                 op_name=self.op_name,
@@ -373,9 +366,8 @@ class TaskMutationTests(CreditaskTestBase):
 
             self.assertEquals(int(task.get('id')), mock_task.id)
             self.assertEquals(task.get('name'), create_input.get('name'))
-                
-    def test_update_input(self, mock_fn):
 
+    def test_update_input(self, mock_fn):
         self.query_under_test = \
             f'''
             mutation {self.op_name}Task($updateInput: TaskInputUpdate) {{
@@ -387,7 +379,7 @@ class TaskMutationTests(CreditaskTestBase):
               }}
             }}
             '''
-        
+
         with self.subTest('test_name_should_have_min_len_of_3'):
             update_input = dict(name='na', type='type1', factor=1)
 
@@ -405,7 +397,8 @@ class TaskMutationTests(CreditaskTestBase):
                               "length (3)']")
 
         with self.subTest('test_name_should_have_max_len_of_30'):
-            update_input = dict(name='Very long task name, way too long', factor=1)
+            update_input = dict(name='Very long task name, way too long',
+                                factor=1)
 
             response = self.gql(self.query_under_test,
                                 op_name=self.op_name,
@@ -468,9 +461,8 @@ class TaskMutationTests(CreditaskTestBase):
 
             self.assertResponseNoErrors(response)
 
-
-        with self.subTest('test_user_id_should_be_int'):
-            update_input = dict(name='Task Name', factor=1, userId='abc')
+        with self.subTest('test_user_id_can_be_string'):
+            update_input = dict(name='Task Name', factor=1, userId='2')
 
             response = self.gql(self.query_under_test,
                                 op_name=self.op_name,
@@ -479,10 +471,7 @@ class TaskMutationTests(CreditaskTestBase):
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')
 
-            self.assertEquals(response.status_code, 400)
-            self.assertIsNotNone(errors)
-            self.assertIn("could not convert string to float: 'abc'",
-                          errors[0].get('message'))
+            self.assertResponseNoErrors(response)
 
         with self.subTest('test_period_start_should_be_date'):
             update_input = dict(name='Task Name', factor=1, periodStart='abc')

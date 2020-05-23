@@ -54,6 +54,7 @@ input TaskInputUpdate {
   name: CustomString
   factor: CustomFloat
   userId: ID
+  neededTimeSeconds: Int
   periodStart: Date
   periodEnd: Date
 }
