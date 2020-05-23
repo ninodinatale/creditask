@@ -22,8 +22,8 @@ class Task(BaseModel):
                              max_length=64, default=State.TO_DO)
     factor: int = models.IntegerField(default=0)
     user: User = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    period_start: str = models.DateField(default=datetime.datetime.now)
-    period_end: str = models.DateField(default=datetime.datetime.now)
+    period_start: datetime.date = models.DateField(default=datetime.datetime.now)
+    period_end: datetime.date = models.DateField(default=datetime.datetime.now)
     done: bool = models.BooleanField(default=False)
     approvals = models.ManyToManyField(Approval, related_name='tasks')
 
