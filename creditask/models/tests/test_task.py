@@ -1,4 +1,4 @@
-from django.db import DataError
+from django.db import DataError, IntegrityError
 
 from creditask.models import Task, User, TaskGroup
 from .models_test_base import ModelsTestBase
@@ -31,7 +31,7 @@ class TestTaskModel(ModelsTestBase):
     '''
 
     def test_task_group_should_not_be_nunllable(self):
-        with self.assertRaises(DataError):
+        with self.assertRaises(IntegrityError):
             self.valid_entity_dict['task_group'] = None
             Task.objects.create(**self.valid_entity_dict)
 

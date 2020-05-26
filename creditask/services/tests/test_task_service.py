@@ -1,15 +1,16 @@
 import random
-from unittest import TestCase, mock
+from unittest import mock
 from unittest.mock import MagicMock
 
 from django.core.exceptions import ValidationError
+from django.test import TransactionTestCase
 
-from creditask.models import Task, User
+from creditask.models import Task, User, TaskGroup
 from creditask.services.task_service import get_task_by_id, \
-    get_todo_tasks_by_user_email, save_task
+    get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id
 
 
-class TestTaskService(TestCase):
+class TestTaskService(TransactionTestCase):
 
     @mock.patch('creditask.services.task_service.Task.objects.get')
     def test_get_task_by_id(self, mock_fn: MagicMock):
@@ -22,6 +23,51 @@ class TestTaskService(TestCase):
         self.assertIsNotNone(mock_fn.call_args[1].get('id'))
         self.assertEquals(mock_fn.call_args[1]['id'], mock_task.id)
         self.assertTrue(1, len(mock_fn.call_args[1]))
+
+    def test_get_task_by_task_group_id(self):
+        task_group_1 = TaskGroup.objects.create()
+        task_group_2 = TaskGroup.objects.create()
+        user = User.objects.create(
+            email='test_get_task_by_task_group_id@user.com',
+            password='password'
+        )
+
+        task_0 = Task.objects.create(
+            task_group=task_group_2,
+            created_by=user
+        )
+        task_1 = Task.objects.create(
+            task_group=task_group_1,
+            created_by=user
+        )
+        task_2 = Task.objects.create(
+            task_group=task_group_2,
+            created_by=user
+        )
+        task_3 = Task.objects.create(
+            task_group=task_group_1,
+            created_by=user
+        )
+        task_4 = Task.objects.create(
+            task_group=task_group_1,
+            created_by=user
+        )
+        task_5 = Task.objects.create(
+            task_group=task_group_2,
+            created_by=user
+        )
+        task_6 = Task.objects.create(
+            task_group=task_group_1,
+            created_by=user
+        )
+        task_7 = Task.objects.create(
+            task_group=task_group_2,
+            created_by=user
+        )
+
+        task = get_task_by_task_group_id(task_group_1.id)
+
+        self.assertEquals(task_6.id, task.id)
 
     @mock.patch('creditask.services.task_service.Task.objects')
     def test_get_todo_tasks_by_user_email(self, objects_mock):
@@ -85,7 +131,7 @@ class TestTaskService(TestCase):
                               'task name')
 
         with self.subTest('if is existing task'):
-            pass # TODO test needs to be written
+            pass  # TODO test needs to be written
             # with self.subTest('should validate state'):
             #     try:
             #         save_task(mock_user, **args)
@@ -103,7 +149,7 @@ class TestTaskService(TestCase):
             #                   **{**dict(state='SOME_INVALID_STATE'), **args})
 
         with self.subTest('if is new task'):
-            pass # TODO test needs to be written
+            pass  # TODO test needs to be written
 
         with self.subTest('save should be called'):
             mock_save.call_count = 0

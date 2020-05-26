@@ -3,7 +3,7 @@ from django.db import models, DataError
 
 
 class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     # TODO: set by jwt token
     created_by = models.ForeignKey('User', on_delete=models.SET_NULL,
@@ -35,11 +35,12 @@ class BaseModel(models.Model):
                     # created_by should be ignored on determining if changes
                     # have been made.
                     if field.column != 'created_by_id' and \
-                       current_value != prev_value:
+                            current_value != prev_value:
                         has_changes = True
                 else:
                     # set missing value
-                    setattr(self, field.column, getattr(prev_record, field.column))
+                    setattr(self, field.column,
+                            getattr(prev_record, field.column))
 
             if not has_changes:
                 raise DataError(f'Tried to save {self.__class__.__name__} '

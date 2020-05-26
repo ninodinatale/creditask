@@ -11,6 +11,12 @@ def get_task_by_id(task_id: int) -> Task:
     return Task.objects.get(id=task_id)
 
 
+def get_task_by_task_group_id(task_group_id: int) -> Task:
+    return (Task.objects.filter(task_group_id=task_group_id)
+            .order_by('-created_at')
+            .first())
+
+
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
     return Task.objects.filter(user__email=user_mail,
                                state=Task.State.TO_DO)

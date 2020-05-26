@@ -6,8 +6,8 @@ from graphql_jwt.decorators import login_required
 
 from creditask.models import Task
 from creditask.schema.scalars import custom_string, custom_float
-from creditask.services.task_service import save_task, get_task_by_id, \
-    get_todo_tasks_by_user_email
+from creditask.services.task_service import save_task, \
+    get_task_by_task_group_id, get_todo_tasks_by_user_email
 
 
 #
@@ -28,7 +28,7 @@ class TaskQuery:
     @staticmethod
     @login_required
     def resolve_task(self, info, **kwargs):
-        return get_task_by_id(kwargs.get('task_id'))
+        return get_task_by_task_group_id(kwargs.get('task_group_id'))
 
     @staticmethod
     @login_required
