@@ -22,7 +22,7 @@ class TaskType(DjangoObjectType):
 # Query
 #
 class TaskQuery:
-    task = NonNull(TaskType, task_id=NonNull(ID))
+    task = NonNull(TaskType, task_group_id=NonNull(ID))
     todo_tasks_of_user = List(NonNull(TaskType), user_email=NonNull(String))
 
     @staticmethod
@@ -39,6 +39,7 @@ class TaskQuery:
 #
 # Input Types
 #
+task_input_type_task_group_id = ID
 task_input_type_name = custom_string(min_len=3, max_len=30)
 task_input_type_factor = custom_float(min_value=1)
 task_input_type_user_id = ID
@@ -56,6 +57,7 @@ class TaskInputCreate(InputObjectType):
 
 
 class TaskInputUpdate(InputObjectType):
+    task_group_id = NonNull(task_input_type_task_group_id) # TODO test
     name = task_input_type_name()
     factor = task_input_type_factor()
     user_id = task_input_type_user_id()
