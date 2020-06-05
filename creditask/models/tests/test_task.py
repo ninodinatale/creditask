@@ -38,10 +38,10 @@ class TestTaskModel(ModelsTestBase):
     '''name
     '''
 
-    def test_name_should_have_default_value(self):
-        del self.valid_entity_dict['name']
-        created_task = Task.objects.create(**self.valid_entity_dict)
-        self.assertEqual('Unnamed task', created_task.name)
+    def test_name_should_not_be_nunllable(self):
+        with self.assertRaises(IntegrityError):
+            self.valid_entity_dict['name'] = None
+            Task.objects.create(**self.valid_entity_dict)
 
     def test_name_should_have_max_length_30(self):
         with self.assertRaises(DataError):
@@ -51,10 +51,10 @@ class TestTaskModel(ModelsTestBase):
     '''needed_time_seconds
     '''
 
-    def test_needed_time_seconds_should_have_default_value(self):
-        del self.valid_entity_dict['needed_time_seconds']
-        created_task = Task.objects.create(**self.valid_entity_dict)
-        self.assertEqual(0, created_task.needed_time_seconds)
+    def test_needed_time_seconds_should_not_be_nunllable(self):
+        with self.assertRaises(IntegrityError):
+            self.valid_entity_dict['needed_time_seconds'] = None
+            Task.objects.create(**self.valid_entity_dict)
 
     '''state
     '''
@@ -99,7 +99,7 @@ class TestTaskModel(ModelsTestBase):
     '''done
     '''
 
-    def test_done_should_have_default_value(self):
-        del self.valid_entity_dict['done']
-        created_task = Task.objects.create(**self.valid_entity_dict)
-        self.assertEqual(False, created_task.done)
+    def test_done_should_not_be_nunllable(self):
+        with self.assertRaises(IntegrityError):
+            self.valid_entity_dict['done'] = None
+            Task.objects.create(**self.valid_entity_dict)
