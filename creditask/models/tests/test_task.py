@@ -16,7 +16,7 @@ class TestTaskModel(ModelsTestBase):
             task_group=task_group,
             name='Task name',
             user_id=user.id,
-            needed_time_seconds=10, state=Task.State.UNKNOWN,
+            needed_time_seconds=10, state=Task.State.TO_DO,
             factor=1, period_start='2020-01-01',
             period_end='2020-01-01', done=False)
 

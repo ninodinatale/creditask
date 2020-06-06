@@ -10,7 +10,6 @@ from .user import User
 
 class Task(BaseModel):
     class State(models.TextChoices):
-        UNKNOWN = 'UNKNOWN'
         TO_DO = 'TO_DO'
         TO_APPROVE = 'TO_APPROVE'
         DECLINED = 'DECLINED'
