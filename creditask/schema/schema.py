@@ -2,13 +2,14 @@ import graphql_jwt
 from graphene import ObjectType, Schema, Field
 
 from .task import TaskQuery, TaskMutation
+from .task_group import TaskGroupQuery, TaskGroupType
 from .user import UserQuery, UserType
 
 
 #
 # Queries
 #
-class Query(UserQuery, TaskQuery, ObjectType):
+class Query(UserQuery, TaskGroupQuery, TaskQuery, ObjectType):
     pass
 
 
