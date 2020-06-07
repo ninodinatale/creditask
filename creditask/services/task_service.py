@@ -17,8 +17,24 @@ def get_task_by_task_group_id(task_group_id: int) -> Task:
 
 
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
-    return Task.objects.filter(user__email=user_mail,
-                               state=Task.State.TO_DO)
+    """Get each newest task by task group of provided user"""
+    query = '''
+        SELECT t.*
+        FROM (
+                 SELECT *
+                 FROM (SELECT ROW_NUMBER()
+                              OVER (PARTITION BY t2.task_group_id ORDER BY t2.created_at DESC) AS r,
+                              t2.*
+                       FROM tasks t2
+                      ) t3
+                 WHERE t3.r <= 1) t
+                 INNER JOIN users u ON t.user_id = u.id
+        WHERE t.state = %(task_state)s
+          AND u.email = %(user_mail)s;
+        '''
+    rows = Task.objects.raw(query, params={'user_mail': user_mail,
+                                           'task_state': Task.State.TO_DO})
+    return list(map(lambda row: row, rows))
 
 
 # TODO function is not tested entirely yet
@@ -93,7 +109,7 @@ def validate_state_change(old_task: Task, new_task_dict: dict):
         if old_task.state == Task.State.TO_APPROVE:
             if (new_state != Task.State.APPROVED and
                     new_state != Task.State.UNDER_CONDITIONS and
-                    new_state  != Task.State.DECLINED):
+                    new_state != Task.State.DECLINED):
                 raise ValidationError(
                     f'Task state after [{Task.State.TO_APPROVE}] '
                     f'needs to be [{Task.State.APPROVED}], '

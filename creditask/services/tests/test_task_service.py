@@ -95,32 +95,177 @@ class TestTaskService(TransactionTestCase):
 
         self.assertEquals(task_6.id, task.id)
 
-    @mock.patch('creditask.services.task_service.Task.objects')
-    def test_get_todo_tasks_by_user_email(self, objects_mock):
-        mock_tasks = [Task(id=random.randint(1, 9999))]
+    def test_get_todo_tasks_by_user_email(self):
+        task_group_1 = TaskGroup.objects.create()
+        task_group_2 = TaskGroup.objects.create()
+        task_group_3 = TaskGroup.objects.create()
+        task_group_4 = TaskGroup.objects.create()
+        task_group_5 = TaskGroup.objects.create()
+        task_group_6 = TaskGroup.objects.create()
 
-        objects_mock.filter.return_value = Task.objects.filter()
+        user_1 = User.objects.create(
+            email='test_get_task_by_task_group_id@user_1.com',
+            password='password'
+        )
+        user_2 = User.objects.create(
+            email='test_get_task_by_task_group_id@user_2.com',
+            password='password'
+        )
 
-        user_email = 'user@mail.com'
+        """
+        task group 1: newest task has wrong state, therefore should not be
+        returned
+        """
+        # all good
+        task_1 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
 
-        tasks = get_todo_tasks_by_user_email(user_email)
+        # all good
+        task_2 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
 
-        self.assertIsNotNone(objects_mock.filter.call_args[1].get(
-            'user__email'))
-        self.assertEquals(user_email, objects_mock.filter.call_args[1].get(
-            'user__email'))
+        # wrong state
+        task_3 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.APPROVED
+        )
 
-        # TODO mocking chained .exclude() does not work somehow. Get it to work
-        return
 
-        self.assertTrue(1, len(objects_mock.filter.call_args[1]))
-        self.assertIsNotNone(objects_mock.exclude.call_args[1].get('state'))
-        self.assertEquals(Task.State.APPROVED, objects_mock.exclude.call_args[
-            1].get(
-            'state'))
-        self.assertTrue(1, len(objects_mock.exclude.call_args[1]))
+        """
+        task group 2: newest task has all good, therefore should be
+        returned
+        """
+        # all good
+        task_4 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_2,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
 
-        self.assertIs(mock_tasks, tasks)
+        # all good
+        task_5 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.APPROVED
+        )
+
+        # wrong state
+        task_6 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        """
+        task group 3: newest task has wrong user, therefore should not be
+        returned
+        """
+        # all good
+        task_7 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_2,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        # all good
+        task_8 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        # wrong state
+        task_9 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_2,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        """
+        task group 4: all are good, therefore newest should be
+        returned
+        """
+        # all good
+        task_10 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        # all good
+        task_11 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        # wrong state
+        task_12 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+            done=False,
+            user=user_1,
+            created_by=user_1,
+            state=Task.State.TO_DO
+        )
+
+        tasks = get_todo_tasks_by_user_email(user_1.email)
+
+        self.assertEquals(2, len(tasks))
+        self.assertEquals(task_6.id, tasks[0].id)
+        self.assertEquals(task_12.id, tasks[1].id)
 
     @mock.patch('creditask.services.task_service.validate_task_properties')
     @mock.patch('creditask.services.task_service.get_task_by_task_group_id')
