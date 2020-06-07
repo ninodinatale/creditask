@@ -8,7 +8,7 @@ from django.test import TransactionTestCase
 from creditask.models import Task, User, TaskGroup
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id, \
-    validate_state_change, validate_task_properties
+    validate_state_change, validate_task_properties, merge_values
 
 
 class TestTaskService(TransactionTestCase):
@@ -355,6 +355,30 @@ class TestTaskService(TransactionTestCase):
                 except ValidationError:
                     self.fail('validate_task_properties should not have raised'
                               ' a validation error')
+
+    def test_merge_values(self):
+        with self.subTest('should add attributes if not existing yet and return'
+                          'task'):
+            existing_task = Task()
+            values_to_merge = dict(needed_time_seconds=2, state='TO_DO')
+            return_value = merge_values(existing_task,  values_to_merge)
+
+            self.assertEquals(values_to_merge.get('needed_time_seconds'),
+                              return_value.needed_time_seconds)
+            self.assertEquals(values_to_merge.get('state'),
+                              return_value.state)
+
+        with self.subTest('should override attributes if not existing yet and '
+                          'return task'):
+            existing_task = Task(needed_time_seconds=0, state='TO_DO')
+            values_to_merge = dict(needed_time_seconds=2, state='APPROVED')
+
+            return_value = merge_values(existing_task,  values_to_merge)
+
+            self.assertEquals(values_to_merge.get('needed_time_seconds'),
+                              return_value.needed_time_seconds)
+            self.assertEquals(values_to_merge.get('state'),
+                              return_value.state)
 
     def test_validate_state_change(self):
         with self.subTest('should not raise error if state has not changed'):

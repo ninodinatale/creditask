@@ -67,7 +67,8 @@ def save_task(created_by: User, **kwargs) -> Task:
                         raise ValidationError(
                             f'Column [{key}] of Task with state '
                             f'[{task_to_save.state}] may not be changed')
-        task_to_save.save()
+
+        merge_values(task_to_save, kwargs).save()
         return task_to_save
     else:
         # new task means new task group needed
@@ -79,6 +80,12 @@ def save_task(created_by: User, **kwargs) -> Task:
         validate_task_properties(task_to_create)
         task_to_create.save()
         return task_to_create
+
+
+def merge_values(existing_task: Task, values_to_merge: dict) -> Task:
+    for key, value in values_to_merge.items():
+        setattr(existing_task, key, value)
+    return existing_task
 
 
 def validate_task_properties(task: Task):
