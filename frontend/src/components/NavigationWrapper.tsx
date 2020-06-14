@@ -8,7 +8,7 @@ import DetailTask from './tasks/detail-task/DetailTask';
 export type RootStackParamList = {
   tasks: undefined;
   taskAdd: undefined;
-  detailTask: { taskId: string, taskName: string };
+  detailTask: { taskGroupId: string, taskName: string };
 };
 
 export default function NavigationWrapper() {

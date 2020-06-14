@@ -16,6 +16,6 @@ config:
   withHOC: false
   withHooks: true
   withComponent: false
-  skipTypename: true
-  avoidOptionals: true
+  skipTypename: false
+  avoidOptionals: false
 

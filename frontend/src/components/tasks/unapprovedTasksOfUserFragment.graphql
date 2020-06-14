@@ -1,5 +1,8 @@
 fragment unapprovedTasksOfUser on TaskType {
     id
+    taskGroup {
+        id
+    }
     name
     done
     periodEnd

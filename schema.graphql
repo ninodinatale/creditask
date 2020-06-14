@@ -26,8 +26,9 @@ type ObtainJSONWebToken {
 }
 
 type Query {
-  task(taskId: ID!): TaskType!
+  task(taskGroupId: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]
+  taskGroup(id: ID!): TaskGroupType
   user(id: Int!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
@@ -42,6 +43,11 @@ type SaveTask {
   task: TaskType!
 }
 
+type TaskGroupType {
+  id: ID!
+  taskSet: [TaskType!]!
+}
+
 input TaskInputCreate {
   name: CustomString!
   factor: CustomFloat!
@@ -51,6 +57,7 @@ input TaskInputCreate {
 }
 
 input TaskInputUpdate {
+  taskGroupId: ID!
   name: CustomString
   factor: CustomFloat
   userId: ID
@@ -60,7 +67,6 @@ input TaskInputUpdate {
 }
 
 enum TaskState {
-  UNKNOWN
   TO_DO
   TO_APPROVE
   DECLINED
@@ -73,6 +79,7 @@ type TaskType {
   createdAt: DateTime!
   createdBy: UserType
   isDeleted: Boolean!
+  taskGroup: TaskGroupType!
   name: String!
   neededTimeSeconds: Int!
   state: TaskState!

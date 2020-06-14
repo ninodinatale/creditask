@@ -22,16 +22,17 @@ export type Scalars = {
 
 
 export type Mutation = {
-  saveTask: Maybe<SaveTask>;
-  tokenAuth: Maybe<ObtainJsonWebToken>;
-  verifyToken: Maybe<Verify>;
-  refreshToken: Maybe<Refresh>;
+   __typename?: 'Mutation';
+  saveTask?: Maybe<SaveTask>;
+  tokenAuth?: Maybe<ObtainJsonWebToken>;
+  verifyToken?: Maybe<Verify>;
+  refreshToken?: Maybe<Refresh>;
 };
 
 
 export type MutationSaveTaskArgs = {
-  createInput: Maybe<TaskInputCreate>;
-  updateInput: Maybe<TaskInputUpdate>;
+  createInput?: Maybe<TaskInputCreate>;
+  updateInput?: Maybe<TaskInputUpdate>;
 };
 
 
@@ -51,26 +52,34 @@ export type MutationRefreshTokenArgs = {
 };
 
 export type ObtainJsonWebToken = {
-  token: Maybe<Scalars['String']>;
-  user: Maybe<UserType>;
+   __typename?: 'ObtainJSONWebToken';
+  token?: Maybe<Scalars['String']>;
+  user?: Maybe<UserType>;
 };
 
 export type Query = {
+   __typename?: 'Query';
   task: TaskType;
-  todoTasksOfUser: Maybe<Array<TaskType>>;
-  user: Maybe<UserType>;
-  users: Maybe<Array<UserType>>;
-  otherUsers: Maybe<Array<UserType>>;
+  todoTasksOfUser?: Maybe<Array<TaskType>>;
+  taskGroup?: Maybe<TaskGroupType>;
+  user?: Maybe<UserType>;
+  users?: Maybe<Array<UserType>>;
+  otherUsers?: Maybe<Array<UserType>>;
 };
 
 
 export type QueryTaskArgs = {
-  taskId: Scalars['ID'];
+  taskGroupId: Scalars['ID'];
 };
 
 
 export type QueryTodoTasksOfUserArgs = {
   userEmail: Scalars['String'];
+};
+
+
+export type QueryTaskGroupArgs = {
+  id: Scalars['ID'];
 };
 
 
@@ -84,32 +93,41 @@ export type QueryOtherUsersArgs = {
 };
 
 export type Refresh = {
-  token: Maybe<Scalars['String']>;
-  payload: Maybe<Scalars['GenericScalar']>;
+   __typename?: 'Refresh';
+  token?: Maybe<Scalars['String']>;
+  payload?: Maybe<Scalars['GenericScalar']>;
 };
 
 export type SaveTask = {
+   __typename?: 'SaveTask';
   task: TaskType;
+};
+
+export type TaskGroupType = {
+   __typename?: 'TaskGroupType';
+  id: Scalars['ID'];
+  taskSet: Array<TaskType>;
 };
 
 export type TaskInputCreate = {
   name: Scalars['CustomString'];
   factor: Scalars['CustomFloat'];
-  userId: Maybe<Scalars['ID']>;
-  periodStart: Maybe<Scalars['Date']>;
-  periodEnd: Maybe<Scalars['Date']>;
+  userId?: Maybe<Scalars['ID']>;
+  periodStart?: Maybe<Scalars['Date']>;
+  periodEnd?: Maybe<Scalars['Date']>;
 };
 
 export type TaskInputUpdate = {
-  name: Maybe<Scalars['CustomString']>;
-  factor: Maybe<Scalars['CustomFloat']>;
-  userId: Maybe<Scalars['ID']>;
-  periodStart: Maybe<Scalars['Date']>;
-  periodEnd: Maybe<Scalars['Date']>;
+  taskGroupId: Scalars['ID'];
+  name?: Maybe<Scalars['CustomString']>;
+  factor?: Maybe<Scalars['CustomFloat']>;
+  userId?: Maybe<Scalars['ID']>;
+  neededTimeSeconds?: Maybe<Scalars['Int']>;
+  periodStart?: Maybe<Scalars['Date']>;
+  periodEnd?: Maybe<Scalars['Date']>;
 };
 
 export enum TaskState {
-  Unknown = 'UNKNOWN',
   ToDo = 'TO_DO',
   ToApprove = 'TO_APPROVE',
   Declined = 'DECLINED',
@@ -118,24 +136,27 @@ export enum TaskState {
 }
 
 export type TaskType = {
+   __typename?: 'TaskType';
   id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
-  createdBy: Maybe<UserType>;
+  createdBy?: Maybe<UserType>;
   isDeleted: Scalars['Boolean'];
+  taskGroup: TaskGroupType;
   name: Scalars['String'];
   neededTimeSeconds: Scalars['Int'];
   state: TaskState;
   factor: Scalars['Int'];
-  user: Maybe<UserType>;
+  user?: Maybe<UserType>;
   periodStart: Scalars['Date'];
   periodEnd: Scalars['Date'];
   done: Scalars['Boolean'];
 };
 
 export type UserType = {
+   __typename?: 'UserType';
   id: Scalars['ID'];
   password: Scalars['String'];
-  lastLogin: Maybe<Scalars['DateTime']>;
+  lastLogin?: Maybe<Scalars['DateTime']>;
   email: Scalars['String'];
   publicName: Scalars['String'];
   credits: Scalars['Int'];
@@ -146,7 +167,8 @@ export type UserType = {
 };
 
 export type Verify = {
-  payload: Maybe<Scalars['GenericScalar']>;
+   __typename?: 'Verify';
+  payload?: Maybe<Scalars['GenericScalar']>;
 };
 
 export type TokenAuthMutationVariables = {
@@ -155,29 +177,74 @@ export type TokenAuthMutationVariables = {
 };
 
 
-export type TokenAuthMutation = { tokenAuth: Maybe<(
-    Pick<ObtainJsonWebToken, 'token'>
-    & { user: Maybe<Pick<UserType, 'id' | 'email' | 'publicName'>> }
-  )> };
+export type TokenAuthMutation = (
+  { __typename?: 'Mutation' }
+  & { tokenAuth?: Maybe<(
+    { __typename?: 'ObtainJSONWebToken' }
+    & Pick<ObtainJsonWebToken, 'token'>
+    & { user?: Maybe<(
+      { __typename?: 'UserType' }
+      & Pick<UserType, 'id' | 'email' | 'publicName'>
+    )> }
+  )> }
+);
 
 export type SaveTaskMutationVariables = {
-  createInput: Maybe<TaskInputCreate>;
-  updateInput: Maybe<TaskInputUpdate>;
+  createInput?: Maybe<TaskInputCreate>;
+  updateInput?: Maybe<TaskInputUpdate>;
 };
 
 
-export type SaveTaskMutation = { saveTask: Maybe<{ task: UnapprovedTasksOfUserFragment }> };
+export type SaveTaskMutation = (
+  { __typename?: 'Mutation' }
+  & { saveTask?: Maybe<(
+    { __typename?: 'SaveTask' }
+    & { task: (
+      { __typename?: 'TaskType' }
+      & UnapprovedTasksOfUserFragment
+    ) }
+  )> }
+);
 
 export type DetailTaskQueryVariables = {
-  taskId: Scalars['ID'];
+  taskGroupId: Scalars['ID'];
 };
 
 
-export type DetailTaskQuery = { task: DetailTaskFragment };
+export type DetailTaskQuery = (
+  { __typename?: 'Query' }
+  & { task: (
+    { __typename?: 'TaskType' }
+    & DetailTaskFragment
+  ) }
+);
+
+export type UpdateTaskMutationVariables = {
+  task: TaskInputUpdate;
+};
+
+
+export type UpdateTaskMutation = (
+  { __typename?: 'Mutation' }
+  & { saveTask?: Maybe<(
+    { __typename?: 'SaveTask' }
+    & { task: (
+      { __typename?: 'TaskType' }
+      & DetailTaskFragment
+    ) }
+  )> }
+);
 
 export type DetailTaskFragment = (
-  Pick<TaskType, 'id' | 'done' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
-  & { user: Maybe<Pick<UserType, 'publicName'>> }
+  { __typename?: 'TaskType' }
+  & Pick<TaskType, 'id' | 'done' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
+  & { taskGroup: (
+    { __typename?: 'TaskGroupType' }
+    & Pick<TaskGroupType, 'id'>
+  ), user?: Maybe<(
+    { __typename?: 'UserType' }
+    & Pick<UserType, 'publicName'>
+  )> }
 );
 
 export type OtherUsersQueryVariables = {
@@ -185,36 +252,76 @@ export type OtherUsersQueryVariables = {
 };
 
 
-export type OtherUsersQuery = { otherUsers: Maybe<Array<OtherUsersFragment>> };
+export type OtherUsersQuery = (
+  { __typename?: 'Query' }
+  & { otherUsers?: Maybe<Array<(
+    { __typename?: 'UserType' }
+    & OtherUsersFragment
+  )>> }
+);
 
-export type OtherUsersFragment = Pick<UserType, 'id' | 'publicName'>;
+export type OtherUsersFragment = (
+  { __typename?: 'UserType' }
+  & Pick<UserType, 'id' | 'publicName'>
+);
 
-export type UnapprovedTasksOfUserFragment = Pick<TaskType, 'id' | 'name' | 'done' | 'periodEnd'>;
+export type UnapprovedTasksOfUserFragment = (
+  { __typename?: 'TaskType' }
+  & Pick<TaskType, 'id' | 'name' | 'done' | 'periodEnd'>
+  & { taskGroup: (
+    { __typename?: 'TaskGroupType' }
+    & Pick<TaskGroupType, 'id'>
+  ) }
+);
 
 export type TodoTasksOfUserQueryVariables = {
   email: Scalars['String'];
 };
 
 
-export type TodoTasksOfUserQuery = { todoTasksOfUser: Maybe<Array<UnapprovedTasksOfUserFragment>> };
+export type TodoTasksOfUserQuery = (
+  { __typename?: 'Query' }
+  & { todoTasksOfUser?: Maybe<Array<(
+    { __typename?: 'TaskType' }
+    & UnapprovedTasksOfUserFragment
+  )>> }
+);
 
 export type UsersQueryVariables = {};
 
 
-export type UsersQuery = { users: Maybe<Array<UsersFragment>> };
+export type UsersQuery = (
+  { __typename?: 'Query' }
+  & { users?: Maybe<Array<(
+    { __typename?: 'UserType' }
+    & UsersFragment
+  )>> }
+);
 
-export type UsersFragment = Pick<UserType, 'id' | 'email' | 'publicName'>;
+export type UsersFragment = (
+  { __typename?: 'UserType' }
+  & Pick<UserType, 'id' | 'email' | 'publicName'>
+);
 
 export type RefreshTokenMutationVariables = {
   token: Scalars['String'];
 };
 
 
-export type RefreshTokenMutation = { refreshToken: Maybe<Pick<Refresh, 'token' | 'payload'>> };
+export type RefreshTokenMutation = (
+  { __typename?: 'Mutation' }
+  & { refreshToken?: Maybe<(
+    { __typename?: 'Refresh' }
+    & Pick<Refresh, 'token' | 'payload'>
+  )> }
+);
 
 export const DetailTaskFragmentDoc = gql`
     fragment detailTask on TaskType {
   id
+  taskGroup {
+    id
+  }
   done
   factor
   name
@@ -236,6 +343,9 @@ export const OtherUsersFragmentDoc = gql`
 export const UnapprovedTasksOfUserFragmentDoc = gql`
     fragment unapprovedTasksOfUser on TaskType {
   id
+  taskGroup {
+    id
+  }
   name
   done
   periodEnd
@@ -322,8 +432,8 @@ export type SaveTaskMutationHookResult = ReturnType<typeof useSaveTaskMutation>;
 export type SaveTaskMutationResult = ApolloReactCommon.MutationResult<SaveTaskMutation>;
 export type SaveTaskMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveTaskMutation, SaveTaskMutationVariables>;
 export const DetailTaskDocument = gql`
-    query detailTask($taskId: ID!) {
-  task(taskId: $taskId) {
+    query detailTask($taskGroupId: ID!) {
+  task(taskGroupId: $taskGroupId) {
     ...detailTask
   }
 }
@@ -341,7 +451,7 @@ export const DetailTaskDocument = gql`
  * @example
  * const { data, loading, error } = useDetailTaskQuery({
  *   variables: {
- *      taskId: // value for 'taskId'
+ *      taskGroupId: // value for 'taskGroupId'
  *   },
  * });
  */
@@ -354,6 +464,40 @@ export function useDetailTaskLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type DetailTaskQueryHookResult = ReturnType<typeof useDetailTaskQuery>;
 export type DetailTaskLazyQueryHookResult = ReturnType<typeof useDetailTaskLazyQuery>;
 export type DetailTaskQueryResult = ApolloReactCommon.QueryResult<DetailTaskQuery, DetailTaskQueryVariables>;
+export const UpdateTaskDocument = gql`
+    mutation updateTask($task: TaskInputUpdate!) {
+  saveTask(updateInput: $task) {
+    task {
+      ...detailTask
+    }
+  }
+}
+    ${DetailTaskFragmentDoc}`;
+export type UpdateTaskMutationFn = ApolloReactCommon.MutationFunction<UpdateTaskMutation, UpdateTaskMutationVariables>;
+
+/**
+ * __useUpdateTaskMutation__
+ *
+ * To run a mutation, you first call `useUpdateTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTaskMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTaskMutation, { data, loading, error }] = useUpdateTaskMutation({
+ *   variables: {
+ *      task: // value for 'task'
+ *   },
+ * });
+ */
+export function useUpdateTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTaskMutation, UpdateTaskMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateTaskMutation, UpdateTaskMutationVariables>(UpdateTaskDocument, baseOptions);
+      }
+export type UpdateTaskMutationHookResult = ReturnType<typeof useUpdateTaskMutation>;
+export type UpdateTaskMutationResult = ApolloReactCommon.MutationResult<UpdateTaskMutation>;
+export type UpdateTaskMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTaskMutation, UpdateTaskMutationVariables>;
 export const OtherUsersDocument = gql`
     query otherUsers($userEmail: String!) {
   otherUsers(userEmail: $userEmail) {

@@ -4,7 +4,8 @@ import { UnapprovedTasksOfUserFragment } from '../../../../graphql/types';
 import { Text, View } from 'react-native';
 import {
   ISODateStringToLocaleDateString,
-  ISODateStringToMoment, relativeDateString
+  ISODateStringToMoment,
+  relativeDateString
 } from '../../../../utils/transformer';
 import moment from 'moment';
 
@@ -13,14 +14,27 @@ export type UserAssignedTasksProps = {
   onTaskPress: (taskId: string, taskName: string) => void
 }
 
-export default function UserAssignedTasksView({tasks, onTaskPress}: UserAssignedTasksProps) {
+export default function UserAssignedTasksView(props: UserAssignedTasksProps) {
+
+  const {tasks, onTaskPress} = props;
 
   const theme = useTheme();
 
   if (!tasks || !tasks.length) {
     return (
-        <View>
-          Keine Aufgaben von dir 🥳
+        <View {...props}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+          <Text
+              {...props}
+              style={{
+                fontSize: 20
+              }}
+          >Keine Aufgaben von dir 🥳</Text>
         </View>
     )
   }
@@ -56,7 +70,7 @@ export default function UserAssignedTasksView({tasks, onTaskPress}: UserAssigned
         <View key={task.id}>
           {index == 0 ? <List.Subheader>{headerText}</List.Subheader> : null}
           <TouchableRipple
-              onPress={() => onTaskPress(task.id, task.name)}
+              onPress={() => onTaskPress(task.taskGroup.id, task.name)}
               key={task.id}
           >
             <List.Item

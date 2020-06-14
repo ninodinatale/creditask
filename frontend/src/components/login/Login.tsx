@@ -56,6 +56,7 @@ export default function Login({onLoginFail, onLoginSuccess}: LoginProps) {
 
   function loginFailed(): void {
     setIsError(true);
+    setIsLoading(false);
     onLoginFail?.();
   }
 

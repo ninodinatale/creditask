@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import LoadingSpinner from '../../_shared/LoadingSpinner';
-import { DetailTaskDocument, useDetailTaskQuery } from '../../../graphql/types';
+import {
+  DetailTaskDocument,
+  DetailTaskQuery,
+  DetailTaskQueryVariables,
+  useDetailTaskQuery,
+  useUpdateTaskMutation
+} from '../../../graphql/types';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../NavigationWrapper';
@@ -13,6 +19,7 @@ import {
   transformTaskState
 } from '../../../utils/transformer';
 import moment from 'moment';
+import TaskTimer from './TaskTimer';
 
 interface DetailTaskProps {
   route: RouteProp<RootStackParamList, 'detailTask'>,
@@ -24,12 +31,52 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
 
   const theme = useTheme();
 
+  const [dummyValue, setDummyValue] = useState(false);
+
+  const [saveTaskMutation] = useUpdateTaskMutation();
   let {loading, data} = useDetailTaskQuery({
     query: DetailTaskDocument,
     variables: {
-      taskId: route.params.taskId
-    }
+      taskGroupId: route.params.taskGroupId
+    },
   });
+
+  function updateView() {
+    setDummyValue(!dummyValue)
+  }
+
+  function onTimerStop(elapsedSeconds: number): void {
+    if (data?.task) {
+      saveTaskMutation({
+        variables: {
+          task: {
+            taskGroupId: data.task.taskGroup.id,
+            neededTimeSeconds: data.task.neededTimeSeconds + elapsedSeconds
+          }
+        },
+        optimisticResponse: {
+          saveTask: {
+            task: {
+              ...data.task,
+              neededTimeSeconds: data.task.neededTimeSeconds + elapsedSeconds,
+            }, __typename: 'SaveTask'
+          }, __typename: 'Mutation'
+        },
+        update: (proxy, fetchResult) => {
+          if (fetchResult.data?.saveTask?.task && data?.task) {
+            proxy.writeQuery<DetailTaskQuery, DetailTaskQueryVariables>({
+              query: DetailTaskDocument,
+              data: {task: {...fetchResult.data.saveTask.task}},
+              variables: {
+                taskGroupId: data.task.taskGroup.id
+              }
+            })
+          }
+          updateView() // TODO updateQuery should update view (updating the optimisticResponse)
+        }
+      }).then(() => updateView()); // TODO updateQuery should update view (updating the actual response)
+    }
+  }
 
   if (loading) {
     return <LoadingSpinner/>
@@ -62,6 +109,12 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
           <List.Item style={styles.listItem}
                      title="Benötigte Zeit"
                      left={props => <List.Icon {...props} icon="clock-outline"/>}
+                     right={props => <TaskTimer
+                         {...props}
+                         loading={false}
+                         theme={theme}
+                         onTimerStop={onTimerStop}
+                     />}
                      description={secondsToElapsedTimeString(task.neededTimeSeconds)}
           />
           <List.Item style={styles.listItem}

@@ -19,9 +19,9 @@ export default function UserAssignedTasks() {
     }
   });
 
-  function navigateToTaskDetail(taskId: string, taskName: string): void {
+  function navigateToTaskDetail(taskGroupId: string, taskName: string): void {
     navigation.navigate('detailTask', {
-      taskId,
+      taskGroupId,
       taskName
     })
   }

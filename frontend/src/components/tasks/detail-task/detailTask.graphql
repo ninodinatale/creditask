@@ -1,11 +1,22 @@
-query detailTask($taskId: ID!) {
-    task(taskId: $taskId) {
+query detailTask($taskGroupId: ID!) {
+    task(taskGroupId: $taskGroupId) {
         ...detailTask
+    }
+}
+
+mutation updateTask($task: TaskInputUpdate!) {
+    saveTask(updateInput: $task) {
+        task {
+            ...detailTask
+        }
     }
 }
 
 fragment detailTask on TaskType {
     id
+    taskGroup {
+        id
+    }
     done
     factor
     name
