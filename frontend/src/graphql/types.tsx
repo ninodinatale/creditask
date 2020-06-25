@@ -11,8 +11,8 @@ export type Scalars = {
   Float: number;
   CustomFloat: number;
   CustomString: string;
-  Date: any;
-  DateTime: Date;
+  Date: string;
+  DateTime: string;
   GenericScalar: any;
 };
 
@@ -243,7 +243,7 @@ export type DetailTaskFragment = (
     & Pick<TaskGroupType, 'id'>
   ), user?: Maybe<(
     { __typename?: 'UserType' }
-    & Pick<UserType, 'publicName'>
+    & Pick<UserType, 'publicName' | 'id'>
   )> }
 );
 
@@ -331,6 +331,7 @@ export const DetailTaskFragmentDoc = gql`
   state
   user {
     publicName
+    id
   }
 }
     `;

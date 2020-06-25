@@ -3,7 +3,7 @@ import { Picker as NativePicker, StyleSheet, TextInputProps } from 'react-native
 import { TextInput, } from 'react-native-paper';
 
 /**
- * Wrapper for native picker in order to use with react natiive paper
+ * Wrapper for native datepicker in order to use with react natiive paper
  * @param props
  */
 export default function PickerInput(props: PickerProps & TextInputProps & { ref?: (input: any) => void }) {

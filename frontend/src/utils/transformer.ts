@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { TaskState } from '../graphql/types';
-import { Theme, Colors } from 'react-native-paper';
+import { Colors, Theme } from 'react-native-paper';
 
 /**
  * Transforms date string `YYYY-MM-DD` to `DD.MM.YYYY`
@@ -20,6 +20,10 @@ export function localeDateStringToISOString(dateString: string): string {
 
 export function dateToLocaleDateString(date: Date): string {
   return moment(date).format('DD.MM.YYYY')
+}
+
+export function dateToISODateString(date: Date): string {
+  return moment(date).format('YYYY-MM-DD')
 }
 
 export function ISODateStringToMoment(dateString: string): moment.Moment {
@@ -70,8 +74,8 @@ export function transformTaskState(taskState: TaskState): string {
  *        - ...
  */
 export function relativeDateString(isoDateString: string): string {
-  const now = moment();
-  const date = moment(isoDateString, 'YYYY-MM-DD');
+  const now = moment(Date.now()).format('YYYY-MM-DD');
+  const date = ISODateStringToMoment(isoDateString);
 
   const dayDifference = date.diff(now, 'days');
   if (dayDifference < -1) {
@@ -79,6 +83,9 @@ export function relativeDateString(isoDateString: string): string {
   }
   if (dayDifference === -1) {
     return 'gestern';
+  }
+  if (dayDifference === 0) {
+    return 'heute';
   }
   if (dayDifference === 1) {
     return 'morgen';
@@ -91,6 +98,24 @@ export function relativeDateString(isoDateString: string): string {
   }
 
   return 'Some error...? 🙈'
+}
+
+export function dateToElapsedTimeString(date: Date, options?: { ceilMinutes: boolean }): string {
+  const mDate = moment(date);
+  const seconds = ((mDate.hours() * 3600) + (mDate.minutes() * 60) + mDate.seconds());
+  return secondsToElapsedTimeString(seconds, options)
+}
+
+export function secondsToDate(seconds: string | number): Date {
+  return new Date((+seconds * 1000) - 3600000);
+}
+
+export function dateToSeconds(date: Date, options?: { ceilMinutes: boolean }): number {
+  const mDate = moment(date);
+  if (options?.ceilMinutes) {
+    ceilMinutes(mDate)
+  }
+  return  ((mDate.hours() * 3600) + (mDate.minutes() * 60));
 }
 
 /**
@@ -106,8 +131,7 @@ export function secondsToElapsedTimeString(secondsToTransform: number, options?:
   const timeMoment = moment(0).utc();
   timeMoment.add(secondsToTransform, 'seconds');
   if (options?.ceilMinutes) {
-    timeMoment.add(1, 'minutes');
-    timeMoment.subtract(0);
+    ceilMinutes(timeMoment)
   }
 
   const hours = timeMoment.hours();
@@ -204,3 +228,8 @@ export function secondsToElapsedTimeString(secondsToTransform: number, options?:
 //     throw new Error('TimePipe could not retrieve output format.');
 //   }
 // }
+
+function ceilMinutes(moment: moment.Moment): void {
+    moment.add(1, 'minutes');
+    moment.subtract(0);
+}

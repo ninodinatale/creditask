@@ -9,7 +9,8 @@ generates:
       - "typescript-react-apollo"
 config:
   scalars:
-    DateTime: Date
+    DateTime: string
+    Date: string
     CustomString: string
     CustomFloat: number
     JSON: "{ [key: string]: any }"

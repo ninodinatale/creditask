@@ -1,4 +1,4 @@
-import { IconButton, useTheme } from 'react-native-paper';
+import { IconButton, Portal, useTheme } from 'react-native-paper';
 import React from 'react';
 import Tasks from './tasks/Tasks';
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
@@ -29,24 +29,26 @@ export default function NavigationWrapper() {
   }
 
   return (
-      <Stack.Navigator
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: theme.colors.primary
-            },
-            headerTintColor: theme.colors.surface,
-          }}>
-        <Stack.Screen name="tasks"
-                      component={Tasks}
-                      options={stackScreenOptions}
-        />
-        <Stack.Screen name="taskAdd"
-                      component={AddTask}
-                      options={{headerTitle: 'Task hinzufügen'}}
-        />
-        <Stack.Screen name="detailTask"
-                      component={DetailTask}
-        />
-      </Stack.Navigator>
+      <Portal.Host>
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: theme.colors.primary
+              },
+              headerTintColor: theme.colors.surface,
+            }}>
+          <Stack.Screen name="tasks"
+                        component={Tasks}
+                        options={stackScreenOptions}
+          />
+          <Stack.Screen name="taskAdd"
+                        component={AddTask}
+                        options={{headerTitle: 'Task hinzufügen'}}
+          />
+          <Stack.Screen name="detailTask"
+                        component={DetailTask}
+          />
+        </Stack.Navigator>
+      </Portal.Host>
   );
 }

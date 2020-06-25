@@ -26,5 +26,6 @@ fragment detailTask on TaskType {
     state
     user {
         publicName
+        id
     }
 }

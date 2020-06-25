@@ -4,6 +4,7 @@ import {
   DetailTaskDocument,
   DetailTaskQuery,
   DetailTaskQueryVariables,
+  TaskInputUpdate,
   useDetailTaskQuery,
   useUpdateTaskMutation
 } from '../../../graphql/types';
@@ -20,6 +21,8 @@ import {
 } from '../../../utils/transformer';
 import moment from 'moment';
 import TaskTimer from './TaskTimer';
+import EditButton from './EditButton';
+import { canEditTaskProperty, validatePeriods } from '../../../utils/validators';
 
 interface DetailTaskProps {
   route: RouteProp<RootStackParamList, 'detailTask'>,
@@ -33,7 +36,7 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
 
   const [dummyValue, setDummyValue] = useState(false);
 
-  const [saveTaskMutation] = useUpdateTaskMutation();
+  const [updateTaskMutation] = useUpdateTaskMutation();
   let {loading, data} = useDetailTaskQuery({
     query: DetailTaskDocument,
     variables: {
@@ -47,18 +50,24 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
 
   function onTimerStop(elapsedSeconds: number): void {
     if (data?.task) {
-      saveTaskMutation({
+      onEditTask('neededTimeSeconds', data.task.neededTimeSeconds + elapsedSeconds)
+    }
+  }
+
+  function onEditTask<T extends TaskInputUpdate, K extends keyof T>(propertyToUpdate: K, newValue: T[K]): void {
+    if (data?.task) {
+      updateTaskMutation({
         variables: {
           task: {
             taskGroupId: data.task.taskGroup.id,
-            neededTimeSeconds: data.task.neededTimeSeconds + elapsedSeconds
+            [propertyToUpdate]: newValue
           }
         },
         optimisticResponse: {
           saveTask: {
             task: {
               ...data.task,
-              neededTimeSeconds: data.task.neededTimeSeconds + elapsedSeconds,
+              [propertyToUpdate]: newValue
             }, __typename: 'SaveTask'
           }, __typename: 'Mutation'
         },
@@ -66,7 +75,7 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
           if (fetchResult.data?.saveTask?.task && data?.task) {
             proxy.writeQuery<DetailTaskQuery, DetailTaskQueryVariables>({
               query: DetailTaskDocument,
-              data: {task: {...fetchResult.data.saveTask.task}},
+              data: {task: {...fetchResult.data.saveTask.task, id: data.task.id},},
               variables: {
                 taskGroupId: data.task.taskGroup.id
               }
@@ -99,27 +108,57 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
           <List.Item style={styles.listItem}
                      title="Zuweisung"
                      left={props => <List.Icon {...props} icon="account"/>}
+                     right={props => <EditButton {...props}
+                                                 hidden={!canEditTaskProperty('userId', task.state)}
+                                                 title={'Zuweisung'}
+                                                 onSubmit={(newValue) => onEditTask('userId', newValue)}
+                                                 initialValue={task.user?.id || ''} theme={theme}
+                                                 inputType={'userAssignment'}/>}
                      description={task.user?.publicName || 'Niemandem zugewiesen'}
           />
           <List.Item style={styles.listItem}
                      title="Faktor"
                      left={props => <List.Icon {...props} icon="chart-line"/>}
+                     right={props => <EditButton {...props} title={'Faktor'}
+                                                 hidden={!canEditTaskProperty('factor', task.state)}
+                                                 onSubmit={(newValue) => onEditTask('factor', +newValue)}
+                                                 initialValue={task.factor + ''} theme={theme}
+                                                 inputType={'factor'}/>}
                      description={task.factor + 'x'}
           />
           <List.Item style={styles.listItem}
                      title="Benötigte Zeit"
                      left={props => <List.Icon {...props} icon="clock-outline"/>}
-                     right={props => <TaskTimer
-                         {...props}
-                         loading={false}
-                         theme={theme}
-                         onTimerStop={onTimerStop}
-                     />}
+                     right={props => canEditTaskProperty('neededTimeSeconds', task.state) ?
+                         <View {...props} style={{
+                           flex: 0,
+                           flexDirection: 'row',
+                           alignItems: 'center'
+                         }}>
+                           <TaskTimer
+                               {...props}
+                               loading={false}
+                               theme={theme}
+                               onTimerStop={onTimerStop}
+                           />
+                           <EditButton {...props} title={'Benötigte Zeit'}
+                                       hidden={!canEditTaskProperty('neededTimeSeconds', task.state)}
+                                       onSubmit={(newValue) => onEditTask('neededTimeSeconds', +newValue)}
+                                       initialValue={task.neededTimeSeconds + ''} theme={theme}
+                                       inputType={'neededTimeSeconds'}/>
+                         </View> : undefined}
                      description={secondsToElapsedTimeString(task.neededTimeSeconds)}
           />
           <List.Item style={styles.listItem}
                      title="Frühestens machen am"
                      left={props => <List.Icon {...props} icon="calendar-check"/>}
+                     right={props => <EditButton {...props}
+                                                 hidden={!canEditTaskProperty('periodStart', task.state)}
+                                                 title={'Frühstens machen am'}
+                                                 validateFn={(value) => validatePeriods(moment(value), moment(task.periodEnd))}
+                                                 onSubmit={(newValue) => onEditTask('periodStart', newValue)}
+                                                 initialValue={task.periodStart} theme={theme}
+                                                 inputType={'periodStart'}/>}
                      description={ISODateStringToLocaleDateString(task.periodStart) + ` (${relativeDateString(task.periodStart)})`}
           />
           <List.Item style={styles.listItem}
@@ -127,6 +166,13 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
                      left={props =>
                          <List.Icon {...{...props, ...(overdue ? {color: theme.colors.error} : {})}}
                                     icon="calendar-clock"/>}
+                     right={props => <EditButton {...props}
+                                                 hidden={!canEditTaskProperty('periodEnd', task.state)}
+                                                 title={'Spätestens machen am'}
+                                                 validateFn={(value) => validatePeriods(moment(task.periodStart), moment(value))}
+                                                 onSubmit={(newValue) => onEditTask('periodEnd', newValue)}
+                                                 initialValue={task.periodEnd} theme={theme}
+                                                 inputType={'periodEnd'}/>}
                      description={<Text style={overdue ? {color: theme.colors.error} : undefined}>
                        {ISODateStringToLocaleDateString(task.periodEnd) + ` (${relativeDateString(task.periodEnd)})`}
                      </Text>}

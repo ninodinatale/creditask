@@ -269,9 +269,12 @@ class TestTaskService(TransactionTestCase):
 
     @mock.patch('creditask.services.task_service.validate_task_properties')
     @mock.patch('creditask.services.task_service.get_task_by_task_group_id')
+    @mock.patch('creditask.services.task_service.validate_new_properties_based_'
+                'on_task_state')
     @mock.patch('creditask.services.task_service.Task.save')
     def test_save_task(self, mock_save,
                        mock_get_task_by_task_group_id,
+                       mock_validate_new_properties_based_on_task_state,
                        mock_validate_task_properties):
         mock_user = User(email='user@email.com')
         args = {

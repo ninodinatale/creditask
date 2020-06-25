@@ -46,27 +46,7 @@ def save_task(created_by: User, **kwargs) -> Task:
         task_to_save = get_task_by_task_group_id(kwargs.get('task_group_id'))
 
         validate_state_change(task_to_save, dict(**kwargs))
-
-        if task_to_save.state == Task.State.TO_DO:
-            # everything may be changed
-            validate_task_properties(task_to_save)
-        else:
-            if 'period_start' in kwargs:
-                raise ValidationError(
-                    f'period_start may not be changed if task has'
-                    f' state [{kwargs.get("state")}]')
-            if 'period_end' in kwargs:
-                raise ValidationError(
-                    f'period_end may not be changed if task has'
-                    f' state [{kwargs.get("state")}]')
-
-            for key, value in kwargs:
-                # todo test
-                if key != 'task_group_id' and key != 'state':
-                    if value != task_to_save[key]:
-                        raise ValidationError(
-                            f'Column [{key}] of Task with state '
-                            f'[{task_to_save.state}] may not be changed')
+        validate_new_properties_based_on_task_state(task_to_save, dict(**kwargs))
 
         merge_values(task_to_save, kwargs).save()
         return task_to_save
@@ -76,7 +56,10 @@ def save_task(created_by: User, **kwargs) -> Task:
         task_group = TaskGroup.objects.create()
         task_to_create = Task(created_by=created_by,
                               task_group=task_group,
-                              **kwargs)
+                              **kwargs,
+                              state=Task.State.TO_DO,
+                              done=False,
+                              needed_time_seconds=0)
         validate_task_properties(task_to_create)
         task_to_create.save()
         return task_to_create
@@ -86,6 +69,31 @@ def merge_values(existing_task: Task, values_to_merge: dict) -> Task:
     for key, value in values_to_merge.items():
         setattr(existing_task, key, value)
     return existing_task
+
+
+# TODO test
+def validate_new_properties_based_on_task_state(
+        task_to_save: Task, new_properties: dict) -> None:
+    if task_to_save.state == Task.State.TO_DO:
+        # everything may be changed
+        validate_task_properties(task_to_save)
+    else:
+        if 'period_start' in new_properties:
+            raise ValidationError(
+                f'period_start may not be changed if task has'
+                f' state [{new_properties.get("state")}]')
+        if 'period_end' in new_properties:
+            raise ValidationError(
+                f'period_end may not be changed if task has'
+                f' state [{new_properties.get("state")}]')
+
+        for key, value in new_properties:
+            # todo test
+            if key != 'task_group_id' and key != 'state':
+                if value != task_to_save[key]:
+                    raise ValidationError(
+                        f'Column [{key}] of Task with state '
+                        f'[{task_to_save.state}] may not be changed')
 
 
 def validate_task_properties(task: Task):
