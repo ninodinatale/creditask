@@ -3,6 +3,9 @@ from typing import List
 from django.core.exceptions import ValidationError
 
 from creditask.models import Task, User, TaskGroup
+from creditask.models.enums.changeable_task_property import \
+    ChangeableTaskProperty
+from creditask.models.task_change import TaskChange
 from creditask.validators import MinLenValidator
 
 
@@ -46,7 +49,8 @@ def save_task(created_by: User, **kwargs) -> Task:
         task_to_save = get_task_by_task_group_id(kwargs.get('task_group_id'))
 
         validate_state_change(task_to_save, dict(**kwargs))
-        validate_new_properties_based_on_task_state(task_to_save, dict(**kwargs))
+        validate_new_properties_based_on_task_state(task_to_save,
+                                                    dict(**kwargs))
 
         merge_values(task_to_save, kwargs).save()
         return task_to_save
@@ -131,3 +135,35 @@ def validate_state_change(old_task: Task, new_task_dict: dict):
                     f'[{Task.State.UNDER_CONDITIONS}] or '
                     f'[{Task.State.DECLINED}],'
                     f'but was [{new_state}]')
+
+
+def get_changes(task: Task) -> List[TaskChange]:
+    changes: List[TaskChange] = []
+
+    tasks: List[Task] = list(Task.objects.filter(
+        task_group_id=task.task_group_id).order_by('created_at'))
+
+    for i, tsk in enumerate(tasks):
+        if i == 0:
+            changes.append(
+                TaskChange(
+                    current_value=None,
+                    previous_value=None,
+                    user=tsk.created_by,
+                    timestamp=tsk.created_at,
+                    changed_property=None))
+        else:
+            for prop in ChangeableTaskProperty:
+
+                current_value = getattr(tsk, prop.value)
+                previous_value = getattr(tasks[i - 1], prop.value)
+
+                if current_value != previous_value:
+                    changes.append(TaskChange(
+                        current_value=str(current_value),
+                        previous_value=str(previous_value),
+                        user=tsk.created_by,
+                        timestamp=tsk.created_at,
+                        changed_property=ChangeableTaskProperty(prop)
+                    ))
+    return changes

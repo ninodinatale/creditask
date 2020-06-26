@@ -1,19 +1,37 @@
-from graphene import Field, NonNull, InputObjectType, \
-    String, Mutation as GrapheneMutation, Int, Date, List, ID
+from graphene import NonNull, InputObjectType, \
+    String, Mutation as GrapheneMutation, Int, Date, List, ID, ObjectType, \
+    DateTime, Enum, Field
 from graphene_django.types import DjangoObjectType
 from graphql import GraphQLError
+from graphql.execution.base import ResolveInfo
 from graphql_jwt.decorators import login_required
 
 from creditask.models import Task
 from creditask.schema.scalars import custom_string, custom_float
-from creditask.services.task_service import save_task, \
+from creditask.schema.user import UserType
+from creditask.services.task_service import save_task, get_changes, \
     get_task_by_task_group_id, get_todo_tasks_by_user_email
+from creditask.models.enums import ChangeableTaskProperty
 
 
 #
 # Object Types
 #
+class TaskChangeType(ObjectType):
+    current_value = String()
+    previous_value = String()
+    user = NonNull(UserType)
+    timestamp = NonNull(DateTime)
+    changed_property = Field(Enum.from_enum(ChangeableTaskProperty))
+
+
 class TaskType(DjangoObjectType):
+    changes = NonNull(List(TaskChangeType))
+
+    @staticmethod
+    def resolve_changes(parent: Task, info: ResolveInfo):
+        return get_changes(parent)
+
     class Meta:
         model = Task
 
@@ -57,7 +75,7 @@ class TaskInputCreate(InputObjectType):
 
 
 class TaskInputUpdate(InputObjectType):
-    task_group_id = NonNull(task_input_type_task_group_id) # TODO test
+    task_group_id = NonNull(task_input_type_task_group_id)  # TODO test
     name = task_input_type_name()
     factor = task_input_type_factor()
     user_id = task_input_type_user_id()

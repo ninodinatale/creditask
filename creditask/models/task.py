@@ -21,7 +21,7 @@ class Task(BaseModel):
     needed_time_seconds: int = models.IntegerField()
     state = models.CharField(choices=State.choices,
                              max_length=64, default=State.TO_DO)
-    factor: int = models.IntegerField(default=0)
+    factor: int = models.FloatField(default=0)
     user: User = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     period_start: datetime.date = models.DateField(default=datetime.datetime.now)
     period_end: datetime.date = models.DateField(default=datetime.datetime.now)
