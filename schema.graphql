@@ -12,7 +12,7 @@ enum ApprovalState {
 type ApprovalType {
   id: ID!
   createdAt: DateTime!
-  createdBy: UserType
+  createdBy: UserType!
   isDeleted: Boolean!
   state: ApprovalState!
   task: TaskType!
@@ -54,7 +54,7 @@ type ObtainJSONWebToken {
 
 type Query {
   task(taskGroupId: ID!): TaskType!
-  todoTasksOfUser(userEmail: String!): [TaskType!]
+  todoTasksOfUser(userEmail: String!): [TaskType!]!
   taskGroup(id: ID!): TaskGroupType
   user(id: Int!): UserType
   users: [UserType!]
@@ -110,7 +110,7 @@ enum TaskState {
 
 type TaskType {
   createdAt: DateTime!
-  createdBy: UserType
+  createdBy: UserType!
   isDeleted: Boolean!
   id: ID!
   taskGroup: TaskGroupType!

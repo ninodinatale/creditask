@@ -48,7 +48,8 @@ class TaskType(DjangoObjectType):
 #
 class TaskQuery:
     task = NonNull(TaskType, task_group_id=NonNull(ID))
-    todo_tasks_of_user = List(NonNull(TaskType), user_email=NonNull(String))
+    todo_tasks_of_user = NonNull(List(NonNull(TaskType)),
+                                 user_email=NonNull(String))
 
     @staticmethod
     @login_required

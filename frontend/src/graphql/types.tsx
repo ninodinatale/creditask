@@ -26,7 +26,7 @@ export type ApprovalType = {
    __typename?: 'ApprovalType';
   id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
-  createdBy?: Maybe<UserType>;
+  createdBy: UserType;
   isDeleted: Scalars['Boolean'];
   state: ApprovalState;
   task: TaskType;
@@ -88,7 +88,7 @@ export type ObtainJsonWebToken = {
 export type Query = {
    __typename?: 'Query';
   task: TaskType;
-  todoTasksOfUser?: Maybe<Array<TaskType>>;
+  todoTasksOfUser: Array<TaskType>;
   taskGroup?: Maybe<TaskGroupType>;
   user?: Maybe<UserType>;
   users?: Maybe<Array<UserType>>;
@@ -174,7 +174,7 @@ export enum TaskState {
 export type TaskType = {
    __typename?: 'TaskType';
   createdAt: Scalars['DateTime'];
-  createdBy?: Maybe<UserType>;
+  createdBy: UserType;
   isDeleted: Scalars['Boolean'];
   id: Scalars['ID'];
   taskGroup: TaskGroupType;
@@ -331,10 +331,10 @@ export type TodoTasksOfUserQueryVariables = {
 
 export type TodoTasksOfUserQuery = (
   { __typename?: 'Query' }
-  & { todoTasksOfUser?: Maybe<Array<(
+  & { todoTasksOfUser: Array<(
     { __typename?: 'TaskType' }
     & UnapprovedTasksOfUserFragment
-  )>> }
+  )> }
 );
 
 export type UsersQueryVariables = {};

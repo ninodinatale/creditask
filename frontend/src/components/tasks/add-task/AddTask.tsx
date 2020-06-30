@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { TaskInputCreate, useSaveTaskMutation } from '../../../graphql/types';
+import {
+  TaskInputCreate,
+  TodoTasksOfUserDocument,
+  TodoTasksOfUserQuery,
+  TodoTasksOfUserQueryVariables,
+  useSaveTaskMutation
+} from '../../../graphql/types';
 import {
   dateToLocaleDateString,
   localeDateStringToDate,
@@ -19,6 +25,7 @@ import PeriodStartInput
 import PeriodEndInput from '../../_shared/CreditaskInput/TaskInput/SpecificInputs/PeriodEndInput';
 import { KeyboardScrollView } from '../../_shared/KeyboardScrollView';
 import { validatePeriods } from '../../../utils/validators';
+import { useAuth } from '../../../hooks/auth/use-auth';
 
 interface AddTaskProps {
   navigation: StackNavigationProp<RootStackParamList, 'taskAdd'>
@@ -26,6 +33,7 @@ interface AddTaskProps {
 
 export default function AddTask(props: AddTaskProps) {
   const [mutate] = useSaveTaskMutation();
+  const auth = useAuth();
 
   const initialValues: AddTaskValues = {
     name: '',
@@ -40,11 +48,12 @@ export default function AddTask(props: AddTaskProps) {
 
     const periodStartDate = moment(localeDateStringToDate(values.periodStart));
     const periodEndDate = moment(localeDateStringToDate(values.periodEnd));
-    const error = validatePeriods(periodStartDate, periodEndDate);
+    const error = validatePeriods(periodStartDate, periodEndDate) || undefined;
 
-    errors.periodStart = error;
-    errors.periodEnd = error;
-
+    if (error) {
+      errors.periodStart = error;
+      errors.periodEnd = error;
+    }
     return errors;
   }
 
@@ -63,10 +72,34 @@ export default function AddTask(props: AddTaskProps) {
       variables: {
         updateInput: null,
         createInput
+      },
+      update: (proxy, fetchResult) => {
+        // TODO add update logic to other lists
+        if (values.assignedUserId === auth.user.id) {
+          const addedTask = fetchResult.data?.saveTask?.task;
+          if (addedTask) {
+            const query = proxy.readQuery<TodoTasksOfUserQuery, TodoTasksOfUserQueryVariables>({
+              query: TodoTasksOfUserDocument,
+              variables: {
+                email: auth.user.email
+              }
+            });
+
+            if (query?.todoTasksOfUser) {
+              proxy.writeQuery<TodoTasksOfUserQuery, TodoTasksOfUserQueryVariables>({
+                query: TodoTasksOfUserDocument,
+                data: {todoTasksOfUser: query.todoTasksOfUser.concat(addedTask)},
+                variables: {
+                  email: auth.user.email
+                }
+              })
+            }
+          }
+        }
       }
+
     })
     .then(_ => {
-      // TODO update cache for lists
       formikHelpers.resetForm();
       props.navigation.goBack()
     })
@@ -121,7 +154,7 @@ export default function AddTask(props: AddTaskProps) {
                 />
                 <Button
                     mode="contained"
-                    onPress={formik.handleSubmit}
+                    onPress={() => formik.handleSubmit()}
                     style={{
                       marginTop: 20,
                       marginBottom: 20

@@ -11,7 +11,6 @@ type LoginProps = {
 }
 
 export default function Login({onLoginFail, onLoginSuccess}: LoginProps) {
-  // TODO move this to higher component
   const auth = useAuth();
 
   const [email, setEmail] = useState('');
