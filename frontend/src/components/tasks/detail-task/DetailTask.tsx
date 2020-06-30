@@ -238,7 +238,7 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
           </View>
           <View style={{marginTop: 30}}>
             <Title style={{marginLeft: 20}}>Änderungen</Title>
-            {task.changes.map((change, i) => <View>
+            {task.changes.map((change, i) => <View key={'change-view-' + i}>
               <List.Item key={'change-' + i}
                          style={styles.listItem}
                          title={change.user.publicName}
