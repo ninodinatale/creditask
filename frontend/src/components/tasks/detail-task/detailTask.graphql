@@ -17,7 +17,6 @@ fragment detailTask on TaskType {
     taskGroup {
         id
     }
-    done
     factor
     name
     neededTimeSeconds
@@ -27,5 +26,18 @@ fragment detailTask on TaskType {
     user {
         publicName
         id
+    }
+    changes {
+        ...taskChanges
+    }
+}
+
+fragment taskChanges on TaskChangeType {
+    changedProperty
+    currentValue
+    previousValue
+    timestamp
+    user {
+        publicName
     }
 }

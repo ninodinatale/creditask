@@ -1,0 +1,9 @@
+[
+  {
+    "model": "creditask.group",
+    "pk": 1,
+    "fields": {
+      "created_at": "2020-01-01 12:00:00.000000+01:00"
+    }
+  }
+]

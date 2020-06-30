@@ -6,13 +6,14 @@ from unittest.mock import MagicMock
 from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase
 
-from creditask.models import Task, User, TaskGroup
+from creditask.models import Task, User, TaskGroup, Approval
 from creditask.models.enums.changeable_task_property import \
     ChangeableTaskProperty
 from creditask.models.task_change import TaskChange
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id, \
-    validate_state_change, validate_task_properties, merge_values, get_changes
+    validate_state_change, validate_task_properties, merge_values, get_changes, \
+    copy_approvals
 
 
 class TestTaskService(TransactionTestCase):
@@ -41,7 +42,6 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user,
 
         )
@@ -49,49 +49,42 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_2 = Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_3 = Task.objects.create(
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_4 = Task.objects.create(
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_5 = Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_6 = Task.objects.create(
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
         task_7 = Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
             created_by=user
         )
 
@@ -125,7 +118,6 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -136,7 +128,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -147,7 +139,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.APPROVED
@@ -162,7 +154,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_2,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -173,7 +165,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.APPROVED
@@ -184,7 +176,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -199,7 +191,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_2,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -210,7 +202,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -221,7 +213,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_2,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -236,7 +228,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -247,7 +239,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -258,7 +250,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             user=user_1,
             created_by=user_1,
             state=Task.State.TO_DO
@@ -270,6 +262,7 @@ class TestTaskService(TransactionTestCase):
         self.assertEquals(task_6.id, tasks[0].id)
         self.assertEquals(task_12.id, tasks[1].id)
 
+    @mock.patch('creditask.services.task_service.copy_approvals')
     @mock.patch('creditask.services.task_service.validate_task_properties')
     @mock.patch('creditask.services.task_service.get_task_by_task_group_id')
     @mock.patch('creditask.services.task_service.validate_new_properties_based_'
@@ -278,7 +271,8 @@ class TestTaskService(TransactionTestCase):
     def test_save_task(self, mock_save,
                        mock_get_task_by_task_group_id,
                        mock_validate_new_properties_based_on_task_state,
-                       mock_validate_task_properties):
+                       mock_validate_task_properties,
+                       copy_approvals):
         mock_user = User(email='user@email.com')
         args = {
             'name': 'created_task',
@@ -387,6 +381,57 @@ class TestTaskService(TransactionTestCase):
             self.assertEquals(values_to_merge.get('state'),
                               return_value.state)
 
+    def test_copy_approvals(self):
+        with self.subTest('should copy all approvals to new task'):
+            task_group = TaskGroup.objects.create()
+            user_1 = User.objects.create(
+                email='test_copy_approvals@user_1.com', password='password'
+            )
+            user_2 = User.objects.create(
+                email='test_copy_approvals@user_2.com', password='password'
+            )
+            user_3 = User.objects.create(
+                email='test_copy_approvals@user_3.com', password='password'
+            )
+            old_task = Task.objects.create(task_group=task_group,
+                                           needed_time_seconds=0,
+                                           name='name',
+                                           created_by=user_1)
+            approval_1 = Approval.objects.create(state=Approval.State.NONE,
+                                                 user=user_1,
+                                                 task=old_task,
+                                                 created_by=user_1)
+            approval_2 = Approval.objects.create(state=Approval.State.APPROVED,
+                                                 user=user_2,
+                                                 task=old_task,
+                                                 created_by=user_2)
+            approval_3 = Approval.objects.create(state=Approval.State.DECLINED,
+                                                 user=user_3,
+                                                 task=old_task,
+                                                 created_by=user_3)
+
+            new_task = Task.objects.create(task_group=task_group,
+                                           needed_time_seconds=0,
+                                           name='name',
+                                           created_by=user_1)
+
+            copy_approvals(old_task, new_task)
+
+            old_approvals = list((approval_1, approval_2, approval_3))
+            copied_approvals = list(Approval.objects.filter(task=new_task))
+
+            self.assertEquals(3, len(copied_approvals))
+
+            for index, old_approval in enumerate(old_approvals):
+                self.assertEqual(old_approval.state,
+                                 copied_approvals[index].state)
+                self.assertEqual(old_approval.user,
+                                 copied_approvals[index].user)
+                self.assertEqual(old_approval.created_by,
+                                 copied_approvals[index].created_by)
+                self.assertEqual(new_task,
+                                 copied_approvals[index].task)
+
     def test_get_changes(self):
         task_group_1 = TaskGroup.objects.create()
         task_group_2 = TaskGroup.objects.create()
@@ -409,7 +454,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -423,7 +468,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             created_by=user_1,
             factor=1.1,
             period_start=now,
@@ -436,7 +481,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -450,7 +495,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-            done=False,
+
             created_by=user_2,
             factor=1.2,
             period_start=now,
@@ -463,7 +508,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -472,12 +517,12 @@ class TestTaskService(TransactionTestCase):
             user=user_3
         )
 
-        # name
+        # name + approval
         task_2 = Task.objects.create(
             task_group=task_group_1,
             needed_time_seconds=0,
             name='new name',
-            done=False,
+
             created_by=user_3,
             factor=1.2,
             period_start=now,
@@ -485,12 +530,15 @@ class TestTaskService(TransactionTestCase):
             state=Task.State.TO_DO,
             user=user_1
         )
+        approval_0 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_2, user=user_1,
+                                             created_by=user_1)
 
         Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -504,7 +552,7 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=0,
             name='new name',
-            done=False,
+
             created_by=user_1,
             factor=1.2,
             period_start=now,
@@ -512,12 +560,15 @@ class TestTaskService(TransactionTestCase):
             state=Task.State.TO_DO,
             user=user_1
         )
+        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_3, user=user_1,
+                                             created_by=user_1)
 
         Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -526,12 +577,12 @@ class TestTaskService(TransactionTestCase):
             user=user_3
         )
 
-        # done + state + needed_time_seconds
+        # state + needed_time_seconds
         task_4 = Task.objects.create(
             task_group=task_group_1,
             needed_time_seconds=120,
             name='new name',
-            done=True,
+
             created_by=user_2,
             factor=1.2,
             period_start=now,
@@ -539,12 +590,15 @@ class TestTaskService(TransactionTestCase):
             state=Task.State.TO_APPROVE,
             user=user_1
         )
+        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_4, user=user_1,
+                                             created_by=user_1)
 
         Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -558,7 +612,24 @@ class TestTaskService(TransactionTestCase):
             task_group=task_group_1,
             needed_time_seconds=120,
             name='new name',
-            done=True,
+
+            created_by=user_3,
+            factor=1.2,
+            period_start=now,
+            period_end=now + datetime.timedelta(days=1),
+            state=Task.State.TO_APPROVE,
+            user=user_2
+        )
+        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_5, user=user_1,
+                                             created_by=user_1)
+
+        # approval
+        task_6 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=120,
+            name='new name',
+
             created_by=user_3,
             factor=1.2,
             period_start=now,
@@ -567,11 +638,36 @@ class TestTaskService(TransactionTestCase):
             user=user_2
         )
 
+        # no change!
+        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_6, user=user_1,
+                                             created_by=user_1)
+
+        # no change!
+        approval_2 = Approval.objects.create(state=Approval.State.NONE,
+                                             task=task_6, user=user_2,
+                                             created_by=user_2)
+
+        # change!
+        approval_3 = Approval.objects.create(state=Approval.State.APPROVED,
+                                             task=task_6, user=user_3,
+                                             created_by=user_3)
+
+        # change!
+        approval_4 = Approval.objects.create(state=Approval.State.DECLINED,
+                                             task=task_6, user=user_1,
+                                             created_by=user_1)
+
+        # change!
+        approval_5 = Approval.objects.create(state=Approval.State.DECLINED,
+                                             task=task_6, user=user_2,
+                                             created_by=user_2)
+
         Task.objects.create(
             task_group=task_group_2,
             needed_time_seconds=200,
             name='abc',
-            done=True,
+
             created_by=user_1,
             factor=2.2,
             period_start=now,
@@ -581,7 +677,7 @@ class TestTaskService(TransactionTestCase):
         )
 
         task_changes = get_changes(task_5)
-        self.assertEquals(8, len(task_changes))
+        self.assertEquals(11, len(task_changes))
 
         expected_result = list((
             TaskChange(
@@ -589,58 +685,81 @@ class TestTaskService(TransactionTestCase):
                 previous_value=None,
                 user=task_0.created_by,
                 timestamp=task_0.created_at,
-                type=None
+                changed_property=None
             ),
             TaskChange(
                 current_value=str(task_1.factor),
                 previous_value=str(task_0.factor),
                 user=task_1.created_by,
                 timestamp=task_1.created_at,
-                type=ChangeableTaskProperty.Factor
+                changed_property=ChangeableTaskProperty.Factor
             ),
             TaskChange(
                 current_value=str(task_2.name),
                 previous_value=str(task_1.name),
                 user=task_2.created_by,
                 timestamp=task_2.created_at,
-                type=ChangeableTaskProperty.Name
+                changed_property=ChangeableTaskProperty.Name
+            ),
+            TaskChange(
+                current_value=approval_0.state.value,
+                previous_value=Approval.State.NONE.value,
+                user=approval_0.created_by,
+                timestamp=approval_0.created_at,
+                changed_property=ChangeableTaskProperty.Approval
             ),
             TaskChange(
                 current_value=str(task_3.period_end),
                 previous_value=str(task_2.period_end),
                 user=task_3.created_by,
                 timestamp=task_3.created_at,
-                type=ChangeableTaskProperty.PeriodEnd
+                changed_property=ChangeableTaskProperty.PeriodEnd
             ),
             TaskChange(
                 current_value=str(task_4.needed_time_seconds),
                 previous_value=str(task_3.needed_time_seconds),
                 user=task_4.created_by,
                 timestamp=task_4.created_at,
-                type=ChangeableTaskProperty.NeededTimeSeconds
+                changed_property=ChangeableTaskProperty.NeededTimeSeconds
             ),
             TaskChange(
                 current_value=str(task_4.state),
                 previous_value=str(task_3.state),
                 user=task_4.created_by,
                 timestamp=task_4.created_at,
-                type=ChangeableTaskProperty.State
-            ),
-            TaskChange(
-                current_value=str(task_4.done),
-                previous_value=str(task_3.done),
-                user=task_4.created_by,
-                timestamp=task_4.created_at,
-                type=ChangeableTaskProperty.Done
+                changed_property=ChangeableTaskProperty.State
             ),
             TaskChange(
                 current_value=str(task_5.user.id),
                 previous_value=str(task_4.user.id),
                 user=task_5.created_by,
                 timestamp=task_5.created_at,
-                type=ChangeableTaskProperty.UserId
+                changed_property=ChangeableTaskProperty.UserId
             ),
+            TaskChange(
+                current_value=approval_3.state.value,
+                previous_value=Approval.State.NONE.value,
+                user=approval_3.created_by,
+                timestamp=approval_3.created_at,
+                changed_property=ChangeableTaskProperty.Approval
+            ),
+            TaskChange(
+                current_value=approval_4.state.value,
+                previous_value=approval_1.state.value,
+                user=approval_4.created_by,
+                timestamp=approval_4.created_at,
+                changed_property=ChangeableTaskProperty.Approval
+            ),
+            TaskChange(
+                current_value=approval_5.state.value,
+                previous_value=approval_2.state.value,
+                user=approval_5.created_by,
+                timestamp=approval_5.created_at,
+                changed_property=ChangeableTaskProperty.Approval
+            ),
+
         ))
+        expected_result.reverse()
 
         self.assertListEqual(expected_result, task_changes)
 
@@ -673,7 +792,6 @@ def test_validate_state_change(self):
 
     for state_under_test in Task.State.values:
         if not (state_under_test != Task.State.APPROVED and
-                state_under_test != Task.State.UNDER_CONDITIONS and
                 state_under_test != Task.State.DECLINED):
             continue
 
@@ -685,8 +803,7 @@ def test_validate_state_change(self):
             with self.assertRaises(ValidationError) as e:
                 validate_state_change(mock_old_task, new_task_dict)
             self.assertEquals(f'Task state after [{Task.State.TO_APPROVE}] '
-                              f'needs to be [{Task.State.APPROVED}], '
-                              f'[{Task.State.UNDER_CONDITIONS}] or '
+                              f'needs to be [{Task.State.APPROVED}] or '
                               f'[{Task.State.DECLINED}],'
                               f'but was [{state_under_test}]',
                               e.exception.message)
@@ -707,7 +824,6 @@ def test_validate_state_change(self):
 
     for state_under_test in Task.State.values:
         if (state_under_test != Task.State.APPROVED and
-                state_under_test != Task.State.UNDER_CONDITIONS and
                 state_under_test != Task.State.DECLINED):
             continue
 

@@ -67,8 +67,6 @@ export function canEditTaskProperty(property: keyof TaskInputUpdate, taskState: 
       return property === 'name';
     case TaskState.Declined:
       return property === 'name' || property === 'neededTimeSeconds' || property === 'factor';
-    case TaskState.UnderConditions:
-      return false;
     case TaskState.Approved:
       return false;
     default:

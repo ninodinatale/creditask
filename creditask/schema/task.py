@@ -7,11 +7,13 @@ from graphql.execution.base import ResolveInfo
 from graphql_jwt.decorators import login_required
 
 from creditask.models import Task
+from creditask.models.enums import ChangeableTaskProperty
+from creditask.schema.approval import ApprovalType
 from creditask.schema.scalars import custom_string, custom_float
 from creditask.schema.user import UserType
+from creditask.services.approval_service import get_approvals_by_task_group
 from creditask.services.task_service import save_task, get_changes, \
     get_task_by_task_group_id, get_todo_tasks_by_user_email
-from creditask.models.enums import ChangeableTaskProperty
 
 
 #
@@ -26,11 +28,16 @@ class TaskChangeType(ObjectType):
 
 
 class TaskType(DjangoObjectType):
-    changes = NonNull(List(TaskChangeType))
+    changes = NonNull(List(NonNull(TaskChangeType)))
+    approvals = NonNull(List(NonNull(ApprovalType)))
 
     @staticmethod
     def resolve_changes(parent: Task, info: ResolveInfo):
         return get_changes(parent)
+
+    @staticmethod
+    def resolve_approvals(parent: Task, info: ResolveInfo):
+        return get_approvals_by_task_group(parent.task_group)
 
     class Meta:
         model = Task

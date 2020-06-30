@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from .group import Group
+from creditask.models import Group
 
 
 class CustomUserManager(BaseUserManager):
@@ -56,5 +56,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
-
-

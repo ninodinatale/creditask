@@ -2,12 +2,13 @@ from django.core.exceptions import ValidationError
 from django.db import models, DataError
 
 
+# TODO not entirely tested yet
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # TODO: set by jwt token
-    created_by = models.ForeignKey('User', on_delete=models.SET_NULL,
-                                   related_name='+', null=True)
+    created_by = models.ForeignKey('User', related_name='+',
+                                   on_delete=models.CASCADE)
     is_deleted: bool = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
@@ -43,6 +44,7 @@ class BaseModel(models.Model):
                             getattr(prev_record, field.column))
 
             if not has_changes:
+                # TODO test
                 raise DataError(f'Tried to save {self.__class__.__name__} '
                                 'without making any changes.')
 

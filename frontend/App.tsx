@@ -7,7 +7,6 @@ import AuthWrapper from './src/components/AuthWrapper';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
 import * as CreditaskStorage from './src/utils/storage';
-import Constants from 'expo-constants';
 
 // TODO implement toggle for light/dark theme
 const theme: Theme = {
@@ -18,19 +17,9 @@ const theme: Theme = {
     accent: '#5686e8',
   }
 };
-const {manifest} = Constants;
-// let uri: string = '';
-// if (manifest.debuggerHost) {
-//
-//   uri = (typeof manifest.packagerOpts === `object`) && manifest.packagerOpts.dev
-//       ? 'http://'.concat(manifest.debuggerHost.split(`:`).shift().concat(`:8000/graphql`))
-//       : `api.example.com`;
-//
-// }
 
-  // console.log(uri);
 const apolloClient = new ApolloClient({
-  uri: 'http://14001af48f2a.ngrok.io/graphql', // TODO env var,
+  uri: 'http://39f9ad4c3b2c.ngrok.io/graphql', // TODO env var,
   request: async (operation) => {
     const token = await CreditaskStorage.getItem('creditask_jwt');
     operation.setContext({

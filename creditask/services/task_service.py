@@ -2,7 +2,7 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 
-from creditask.models import Task, User, TaskGroup
+from creditask.models import Task, User, TaskGroup, Approval
 from creditask.models.enums.changeable_task_property import \
     ChangeableTaskProperty
 from creditask.models.task_change import TaskChange
@@ -53,7 +53,11 @@ def save_task(created_by: User, **kwargs) -> Task:
                                                     dict(**kwargs))
 
         merge_values(task_to_save, kwargs).save()
-        return task_to_save
+
+        new_task = get_task_by_task_group_id(kwargs.get('task_group_id'))
+        copy_approvals(task_to_save, new_task)
+
+        return new_task
     else:
         # new task means new task group needed
         # TODO TEST
@@ -62,7 +66,6 @@ def save_task(created_by: User, **kwargs) -> Task:
                               task_group=task_group,
                               **kwargs,
                               state=Task.State.TO_DO,
-                              done=False,
                               needed_time_seconds=0)
         validate_task_properties(task_to_create)
         task_to_create.save()
@@ -73,6 +76,12 @@ def merge_values(existing_task: Task, values_to_merge: dict) -> Task:
     for key, value in values_to_merge.items():
         setattr(existing_task, key, value)
     return existing_task
+
+
+def copy_approvals(old_task: Task, new_task: Task) -> None:
+    for approval in list(Approval.objects.filter(task=old_task)):
+        approval.task = new_task
+        approval.save()
 
 
 # TODO test
@@ -127,12 +136,10 @@ def validate_state_change(old_task: Task, new_task_dict: dict):
                                   f'but was [{new_state}]')
         if old_task.state == Task.State.TO_APPROVE:
             if (new_state != Task.State.APPROVED and
-                    new_state != Task.State.UNDER_CONDITIONS and
                     new_state != Task.State.DECLINED):
                 raise ValidationError(
                     f'Task state after [{Task.State.TO_APPROVE}] '
-                    f'needs to be [{Task.State.APPROVED}], '
-                    f'[{Task.State.UNDER_CONDITIONS}] or '
+                    f'needs to be [{Task.State.APPROVED}] or '
                     f'[{Task.State.DECLINED}],'
                     f'but was [{new_state}]')
 
@@ -154,6 +161,8 @@ def get_changes(task: Task) -> List[TaskChange]:
                     changed_property=None))
         else:
             for prop in ChangeableTaskProperty:
+                if prop == ChangeableTaskProperty.Approval:
+                    continue
 
                 current_value = getattr(tsk, prop.value)
                 previous_value = getattr(tasks[i - 1], prop.value)
@@ -166,4 +175,26 @@ def get_changes(task: Task) -> List[TaskChange]:
                         timestamp=tsk.created_at,
                         changed_property=ChangeableTaskProperty(prop)
                     ))
+            for approval in tsk.approvals.all():
+                prev_approval = tasks[i - 1].approvals.filter(
+                    user=approval.user).first()
+                if prev_approval is not None:
+                    if prev_approval.state != approval.state:
+                        changes.append(TaskChange(
+                            current_value=approval.state,
+                            previous_value=prev_approval.state,
+                            user=approval.user,
+                            timestamp=approval.created_at,
+                            changed_property=ChangeableTaskProperty.Approval
+                        ))
+                elif approval.state != Approval.State.NONE:
+                    changes.append(TaskChange(
+                        current_value=approval.state,
+                        previous_value=Approval.State.NONE.value,
+                        user=approval.user,
+                        timestamp=approval.created_at,
+                        changed_property=ChangeableTaskProperty.Approval
+                    ))
+
+    changes.reverse()
     return changes

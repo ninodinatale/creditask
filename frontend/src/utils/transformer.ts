@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { TaskState } from '../graphql/types';
+import { ApprovalState, TaskState } from '../graphql/types';
 import { Colors, Theme } from 'react-native-paper';
 
 /**
@@ -30,6 +30,11 @@ export function ISODateStringToMoment(dateString: string): moment.Moment {
   return moment(dateString, 'YYYY-MM-DD');
 }
 
+export function ISODateTimeStringToLocaleDateTimeTuple(dateTimeString: string): [string, string] {
+  const mDate = moment(dateTimeString);
+  return [mDate.format('DD.MM.YYYY'), mDate.format('HH:MM')]
+}
+
 export function getTaskStateIconProps(taskState: TaskState, theme: Theme): { icon: string, color?: string } {
   switch (taskState) {
     case TaskState.ToDo:
@@ -38,8 +43,6 @@ export function getTaskStateIconProps(taskState: TaskState, theme: Theme): { ico
       return {icon: 'progress-check', color: Colors.green900};
     case TaskState.Approved:
       return {icon: 'check-circle-outline', color: Colors.green900};
-    case TaskState.UnderConditions:
-      return {icon: 'check-circle-outline', color: Colors.yellow800};
     case TaskState.Declined:
       return {icon: 'close-circle-outline', color: Colors.red900};
     default:
@@ -55,10 +58,21 @@ export function transformTaskState(taskState: TaskState): string {
       return 'Gemacht, zu bestätigen';
     case TaskState.Approved:
       return 'Gemacht und bestätigt';
-    case TaskState.UnderConditions:
-      return 'Gemacht und unter Bedingungen bestätigt';
     case TaskState.Declined:
       return 'Gemacht und abgelehnt';
+    default:
+      return 'Unbekannter Status';
+  }
+}
+
+export function transformApprovalState(approvalState: ApprovalState | string): string {
+  switch (approvalState) {
+    case ApprovalState.None:
+      return 'zu bestätigen';
+    case ApprovalState.Approved:
+      return 'bestätigt';
+    case ApprovalState.Declined:
+      return 'abgelehnt';
     default:
       return 'Unbekannter Status';
   }
@@ -144,90 +158,6 @@ export function secondsToElapsedTimeString(secondsToTransform: number, options?:
 
   return valueStr(hours, 'h') + valueStr(minutes, 'min') + valueStr(seconds, 's');
 }
-
-// type InputFormatType = 'seconds' | 'minutes' | 'hours' | 'HH:MM'
-// type OutputFormatType = 'HHh MMmin' | 'HH:MM' | 'seconds' | 'object'
-
-// export function transform<InputFormat extends InputFormatType, OutputFormat extends OutputFormatType>(value: number | string, inputFormat: InputFormat, options: {
-//   outputFormat: OutputFormat,
-//   ceilMinutes?: boolean
-// }): OutputFormat extends 'object' ? { hours: string, minutes: string, seconds: string } : OutputFormat extends 'seconds' ? number : string {
-//   let multiplier = 0;
-//   switch (inputFormat) {
-//     case 'seconds': {
-//       multiplier = 1000;
-//       break;
-//     }
-//     case 'minutes': {
-//       multiplier = 60000;
-//       break;
-//     }
-//     case 'hours': {
-//       multiplier = 3600000;
-//       break;
-//     }
-//     case 'HH:MM': {
-//       if (typeof value !== 'string') {
-//         throw Error('inputFormat was defined "HH:MM", but value was not of type string.');
-//       }
-//       if (options) {
-//         console.error('The `options` parameter has been defined, but with `inputFormat` = "HH:MM", the `options` have no effect.')
-//       }
-//
-//       const [hours, minutes] = [...value.split(':')];
-//
-//       let seconds = Number(hours) * 60 * 60;
-//       seconds += Number(minutes) * 60;
-//
-//       if (options?.outputFormat === 'seconds') {
-//         return seconds;
-//       }
-//     }
-//   }
-//
-//   const rawtime: Date = new Date(Number(value) * multiplier);
-//
-//   if (options && options.ceilMinutes) {
-//     rawtime.setSeconds(0);
-//     rawtime.setMinutes(rawtime.getMinutes() + 1);
-//   }
-//
-//   // format: 00:00:00
-//   const rawTimeStr = rawtime.toISOString().substr(11, 8);
-//   const hoursStr = rawTimeStr.substr(0, 2);
-//   const minutesStr = rawTimeStr.substr(3, 2);
-//   const secondsStr = rawTimeStr.substr(6, 2);
-//
-//   // format: 00h 00min 00s
-//   if (options?.outputFormat === 'HHh MMmin') {
-//     let returnStr = '';
-//     const hours = Number(hoursStr);
-//     const minutes = Number(minutesStr);
-//     const seconds = Number(secondsStr);
-//
-//     if (hours > 0) {
-//       returnStr += `${hours}h `;
-//     }
-//     if (minutes > 0) {
-//       returnStr += `${minutes}min `;
-//     }
-//     if (seconds > 0) {
-//       returnStr += `${seconds}s`;
-//     }
-//
-//     return returnStr.length > 0 ? returnStr : '0s';
-//
-//     // format: 00:00
-//   } else if (options && options.outputFormat === 'HH:MM') {
-//     return `${hoursStr}:${minutesStr}}`;
-//
-//     // format: {hours, minutes, seconds}
-//   } else if (options && options.outputFormat === 'object') {
-//     return {hours: hoursStr, minutes: minutesStr, seconds: secondsStr};
-//   } else {
-//     throw new Error('TimePipe could not retrieve output format.');
-//   }
-// }
 
 function ceilMinutes(moment: moment.Moment): void {
     moment.add(1, 'minutes');

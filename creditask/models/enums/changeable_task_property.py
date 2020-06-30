@@ -9,4 +9,4 @@ class ChangeableTaskProperty(Enum):
     UserId = 'user_id'
     PeriodStart = 'period_start'
     PeriodEnd = 'period_end'
-    Done = 'done'
+    Approval = 'approval'

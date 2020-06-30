@@ -18,7 +18,7 @@ class TestTaskModel(ModelsTestBase):
             user_id=user.id,
             needed_time_seconds=10, state=Task.State.TO_DO,
             factor=1, period_start='2020-01-01',
-            period_end='2020-01-01', done=False)
+            period_end='2020-01-01')
 
         self.valid_entity_dict = task_dict
         super().setUp()
@@ -95,11 +95,3 @@ class TestTaskModel(ModelsTestBase):
         del self.valid_entity_dict['period_end']
         created_task = Task.objects.create(**self.valid_entity_dict)
         self.assertIsNotNone(created_task.period_end)
-
-    '''done
-    '''
-
-    def test_done_should_not_be_nunllable(self):
-        with self.assertRaises(IntegrityError):
-            self.valid_entity_dict['done'] = None
-            Task.objects.create(**self.valid_entity_dict)

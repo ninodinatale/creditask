@@ -3,6 +3,33 @@ schema {
   mutation: Mutation
 }
 
+enum ApprovalState {
+  NONE
+  APPROVED
+  DECLINED
+}
+
+type ApprovalType {
+  id: ID!
+  createdAt: DateTime!
+  createdBy: UserType
+  isDeleted: Boolean!
+  state: ApprovalState!
+  task: TaskType!
+  user: UserType!
+}
+
+enum ChangeableTaskProperty {
+  Name
+  NeededTimeSeconds
+  State
+  Factor
+  UserId
+  PeriodStart
+  PeriodEnd
+  Approval
+}
+
 scalar CustomFloat
 
 scalar CustomString
@@ -43,6 +70,14 @@ type SaveTask {
   task: TaskType!
 }
 
+type TaskChangeType {
+  currentValue: String
+  previousValue: String
+  user: UserType!
+  timestamp: DateTime!
+  changedProperty: ChangeableTaskProperty
+}
+
 type TaskGroupType {
   id: ID!
   taskSet: [TaskType!]!
@@ -70,24 +105,24 @@ enum TaskState {
   TO_DO
   TO_APPROVE
   DECLINED
-  UNDER_CONDITIONS
   APPROVED
 }
 
 type TaskType {
-  id: ID!
   createdAt: DateTime!
   createdBy: UserType
   isDeleted: Boolean!
+  id: ID!
   taskGroup: TaskGroupType!
   name: String!
   neededTimeSeconds: Int!
   state: TaskState!
-  factor: Int!
+  factor: Float!
   user: UserType
   periodStart: Date!
   periodEnd: Date!
-  done: Boolean!
+  approvals: [ApprovalType!]!
+  changes: [TaskChangeType!]!
 }
 
 type UserType {
@@ -101,6 +136,7 @@ type UserType {
   isSuperuser: Boolean!
   isActive: Boolean!
   taskSet: [TaskType!]!
+  approvalSet: [ApprovalType!]!
 }
 
 type Verify {

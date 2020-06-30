@@ -16,6 +16,34 @@ export type Scalars = {
   GenericScalar: any;
 };
 
+export enum ApprovalState {
+  None = 'NONE',
+  Approved = 'APPROVED',
+  Declined = 'DECLINED'
+}
+
+export type ApprovalType = {
+   __typename?: 'ApprovalType';
+  id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  createdBy?: Maybe<UserType>;
+  isDeleted: Scalars['Boolean'];
+  state: ApprovalState;
+  task: TaskType;
+  user: UserType;
+};
+
+export enum ChangeableTaskProperty {
+  Name = 'Name',
+  NeededTimeSeconds = 'NeededTimeSeconds',
+  State = 'State',
+  Factor = 'Factor',
+  UserId = 'UserId',
+  PeriodStart = 'PeriodStart',
+  PeriodEnd = 'PeriodEnd',
+  Approval = 'Approval'
+}
+
 
 
 
@@ -103,6 +131,15 @@ export type SaveTask = {
   task: TaskType;
 };
 
+export type TaskChangeType = {
+   __typename?: 'TaskChangeType';
+  currentValue?: Maybe<Scalars['String']>;
+  previousValue?: Maybe<Scalars['String']>;
+  user: UserType;
+  timestamp: Scalars['DateTime'];
+  changedProperty?: Maybe<ChangeableTaskProperty>;
+};
+
 export type TaskGroupType = {
    __typename?: 'TaskGroupType';
   id: Scalars['ID'];
@@ -131,25 +168,25 @@ export enum TaskState {
   ToDo = 'TO_DO',
   ToApprove = 'TO_APPROVE',
   Declined = 'DECLINED',
-  UnderConditions = 'UNDER_CONDITIONS',
   Approved = 'APPROVED'
 }
 
 export type TaskType = {
    __typename?: 'TaskType';
-  id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
   createdBy?: Maybe<UserType>;
   isDeleted: Scalars['Boolean'];
+  id: Scalars['ID'];
   taskGroup: TaskGroupType;
   name: Scalars['String'];
   neededTimeSeconds: Scalars['Int'];
   state: TaskState;
-  factor: Scalars['Int'];
+  factor: Scalars['Float'];
   user?: Maybe<UserType>;
   periodStart: Scalars['Date'];
   periodEnd: Scalars['Date'];
-  done: Scalars['Boolean'];
+  approvals: Array<ApprovalType>;
+  changes: Array<TaskChangeType>;
 };
 
 export type UserType = {
@@ -164,6 +201,7 @@ export type UserType = {
   isSuperuser: Scalars['Boolean'];
   isActive: Scalars['Boolean'];
   taskSet: Array<TaskType>;
+  approvalSet: Array<ApprovalType>;
 };
 
 export type Verify = {
@@ -237,14 +275,26 @@ export type UpdateTaskMutation = (
 
 export type DetailTaskFragment = (
   { __typename?: 'TaskType' }
-  & Pick<TaskType, 'id' | 'done' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
+  & Pick<TaskType, 'id' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
   & { taskGroup: (
     { __typename?: 'TaskGroupType' }
     & Pick<TaskGroupType, 'id'>
   ), user?: Maybe<(
     { __typename?: 'UserType' }
     & Pick<UserType, 'publicName' | 'id'>
+  )>, changes: Array<(
+    { __typename?: 'TaskChangeType' }
+    & TaskChangesFragment
   )> }
+);
+
+export type TaskChangesFragment = (
+  { __typename?: 'TaskChangeType' }
+  & Pick<TaskChangeType, 'changedProperty' | 'currentValue' | 'previousValue' | 'timestamp'>
+  & { user: (
+    { __typename?: 'UserType' }
+    & Pick<UserType, 'publicName'>
+  ) }
 );
 
 export type OtherUsersQueryVariables = {
@@ -267,7 +317,7 @@ export type OtherUsersFragment = (
 
 export type UnapprovedTasksOfUserFragment = (
   { __typename?: 'TaskType' }
-  & Pick<TaskType, 'id' | 'name' | 'done' | 'periodEnd'>
+  & Pick<TaskType, 'id' | 'name' | 'periodEnd'>
   & { taskGroup: (
     { __typename?: 'TaskGroupType' }
     & Pick<TaskGroupType, 'id'>
@@ -316,13 +366,23 @@ export type RefreshTokenMutation = (
   )> }
 );
 
+export const TaskChangesFragmentDoc = gql`
+    fragment taskChanges on TaskChangeType {
+  changedProperty
+  currentValue
+  previousValue
+  timestamp
+  user {
+    publicName
+  }
+}
+    `;
 export const DetailTaskFragmentDoc = gql`
     fragment detailTask on TaskType {
   id
   taskGroup {
     id
   }
-  done
   factor
   name
   neededTimeSeconds
@@ -333,8 +393,11 @@ export const DetailTaskFragmentDoc = gql`
     publicName
     id
   }
+  changes {
+    ...taskChanges
+  }
 }
-    `;
+    ${TaskChangesFragmentDoc}`;
 export const OtherUsersFragmentDoc = gql`
     fragment otherUsers on UserType {
   id
@@ -348,7 +411,6 @@ export const UnapprovedTasksOfUserFragmentDoc = gql`
     id
   }
   name
-  done
   periodEnd
 }
     `;
