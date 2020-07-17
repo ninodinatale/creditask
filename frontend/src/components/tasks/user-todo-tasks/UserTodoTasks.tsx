@@ -18,7 +18,7 @@ import {
 } from '../../../utils/transformer';
 import moment from 'moment';
 
-export default function UserAssignedTasks(props: any) {
+export default function UserTodoTasks(props: any) {
 
   const {user} = useAuth();
   const theme = useTheme();
