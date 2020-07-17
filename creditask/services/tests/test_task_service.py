@@ -6,13 +6,14 @@ from unittest.mock import MagicMock
 from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase
 
-from creditask.models import Task, User, TaskGroup, Approval
+from creditask.models import Task, User, TaskGroup, Approval, TaskState, \
+    ApprovalState
 from creditask.models.enums.changeable_task_property import \
     ChangeableTaskProperty
 from creditask.models.task_change import TaskChange
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id, \
-    validate_state_change, validate_task_properties, merge_values, get_changes, \
+    validate_state_change, validate_task_properties, merge_values, get_task_changes, \
     copy_approvals
 
 
@@ -120,7 +121,7 @@ class TestTaskService(TransactionTestCase):
             name='name',
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # all good
@@ -131,7 +132,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # wrong state
@@ -142,7 +143,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.APPROVED
+            state=TaskState.APPROVED
         )
 
         """
@@ -157,7 +158,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_2,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # all good
@@ -168,7 +169,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.APPROVED
+            state=TaskState.APPROVED
         )
 
         # wrong state
@@ -179,7 +180,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         """
@@ -194,7 +195,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_2,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # all good
@@ -205,7 +206,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # wrong state
@@ -216,7 +217,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_2,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         """
@@ -231,7 +232,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # all good
@@ -242,7 +243,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         # wrong state
@@ -253,7 +254,7 @@ class TestTaskService(TransactionTestCase):
 
             user=user_1,
             created_by=user_1,
-            state=Task.State.TO_DO
+            state=TaskState.TO_DO
         )
 
         tasks = get_todo_tasks_by_user_email(user_1.email)
@@ -292,7 +293,7 @@ class TestTaskService(TransactionTestCase):
             #         self.fail('If state is None, no validation should be performed')
             #     try:
             #
-            #         save_task(mock_user, **{**{'state': Task.State.TO_DO},
+            #         save_task(mock_user, **{**{'state': TaskState.TO_DO},
             #                                 **args})
             #     except ValidationError:
             #         self.fail('Should not fail if state is valid')
@@ -349,7 +350,7 @@ class TestTaskService(TransactionTestCase):
         with self.subTest('should not raise error if valid task state is '
                           'provided'):
 
-            for state_under_test in Task.State.values:
+            for state_under_test in TaskState.values:
                 try:
                     validate_task_properties(Task(name='created_task',
                                                   state=state_under_test))
@@ -397,15 +398,15 @@ class TestTaskService(TransactionTestCase):
                                            needed_time_seconds=0,
                                            name='name',
                                            created_by=user_1)
-            approval_1 = Approval.objects.create(state=Approval.State.NONE,
+            approval_1 = Approval.objects.create(state=ApprovalState.NONE,
                                                  user=user_1,
                                                  task=old_task,
                                                  created_by=user_1)
-            approval_2 = Approval.objects.create(state=Approval.State.APPROVED,
+            approval_2 = Approval.objects.create(state=ApprovalState.APPROVED,
                                                  user=user_2,
                                                  task=old_task,
                                                  created_by=user_2)
-            approval_3 = Approval.objects.create(state=Approval.State.DECLINED,
+            approval_3 = Approval.objects.create(state=ApprovalState.DECLINED,
                                                  user=user_3,
                                                  task=old_task,
                                                  created_by=user_3)
@@ -459,7 +460,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -473,7 +474,7 @@ class TestTaskService(TransactionTestCase):
             factor=1.1,
             period_start=now,
             period_end=now,
-            state=Task.State.TO_DO,
+            state=TaskState.TO_DO,
             user=user_1
         )
 
@@ -486,7 +487,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -500,7 +501,7 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now,
-            state=Task.State.TO_DO,
+            state=TaskState.TO_DO,
             user=user_1
         )
 
@@ -513,7 +514,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -527,10 +528,10 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now,
-            state=Task.State.TO_DO,
+            state=TaskState.TO_DO,
             user=user_1
         )
-        approval_0 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_0 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_2, user=user_1,
                                              created_by=user_1)
 
@@ -543,7 +544,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -557,10 +558,10 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now + datetime.timedelta(days=1),
-            state=Task.State.TO_DO,
+            state=TaskState.TO_DO,
             user=user_1
         )
-        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_3, user=user_1,
                                              created_by=user_1)
 
@@ -573,7 +574,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -587,10 +588,10 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now + datetime.timedelta(days=1),
-            state=Task.State.TO_APPROVE,
+            state=TaskState.TO_APPROVE,
             user=user_1
         )
-        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_4, user=user_1,
                                              created_by=user_1)
 
@@ -603,7 +604,7 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
@@ -617,10 +618,10 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now + datetime.timedelta(days=1),
-            state=Task.State.TO_APPROVE,
+            state=TaskState.TO_APPROVE,
             user=user_2
         )
-        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_5, user=user_1,
                                              created_by=user_1)
 
@@ -634,32 +635,32 @@ class TestTaskService(TransactionTestCase):
             factor=1.2,
             period_start=now,
             period_end=now + datetime.timedelta(days=1),
-            state=Task.State.TO_APPROVE,
+            state=TaskState.TO_APPROVE,
             user=user_2
         )
 
         # no change!
-        approval_1 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_6, user=user_1,
                                              created_by=user_1)
 
         # no change!
-        approval_2 = Approval.objects.create(state=Approval.State.NONE,
+        approval_2 = Approval.objects.create(state=ApprovalState.NONE,
                                              task=task_6, user=user_2,
                                              created_by=user_2)
 
         # change!
-        approval_3 = Approval.objects.create(state=Approval.State.APPROVED,
+        approval_3 = Approval.objects.create(state=ApprovalState.APPROVED,
                                              task=task_6, user=user_3,
                                              created_by=user_3)
 
         # change!
-        approval_4 = Approval.objects.create(state=Approval.State.DECLINED,
+        approval_4 = Approval.objects.create(state=ApprovalState.DECLINED,
                                              task=task_6, user=user_1,
                                              created_by=user_1)
 
         # change!
-        approval_5 = Approval.objects.create(state=Approval.State.DECLINED,
+        approval_5 = Approval.objects.create(state=ApprovalState.DECLINED,
                                              task=task_6, user=user_2,
                                              created_by=user_2)
 
@@ -672,11 +673,11 @@ class TestTaskService(TransactionTestCase):
             factor=2.2,
             period_start=now,
             period_end=now,
-            state=Task.State.APPROVED,
+            state=TaskState.APPROVED,
             user=user_3
         )
 
-        task_changes = get_changes(task_5)
+        task_changes = get_task_changes(task_5)
         self.assertEquals(11, len(task_changes))
 
         expected_result = list((
@@ -703,7 +704,7 @@ class TestTaskService(TransactionTestCase):
             ),
             TaskChange(
                 current_value=approval_0.state.value,
-                previous_value=Approval.State.NONE.value,
+                previous_value=ApprovalState.NONE.value,
                 user=approval_0.created_by,
                 timestamp=approval_0.created_at,
                 changed_property=ChangeableTaskProperty.Approval
@@ -738,7 +739,7 @@ class TestTaskService(TransactionTestCase):
             ),
             TaskChange(
                 current_value=approval_3.state.value,
-                previous_value=Approval.State.NONE.value,
+                previous_value=ApprovalState.NONE.value,
                 user=approval_3.created_by,
                 timestamp=approval_3.created_at,
                 changed_property=ChangeableTaskProperty.Approval
@@ -781,35 +782,35 @@ def test_validate_state_change(self):
 
     with self.subTest('should raise error if old task state is TO_DO and '
                       'new state is not TO_APPROVE'):
-        mock_old_task = Task(state=Task.State.TO_DO)
-        new_task_dict = dict(state=Task.State.TO_DO)
+        mock_old_task = Task(state=TaskState.TO_DO)
+        new_task_dict = dict(state=TaskState.TO_DO)
         with self.assertRaises(ValidationError) as e:
             validate_state_change(mock_old_task, new_task_dict)
-        self.assertEquals(f'Task state after [{Task.State.TO_DO}] '
-                          f'needs to be [{Task.State.TO_APPROVE}],'
-                          f'but was [{Task.State.TO_DO}]',
+        self.assertEquals(f'Task state after [{TaskState.TO_DO}] '
+                          f'needs to be [{TaskState.TO_APPROVE}],'
+                          f'but was [{TaskState.TO_DO}]',
                           e.exception.message)
 
-    for state_under_test in Task.State.values:
-        if not (state_under_test != Task.State.APPROVED and
-                state_under_test != Task.State.DECLINED):
+    for state_under_test in TaskState.values:
+        if not (state_under_test != TaskState.APPROVED and
+                state_under_test != TaskState.DECLINED):
             continue
 
         with self.subTest(f'should raise error if old task state is '
                           f'TO_APPROVE and new state is '
                           f'{state_under_test}'):
-            mock_old_task = Task(state=Task.State.TO_APPROVE)
+            mock_old_task = Task(state=TaskState.TO_APPROVE)
             new_task_dict = dict(state=state_under_test)
             with self.assertRaises(ValidationError) as e:
                 validate_state_change(mock_old_task, new_task_dict)
-            self.assertEquals(f'Task state after [{Task.State.TO_APPROVE}] '
-                              f'needs to be [{Task.State.APPROVED}] or '
-                              f'[{Task.State.DECLINED}],'
+            self.assertEquals(f'Task state after [{TaskState.TO_APPROVE}] '
+                              f'needs to be [{TaskState.APPROVED}] or '
+                              f'[{TaskState.DECLINED}],'
                               f'but was [{state_under_test}]',
                               e.exception.message)
 
-    for state_under_test in Task.State.values:
-        if state_under_test == Task.State.TO_APPROVE:
+    for state_under_test in TaskState.values:
+        if state_under_test == TaskState.TO_APPROVE:
             continue
 
         with self.subTest(f'should not raise error if old task state is '
@@ -822,15 +823,15 @@ def test_validate_state_change(self):
                 self.fail(
                     'validate_state_change should not have been failed')
 
-    for state_under_test in Task.State.values:
-        if (state_under_test != Task.State.APPROVED and
-                state_under_test != Task.State.DECLINED):
+    for state_under_test in TaskState.values:
+        if (state_under_test != TaskState.APPROVED and
+                state_under_test != TaskState.DECLINED):
             continue
 
         with self.subTest(f'should not raise error if old task state is '
                           f'TO_APPROVE and new state is '
                           f'{state_under_test}'):
-            mock_old_task = Task(state=Task.State.TO_APPROVE)
+            mock_old_task = Task(state=TaskState.TO_APPROVE)
             new_task_dict = dict(state=state_under_test)
             try:
                 validate_state_change(mock_old_task, new_task_dict)

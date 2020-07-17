@@ -2,7 +2,8 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 
-from creditask.models import Task, User, TaskGroup, Approval
+from creditask.models import Task, User, TaskGroup, Approval, TaskState, \
+    BaseModel, ApprovalState
 from creditask.models.enums.changeable_task_property import \
     ChangeableTaskProperty
 from creditask.models.task_change import TaskChange
@@ -36,7 +37,7 @@ def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
           AND u.email = %(user_mail)s;
         '''
     rows = Task.objects.raw(query, params={'user_mail': user_mail,
-                                           'task_state': Task.State.TO_DO})
+                                           'task_state': TaskState.TO_DO})
     return list(map(lambda row: row, rows))
 
 
@@ -65,21 +66,38 @@ def save_task(created_by: User, **kwargs) -> Task:
         task_to_create = Task(created_by=created_by,
                               task_group=task_group,
                               **kwargs,
-                              state=Task.State.TO_DO,
+                              state=TaskState.TO_DO,
                               needed_time_seconds=0)
         validate_task_properties(task_to_create)
         task_to_create.save()
         return task_to_create
 
 
-def merge_values(existing_task: Task, values_to_merge: dict) -> Task:
+def copy_task(task: Task, created_by_id: int,
+              approval_to_replace: Approval = None) -> Task:
+    task.created_by_id = created_by_id
+    task.save()
+    new_task = get_task_by_task_group_id(task.task_group_id)
+    copy_approvals(task, new_task, approval_to_replace)
+    return new_task
+
+
+# TODO move to general service (?)
+def merge_values(existing_entity: BaseModel,
+                 values_to_merge: dict) -> BaseModel:
     for key, value in values_to_merge.items():
-        setattr(existing_task, key, value)
-    return existing_task
+        setattr(existing_entity, key, value)
+    return existing_entity
 
 
-def copy_approvals(old_task: Task, new_task: Task) -> None:
+# TODO test approval_to_replace: Approval
+def copy_approvals(old_task: Task, new_task: Task,
+                   approval_to_replace: Approval = None) -> None:
     for approval in list(Approval.objects.filter(task=old_task)):
+        if (approval_to_replace is not None and
+                approval.user == approval_to_replace.user):
+            merge_values(approval, vars(approval_to_replace))
+
         approval.task = new_task
         approval.save()
 
@@ -87,7 +105,7 @@ def copy_approvals(old_task: Task, new_task: Task) -> None:
 # TODO test
 def validate_new_properties_based_on_task_state(
         task_to_save: Task, new_properties: dict) -> None:
-    if task_to_save.state == Task.State.TO_DO:
+    if task_to_save.state == TaskState.TO_DO:
         # everything may be changed
         validate_task_properties(task_to_save)
     else:
@@ -119,7 +137,7 @@ def validate_task_properties(task: Task):
 
     MinLenValidator(3)(task.name)
     if task.state is not None:
-        if not hasattr(Task.State, task.state):
+        if not hasattr(TaskState, task.state):
             raise ValidationError(f'"{task.state}" is an invalid '
                                   'type of task state')
 
@@ -129,22 +147,22 @@ def validate_state_change(old_task: Task, new_task_dict: dict):
         new_state = new_task_dict.get('state')
         if new_state is None:
             raise ValidationError('Task state may not be None')
-        if (old_task.state == Task.State.TO_DO and
-                new_state != Task.State.TO_APPROVE):
-            raise ValidationError(f'Task state after [{Task.State.TO_DO}] '
-                                  f'needs to be [{Task.State.TO_APPROVE}],'
+        if (old_task.state == TaskState.TO_DO and
+                new_state != TaskState.TO_APPROVE):
+            raise ValidationError(f'Task state after [{TaskState.TO_DO}] '
+                                  f'needs to be [{TaskState.TO_APPROVE}],'
                                   f'but was [{new_state}]')
-        if old_task.state == Task.State.TO_APPROVE:
-            if (new_state != Task.State.APPROVED and
-                    new_state != Task.State.DECLINED):
+        if old_task.state == TaskState.TO_APPROVE:
+            if (new_state != TaskState.APPROVED and
+                    new_state != TaskState.DECLINED):
                 raise ValidationError(
-                    f'Task state after [{Task.State.TO_APPROVE}] '
-                    f'needs to be [{Task.State.APPROVED}] or '
-                    f'[{Task.State.DECLINED}],'
+                    f'Task state after [{TaskState.TO_APPROVE}] '
+                    f'needs to be [{TaskState.APPROVED}] or '
+                    f'[{TaskState.DECLINED}],'
                     f'but was [{new_state}]')
 
 
-def get_changes(task: Task) -> List[TaskChange]:
+def get_task_changes(task: Task) -> List[TaskChange]:
     changes: List[TaskChange] = []
 
     tasks: List[Task] = list(Task.objects.filter(
@@ -187,10 +205,10 @@ def get_changes(task: Task) -> List[TaskChange]:
                             timestamp=approval.created_at,
                             changed_property=ChangeableTaskProperty.Approval
                         ))
-                elif approval.state != Approval.State.NONE:
+                elif approval.state != ApprovalState.NONE:
                     changes.append(TaskChange(
                         current_value=approval.state,
-                        previous_value=Approval.State.NONE.value,
+                        previous_value=ApprovalState.NONE.value,
                         user=approval.user,
                         timestamp=approval.created_at,
                         changed_property=ChangeableTaskProperty.Approval

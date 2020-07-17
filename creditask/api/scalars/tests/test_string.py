@@ -3,7 +3,7 @@ from unittest import TestCase
 from django.core.exceptions import ValidationError
 from django.test import tag
 
-from creditask.schema.scalars import custom_string
+from creditask.api.scalars import custom_string
 
 
 @tag('unit')

@@ -16,6 +16,12 @@ export type Scalars = {
   GenericScalar: any;
 };
 
+export type ApprovalInput = {
+  state: ApprovalState;
+  taskGroupId: Scalars['ID'];
+  userId: Scalars['ID'];
+};
+
 export enum ApprovalState {
   None = 'NONE',
   Approved = 'APPROVED',
@@ -28,7 +34,7 @@ export type ApprovalType = {
   createdAt: Scalars['DateTime'];
   createdBy: UserType;
   isDeleted: Scalars['Boolean'];
-  state: ApprovalState;
+  state: Scalars['String'];
   task: TaskType;
   user: UserType;
 };
@@ -51,10 +57,16 @@ export enum ChangeableTaskProperty {
 
 export type Mutation = {
    __typename?: 'Mutation';
+  saveApproval?: Maybe<SaveApproval>;
   saveTask?: Maybe<SaveTask>;
   tokenAuth?: Maybe<ObtainJsonWebToken>;
   verifyToken?: Maybe<Verify>;
   refreshToken?: Maybe<Refresh>;
+};
+
+
+export type MutationSaveApprovalArgs = {
+  input: ApprovalInput;
 };
 
 
@@ -126,6 +138,11 @@ export type Refresh = {
   payload?: Maybe<Scalars['GenericScalar']>;
 };
 
+export type SaveApproval = {
+   __typename?: 'SaveApproval';
+  approval: ApprovalType;
+};
+
 export type SaveTask = {
    __typename?: 'SaveTask';
   task: TaskType;
@@ -156,6 +173,7 @@ export type TaskInputCreate = {
 
 export type TaskInputUpdate = {
   taskGroupId: Scalars['ID'];
+  state?: Maybe<TaskState>;
   name?: Maybe<Scalars['CustomString']>;
   factor?: Maybe<Scalars['CustomFloat']>;
   userId?: Maybe<Scalars['ID']>;
@@ -273,6 +291,22 @@ export type UpdateTaskMutation = (
   )> }
 );
 
+export type UpdateApprovalMutationVariables = {
+  approval: ApprovalInput;
+};
+
+
+export type UpdateApprovalMutation = (
+  { __typename?: 'Mutation' }
+  & { saveApproval?: Maybe<(
+    { __typename?: 'SaveApproval' }
+    & { approval: (
+      { __typename?: 'ApprovalType' }
+      & Pick<ApprovalType, 'state'>
+    ) }
+  )> }
+);
+
 export type DetailTaskFragment = (
   { __typename?: 'TaskType' }
   & Pick<TaskType, 'id' | 'factor' | 'name' | 'neededTimeSeconds' | 'periodStart' | 'periodEnd' | 'state'>
@@ -285,6 +319,13 @@ export type DetailTaskFragment = (
   )>, changes: Array<(
     { __typename?: 'TaskChangeType' }
     & TaskChangesFragment
+  )>, approvals: Array<(
+    { __typename?: 'ApprovalType' }
+    & Pick<ApprovalType, 'state'>
+    & { user: (
+      { __typename?: 'UserType' }
+      & Pick<UserType, 'id' | 'publicName'>
+    ) }
   )> }
 );
 
@@ -395,6 +436,13 @@ export const DetailTaskFragmentDoc = gql`
   }
   changes {
     ...taskChanges
+  }
+  approvals {
+    state
+    user {
+      id
+      publicName
+    }
   }
 }
     ${TaskChangesFragmentDoc}`;
@@ -561,6 +609,40 @@ export function useUpdateTaskMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type UpdateTaskMutationHookResult = ReturnType<typeof useUpdateTaskMutation>;
 export type UpdateTaskMutationResult = ApolloReactCommon.MutationResult<UpdateTaskMutation>;
 export type UpdateTaskMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTaskMutation, UpdateTaskMutationVariables>;
+export const UpdateApprovalDocument = gql`
+    mutation updateApproval($approval: ApprovalInput!) {
+  saveApproval(input: $approval) {
+    approval {
+      state
+    }
+  }
+}
+    `;
+export type UpdateApprovalMutationFn = ApolloReactCommon.MutationFunction<UpdateApprovalMutation, UpdateApprovalMutationVariables>;
+
+/**
+ * __useUpdateApprovalMutation__
+ *
+ * To run a mutation, you first call `useUpdateApprovalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateApprovalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateApprovalMutation, { data, loading, error }] = useUpdateApprovalMutation({
+ *   variables: {
+ *      approval: // value for 'approval'
+ *   },
+ * });
+ */
+export function useUpdateApprovalMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateApprovalMutation, UpdateApprovalMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateApprovalMutation, UpdateApprovalMutationVariables>(UpdateApprovalDocument, baseOptions);
+      }
+export type UpdateApprovalMutationHookResult = ReturnType<typeof useUpdateApprovalMutation>;
+export type UpdateApprovalMutationResult = ApolloReactCommon.MutationResult<UpdateApprovalMutation>;
+export type UpdateApprovalMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateApprovalMutation, UpdateApprovalMutationVariables>;
 export const OtherUsersDocument = gql`
     query otherUsers($userEmail: String!) {
   otherUsers(userEmail: $userEmail) {

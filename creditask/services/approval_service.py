@@ -2,13 +2,13 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 
-from creditask.models import Approval, TaskGroup
-from .task_service import get_task_by_task_group_id
+from creditask.models import Approval, TaskGroup, ApprovalState
+from .task_service import get_task_by_task_group_id, copy_task
 
 
-# TODO TEST
+# TODO only validations are tested
 def save_approval(task_group_id: int, user_id: int,
-                  state: Approval.State) -> Approval:
+                  state: ApprovalState) -> Approval:
     if task_group_id is None:
         raise ValidationError('task_group_id may not be None')
 
@@ -24,8 +24,11 @@ def save_approval(task_group_id: int, user_id: int,
     #  is actually already done, which means the approvals can also change
     #  anytime. Implement of task state if this business logic changes.
 
-    return Approval.objects.create(task=affecting_task, user_id=user_id,
-                                   created_by_id=user_id, state=state)
+    new_task = copy_task(affecting_task, user_id,
+                         Approval(task=affecting_task, user_id=user_id,
+                                  created_by_id=user_id, state=state))
+
+    return new_task.approvals.get(user_id=user_id)
 
 
 # TODO test

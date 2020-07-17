@@ -1,6 +1,6 @@
 from django.db import DataError, IntegrityError
 
-from creditask.models import Task, User, TaskGroup
+from creditask.models import Task, User, TaskGroup, TaskState
 from .models_test_base import ModelsTestBase
 
 
@@ -16,7 +16,7 @@ class TestTaskModel(ModelsTestBase):
             task_group=task_group,
             name='Task name',
             user_id=user.id,
-            needed_time_seconds=10, state=Task.State.TO_DO,
+            needed_time_seconds=10, state=TaskState.TO_DO,
             factor=1, period_start='2020-01-01',
             period_end='2020-01-01')
 
@@ -62,7 +62,7 @@ class TestTaskModel(ModelsTestBase):
     def test_state_should_have_default_value(self):
         del self.valid_entity_dict['state']
         created_task = Task.objects.create(**self.valid_entity_dict)
-        self.assertEqual(Task.State.TO_DO, created_task.state)
+        self.assertEqual(TaskState.TO_DO, created_task.state)
 
     '''factor
     '''

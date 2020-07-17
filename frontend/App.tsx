@@ -19,7 +19,7 @@ const theme: Theme = {
 };
 
 const apolloClient = new ApolloClient({
-  uri: 'http://39f9ad4c3b2c.ngrok.io/graphql', // TODO env var,
+  uri: 'http://066139c4a34e.ngrok.io/graphql', // TODO env var,
   request: async (operation) => {
     const token = await CreditaskStorage.getItem('creditask_jwt');
     operation.setContext({

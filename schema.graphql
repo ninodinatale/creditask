@@ -3,6 +3,12 @@ schema {
   mutation: Mutation
 }
 
+input ApprovalInput {
+  state: ApprovalState!
+  taskGroupId: ID!
+  userId: ID!
+}
+
 enum ApprovalState {
   NONE
   APPROVED
@@ -14,7 +20,7 @@ type ApprovalType {
   createdAt: DateTime!
   createdBy: UserType!
   isDeleted: Boolean!
-  state: ApprovalState!
+  state: String!
   task: TaskType!
   user: UserType!
 }
@@ -41,6 +47,7 @@ scalar DateTime
 scalar GenericScalar
 
 type Mutation {
+  saveApproval(input: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
   verifyToken(token: String!): Verify
@@ -64,6 +71,10 @@ type Query {
 type Refresh {
   token: String
   payload: GenericScalar
+}
+
+type SaveApproval {
+  approval: ApprovalType!
 }
 
 type SaveTask {
@@ -93,6 +104,7 @@ input TaskInputCreate {
 
 input TaskInputUpdate {
   taskGroupId: ID!
+  state: TaskState
   name: CustomString
   factor: CustomFloat
   userId: ID

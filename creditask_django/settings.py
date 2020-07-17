@@ -64,7 +64,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 GRAPHENE = {
-    'SCHEMA': 'creditask.schema.schema',
+    'SCHEMA': 'creditask.api.schema',
     'MIDDLEWARE': [
         'graphql_jwt.middleware.JSONWebTokenMiddleware',
     ],

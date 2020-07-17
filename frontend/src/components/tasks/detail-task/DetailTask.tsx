@@ -27,7 +27,7 @@ import moment from 'moment';
 import TaskTimer from './TaskTimer';
 import EditButton from './EditButton';
 import { canEditTaskProperty, validatePeriods } from '../../../utils/validators';
-import { DetailTaskFAB } from './FAB';
+import { DetailTaskFab } from './DetailTaskFab';
 
 interface DetailTaskProps {
   route: RouteProp<RootStackParamList, 'detailTask'>,
@@ -151,7 +151,7 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
     const overdue = moment(task.periodEnd).isBefore(moment());
     return (
         <ScrollView>
-          <DetailTaskFAB theme={theme} task={task}/>
+          <DetailTaskFab theme={theme} task={task} />
           <View>
             <List.Item style={styles.listItem}
                        title="Status"

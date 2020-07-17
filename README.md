@@ -7,4 +7,4 @@
 ## CI/CD
 ### Generate `schema.graphql`
 
-Run `./manage.py graphql_schema --schema creditask.schema.schema  --out schema.graphql`
+Run `./manage.py graphql_schema --schema creditask.api.schema  --out schema.graphql`

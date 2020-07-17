@@ -12,6 +12,14 @@ mutation updateTask($task: TaskInputUpdate!) {
     }
 }
 
+mutation updateApproval($approval: ApprovalInput!) {
+    saveApproval(input: $approval) {
+        approval {
+            state
+        }
+    }
+}
+
 fragment detailTask on TaskType {
     id
     taskGroup {
@@ -29,6 +37,13 @@ fragment detailTask on TaskType {
     }
     changes {
         ...taskChanges
+    },
+    approvals {
+        state
+        user {
+            id
+            publicName
+        }
     }
 }
 

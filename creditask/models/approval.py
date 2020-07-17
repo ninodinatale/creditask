@@ -1,16 +1,18 @@
 from django.db import models
 
-from creditask.models import BaseModel, Task
+from .task import BaseModel, Task
+
+
+class ApprovalState(models.TextChoices):
+    NONE = 'NONE'
+    APPROVED = 'APPROVED'
+    DECLINED = 'DECLINED'
 
 
 class Approval(BaseModel):
-    class State(models.TextChoices):
-        NONE = 'NONE'
-        APPROVED = 'APPROVED'
-        DECLINED = 'DECLINED'
 
-    state = models.CharField(choices=State.choices,
-                             max_length=30, default=State.NONE)
+    state = models.CharField(choices=ApprovalState.choices,
+                             max_length=30, default=ApprovalState.NONE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE,
                              related_name='approvals')
     user = models.ForeignKey('User', on_delete=models.CASCADE)

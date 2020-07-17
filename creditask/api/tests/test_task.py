@@ -4,9 +4,9 @@ from typing import List
 from unittest import mock
 from unittest.mock import MagicMock
 
-from creditask.models import User, Task
-from creditask.schema import schema
-from creditask.schema.tests.creditask_test_base import CreditaskTestBase
+from creditask.models import User, Task, TaskState
+from creditask.api import schema
+from creditask.api.tests.creditask_test_base import CreditaskTestBase
 
 
 class ResolveTaskTest(CreditaskTestBase):
@@ -46,7 +46,7 @@ class ResolveTaskTest(CreditaskTestBase):
 
         self.assertEquals(response.status_code, 400)
 
-    @mock.patch('creditask.schema.task.get_task_by_task_group_id')
+    @mock.patch('creditask.api.schema_def.get_task_by_task_group_id')
     def test_should_succeed(self, mock_get_task_by_id: MagicMock):
         mock_task = Task(id=random.randint(1, 9999),
                          task_group_id=random.randint(1, 9999),
@@ -111,7 +111,7 @@ class ResolveTodoTasksOfUserTest(CreditaskTestBase):
                           "Variable \"$userEmail\" "
                           "of required type \"String!\" was not provided.")
 
-    @mock.patch('creditask.schema.task.get_todo_tasks_by_user_email')
+    @mock.patch('creditask.api.schema_def.get_todo_tasks_by_user_email')
     def test_should_succeed(self, mock_fn: MagicMock):
         user_email = 'user@mail.com'
 
@@ -140,7 +140,7 @@ class ResolveTodoTasksOfUserTest(CreditaskTestBase):
         self.assertEquals(task_list[0].get('name'), mock_task_list[0].name)
 
 
-@mock.patch('creditask.schema.task.save_task', return_value=Task(
+@mock.patch('creditask.api.schema_def.save_task', return_value=Task(
     id=371827391,
     name='returning task'))
 class TaskMutationTests(CreditaskTestBase):
