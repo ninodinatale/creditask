@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/auth/use-auth';
 import LoadingSpinner from '../../_shared/LoadingSpinner';
 import {
+  TaskState,
   TodoTasksOfUserQueryVariables,
   UnapprovedTasksOfUserFragment,
   useTodoTasksOfUserQuery
@@ -12,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack/lib/typescript/src/
 import { RefreshControl, View } from 'react-native';
 import { Avatar, List, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import {
+  getTaskStateIconProps,
   ISODateStringToLocaleDateString,
   ISODateStringToMoment,
   relativeDateString
@@ -63,9 +65,16 @@ export default function UserTodoTasks(props: any) {
                 title={task.name}
                 left={props => <Avatar.Image {...props}
                                              source={require('../../../../assets/dummy.jpg')}/>} // TODO image source
-                right={props => overdue ?
-                    <List.Icon {...props} color={theme.colors.error} icon="calendar-clock"/> : null}
-                description={<Text style={overdue ? {color: theme.colors.error} : undefined}>
+                right={props => {
+                  if (task.state === TaskState.ToApprove) {
+                    return <List.Icon {...props} {...getTaskStateIconProps(task.state, theme)}/>
+                  }
+                  if (overdue) {
+                    return <List.Icon {...props} color={theme.colors.error} icon="calendar-clock"/>
+                  }
+                }}
+                description={<Text
+                    style={task.state === TaskState.ToDo && overdue ? {color: theme.colors.error} : undefined}>
                   {`Fällig am ${ISODateStringToLocaleDateString(task.periodEnd)} (${relativeDateString(task.periodEnd)})`}</Text>}
             />
           </TouchableRipple>
@@ -98,16 +107,19 @@ export default function UserTodoTasks(props: any) {
       )
     }
 
+    const toApproveTasks = [];
     const overdueTasks = [];
     const todayTasks = [];
     const next7DaysTasks = [];
     const fartherTasks = [];
 
     for (let task of data.todoTasksOfUser) {
-      const now = moment(new Date());
+      const now = moment().startOf('day');
       const periodEndMoment = ISODateStringToMoment(task.periodEnd);
 
-      if (periodEndMoment.isBefore(now)) {
+      if (task.state !== TaskState.ToDo) {
+        toApproveTasks.push(task)
+      } else if (periodEndMoment.isBefore(now)) {
         overdueTasks.push(task)
       } else if (periodEndMoment.isSame(now)) {
         todayTasks.push(task)
@@ -123,29 +135,38 @@ export default function UserTodoTasks(props: any) {
                         refreshing={refreshing}>
           <View>
             {
+              toApproveTasks.length > 0 &&
+              toApproveTasks.map((task, index) => getItem({
+                task,
+                headerText: 'Zu bestätigen',
+                index,
+                overdue: true
+              }))
+            }
+            {
               overdueTasks.length > 0 &&
               overdueTasks.map((task, index) => getItem({
                 task,
-                headerText: 'Overdue Tasks',
+                headerText: 'Überfällig',
                 index,
                 overdue: true
               }))
             }
             {
               todayTasks.length > 0 &&
-              todayTasks.map((task, index) => getItem({task, headerText: 'todayTasks', index}))
+              todayTasks.map((task, index) => getItem({task, headerText: 'Heute zu machen', index}))
             }
             {
               next7DaysTasks.length > 0 &&
               next7DaysTasks.map((task, index) => getItem({
                 task,
-                headerText: 'next7DaysTasks',
+                headerText: 'In den nächsten 7 Tagen',
                 index
               }))
             }
             {
               fartherTasks.length > 0 &&
-              fartherTasks.map((task, index) => getItem({task, headerText: 'fartherTasks', index}))
+              fartherTasks.map((task, index) => getItem({task, headerText: 'Später', index}))
             }
           </View>
         </RefreshControl>

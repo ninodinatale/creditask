@@ -148,7 +148,7 @@ export default function DetailTask({route, navigation}: DetailTaskProps) {
 
   if (data) {
     const task = data.task;
-    const overdue = moment(task.periodEnd).isBefore(moment().subtract(1, 'd'));
+    const overdue = moment(task.periodEnd).isBefore(moment().startOf('day'));
     return (
         <ScrollView>
           <DetailTaskFab theme={theme} task={task} />

@@ -358,7 +358,7 @@ export type OtherUsersFragment = (
 
 export type UnapprovedTasksOfUserFragment = (
   { __typename?: 'TaskType' }
-  & Pick<TaskType, 'id' | 'name' | 'periodEnd'>
+  & Pick<TaskType, 'id' | 'name' | 'periodEnd' | 'state'>
   & { taskGroup: (
     { __typename?: 'TaskGroupType' }
     & Pick<TaskGroupType, 'id'>
@@ -460,6 +460,7 @@ export const UnapprovedTasksOfUserFragmentDoc = gql`
   }
   name
   periodEnd
+  state
 }
     `;
 export const UsersFragmentDoc = gql`
