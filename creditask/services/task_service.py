@@ -20,6 +20,17 @@ def get_task_by_task_group_id(task_group_id: int) -> Task:
             .first())
 
 
+newest_task_by_tg_query = '''
+                 SELECT *
+                 FROM (SELECT ROW_NUMBER()
+                              OVER (PARTITION BY t2.task_group_id ORDER BY t2.created_at DESC) AS r,
+                              t2.*
+                       FROM tasks t2
+                      ) t3
+                 WHERE t3.r <= 1
+                 '''
+
+
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
     """Get each newest task by task group of provided user"""
     query = '''
@@ -38,7 +49,29 @@ def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
         '''
     rows = Task.objects.raw(query, params={'user_mail': user_mail,
                                            'task_state': TaskState.TO_DO})
-    return list(map(lambda row: row, rows))
+    return list(rows)
+
+
+# TODO TEST
+def get_to_approve_tasks_of_user(user_mail: str) -> List[Task]:
+    """Get each newest task by task group of provided user"""
+    query = '''
+        SELECT newest_task.*
+        FROM (                 
+                 SELECT *
+                 FROM (SELECT ROW_NUMBER()
+                              OVER (PARTITION BY t2.task_group_id ORDER BY t2.created_at DESC) AS row,
+                              t2.*
+                       FROM tasks t2
+                      ) t3
+                 WHERE t3.row <= 1 ) newest_task
+                 FULL OUTER JOIN users usr ON newest_task.user_id = usr.id
+        WHERE newest_task.state = %(task_state)s
+          AND usr.email != %(user_mail)s;
+        '''
+    rows = Task.objects.raw(query, params={'user_mail': user_mail,
+                                           'task_state': TaskState.TO_APPROVE})
+    return list(rows)
 
 
 # TODO function is not tested entirely yet

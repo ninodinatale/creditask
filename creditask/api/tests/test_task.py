@@ -140,6 +140,79 @@ class ResolveTodoTasksOfUserTest(CreditaskTestBase):
         self.assertEquals(task_list[0].get('name'), mock_task_list[0].name)
 
 
+class ResolveToApproveTasksOfUserTest(CreditaskTestBase):
+    GRAPHQL_SCHEMA = schema
+
+    def setUp(self):
+        self.query_under_test = \
+            '''
+            query toApproveTasksOfUser($userEmail: String!) {
+                toApproveTasksOfUser(userEmail: $userEmail) {
+                    id
+                    name
+                }
+            }
+            '''
+        self.op_name = 'toApproveTasksOfUser'
+
+        create_user = User.objects.create_user
+        self.user_1_credentials = {
+            'email': 'user_1@email.com',
+            'password': 'pwuser1'
+        }
+        self.user_1 = create_user(**self.user_1_credentials,
+                                  public_name='user_1')
+
+        self.login(self.user_1_credentials.get('email'),
+                   self.user_1_credentials.get('password'))
+
+    def test_should_require_login(self):
+        self.should_require_login(self.query_under_test, op_name=self.op_name,
+                                  variables={'userEmail': 'user@mail.com'})
+
+    def test_should_require_user_email(self):
+        response = self.gql(self.query_under_test,
+                            op_name=self.op_name,
+                            variables={'userEmail': None})
+
+        response_content: dict = json.loads(response.content)
+        errors: List = response_content.get('errors')
+
+        self.assertEquals(response.status_code, 400)
+        self.assertIsNotNone(errors)
+        self.assertEquals(errors[0].get('message'),
+                          "Variable \"$userEmail\" "
+                          "of required type \"String!\" was not provided.")
+
+    @mock.patch('creditask.api.schema_def.get_to_approve_tasks_of_user')
+    def test_should_succeed(self, mock_fn: MagicMock):
+        user_email = 'user@mail.com'
+
+        mock_task_list = [Task(id=random.randint(1, 9999), name='name')]
+        mock_fn.return_value = mock_task_list
+
+        response = self.gql(self.query_under_test,
+                            op_name=self.op_name,
+                            variables={'userEmail': user_email})
+
+        self.assertResponseNoErrors(response)
+
+        task_list: List[dict] = json.loads(response.content).get(
+            'data').get(self.op_name)
+
+        self.assertIsNotNone(task_list)
+        self.assertTrue(len(task_list) == 1)
+
+        self.assertEqual(1, mock_fn.call_count)
+
+        first_call_args = mock_fn.call_args[0]
+        self.assertEqual(1, len(first_call_args))
+        self.assertEqual(user_email, first_call_args[0])
+
+        self.assertEquals(int(task_list[0].get('id')), mock_task_list[0].id)
+        self.assertEquals(task_list[0].get('name'), mock_task_list[0].name)
+
+
 @mock.patch('creditask.api.schema_def.save_task', return_value=Task(
     id=371827391,
     name='returning task'))

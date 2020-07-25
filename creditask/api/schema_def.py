@@ -8,8 +8,9 @@ from creditask.models import User, ApprovalState, TaskState, Approval, \
 from creditask.models.enums import ChangeableTaskProperty
 from .scalars import custom_string, custom_float
 from ..services import get_task_changes, get_approvals_by_task_group, \
-    get_task_by_task_group_id, get_todo_tasks_by_user_email, save_task, \
-    save_approval, get_users, get_other_users
+    get_task_by_task_group_id, get_todo_tasks_by_user_email, \
+    get_to_approve_tasks_of_user, save_task, save_approval, get_users, \
+    get_other_users
 
 
 class UserType(graphene_django.DjangoObjectType):
@@ -88,6 +89,9 @@ class TaskQuery:
     todo_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
+    to_approve_tasks_of_user = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskType)),
+        user_email=graphene.NonNull(graphene.String))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -98,6 +102,11 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_todo_tasks_of_user(self, info, **kwargs):
         return get_todo_tasks_by_user_email(kwargs.get('user_email'))
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_to_approve_tasks_of_user(self, info, **kwargs):
+        return get_to_approve_tasks_of_user(kwargs.get('user_email'))
 
 
 class TaskInputCreate(graphene.InputObjectType):

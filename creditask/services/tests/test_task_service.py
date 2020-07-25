@@ -13,8 +13,9 @@ from creditask.models.enums.changeable_task_property import \
 from creditask.models.task_change import TaskChange
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id, \
-    validate_state_change, validate_task_properties, merge_values, get_task_changes, \
-    copy_approvals
+    validate_state_change, validate_task_properties, merge_values, \
+    get_task_changes, \
+    copy_approvals, get_to_approve_tasks_of_user
 
 
 class TestTaskService(TransactionTestCase):
@@ -258,6 +259,176 @@ class TestTaskService(TransactionTestCase):
         )
 
         tasks = get_todo_tasks_by_user_email(user_1.email)
+
+        self.assertEquals(2, len(tasks))
+        self.assertEquals(task_6.id, tasks[0].id)
+        self.assertEquals(task_12.id, tasks[1].id)
+
+    def test_get_to_approve_tasks_of_user(self):
+        task_group_1 = TaskGroup.objects.create()
+        task_group_2 = TaskGroup.objects.create()
+        task_group_3 = TaskGroup.objects.create()
+        task_group_4 = TaskGroup.objects.create()
+        task_group_5 = TaskGroup.objects.create()
+        task_group_6 = TaskGroup.objects.create()
+
+        user_1 = User.objects.create(
+            email='test_get_task_by_task_group_id@user_1.com',
+            password='password'
+        )
+        user_2 = User.objects.create(
+            email='test_get_task_by_task_group_id@user_2.com',
+            password='password'
+        )
+
+        """
+        task group 1: newest task has wrong state, therefore should not be
+        returned
+        """
+        # all good
+        task_1 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # all good
+        task_2 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # wrong state
+        task_3 = Task.objects.create(
+            task_group=task_group_1,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_DO
+        )
+
+        """
+        task group 2: newest task has all good, therefore should be
+        returned
+        """
+        # wrong user
+        task_4 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_1,
+            created_by=user_1,
+            state=TaskState.TO_APPROVE
+        )
+
+        # wrong state
+        task_5 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_DO
+        )
+
+        # all good
+        task_6 = Task.objects.create(
+            task_group=task_group_2,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        """
+        task group 3: newest task has wrong user, therefore should not be
+        returned
+        """
+        # all good
+        task_7 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # all good
+        task_8 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # wrong user
+        task_9 = Task.objects.create(
+            task_group=task_group_3,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_1,
+            created_by=user_1,
+            state=TaskState.TO_APPROVE
+        )
+
+        """
+        task group 4: all are good, therefore newest should be
+        returned
+        """
+        # all good
+        task_10 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # all good
+        task_11 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        # all good
+        task_12 = Task.objects.create(
+            task_group=task_group_4,
+            needed_time_seconds=0,
+            name='name',
+
+            user=user_2,
+            created_by=user_2,
+            state=TaskState.TO_APPROVE
+        )
+
+        tasks = get_to_approve_tasks_of_user(user_1.email)
 
         self.assertEquals(2, len(tasks))
         self.assertEquals(task_6.id, tasks[0].id)
