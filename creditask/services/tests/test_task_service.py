@@ -33,7 +33,7 @@ class TestTaskService(TransactionTestCase):
 
     def test_get_task_by_id(self):
         user = User.objects.create(
-            email='test_get_task_by_task_group_id@user.com',
+            email='test_get_task_by_id@user.com',
             password='password'
         )
 
@@ -85,11 +85,11 @@ class TestTaskService(TransactionTestCase):
 
     def test_get_todo_tasks_by_user_email(self):
         user_1 = User.objects.create(
-            email='test_get_task_by_task_group_id@user_1.com',
+            email='test_get_task_by_id@user_1.com',
             password='password'
         )
         user_2 = User.objects.create(
-            email='test_get_task_by_task_group_id@user_2.com',
+            email='test_get_task_by_id@user_2.com',
             password='password'
         )
 
@@ -224,11 +224,11 @@ class TestTaskService(TransactionTestCase):
 
     def test_get_to_approve_tasks_of_user(self):
         user_1 = User.objects.create(
-            email='test_get_task_by_task_group_id@user_1.com',
+            email='test_get_task_by_id@user_1.com',
             password='password'
         )
         user_2 = User.objects.create(
-            email='test_get_task_by_task_group_id@user_2.com',
+            email='test_get_task_by_id@user_2.com',
             password='password'
         )
 
@@ -281,7 +281,7 @@ class TestTaskService(TransactionTestCase):
                 'on_task_state')
     @mock.patch('creditask.services.task_service.Task.save')
     def test_save_task(self, mock_save,
-                       mock_get_task_by_task_group_id,
+                       mock_get_task_by_id,
                        mock_validate_new_properties_based_on_task_state,
                        mock_validate_task_properties):
         mock_user = User(email='user@email.com')

@@ -4,9 +4,8 @@ schema {
 }
 
 input ApprovalInput {
+  id: ID!
   state: ApprovalState!
-  taskGroupId: ID!
-  userId: ID!
 }
 
 enum ApprovalState {
@@ -66,10 +65,9 @@ type ObtainJSONWebToken {
 }
 
 type Query {
-  task(taskGroupId: ID!): TaskType!
+  task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
-  taskGroup(id: ID!): TaskGroupType
   user(id: Int!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
@@ -96,11 +94,6 @@ type TaskChangeType {
   changedProperty: ChangeableTaskProperty
 }
 
-type TaskGroupType {
-  id: ID!
-  taskSet: [TaskType!]!
-}
-
 input TaskInputCreate {
   name: CustomString!
   factor: CustomFloat!
@@ -110,7 +103,7 @@ input TaskInputCreate {
 }
 
 input TaskInputUpdate {
-  taskGroupId: ID!
+  id: ID!
   state: TaskState
   name: CustomString
   factor: CustomFloat
@@ -132,7 +125,6 @@ type TaskType {
   createdBy: UserType!
   isDeleted: Boolean!
   id: ID!
-  taskGroup: TaskGroupType!
   name: String!
   neededTimeSeconds: Int!
   state: TaskState!
