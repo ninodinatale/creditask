@@ -19,7 +19,7 @@
       <sourceFolder url="file://$MODULE_DIR$/creditask_django" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/env" />
-      <excludeFolder url="file://$MODULE_DIR$/frontend" />
+      <excludeFolder url="file://$MODULE_DIR$/_frontend_old" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (creditask_django)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
