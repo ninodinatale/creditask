@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Login from './login/Login';
 import { useAuth } from '../hooks/auth/use-auth';
 import { RefreshTokenDocument, RefreshTokenMutation } from '../graphql/types';
@@ -6,19 +6,19 @@ import { useApolloClient } from '@apollo/react-hooks';
 import NavigationWrapper from './NavigationWrapper';
 import LoadingSpinner from './_shared/LoadingSpinner';
 import NetInfo from '@react-native-community/netinfo';
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 export default function AuthWrapper() {
   const {mutate} = useApolloClient();
-  const {getJwt, logout, login} = useAuth();
+  const {getJwt, logout, login, user} = useAuth();
 
   const [state, setState] = useState({isLoading: true, hasToken: false});
 
   const netInfo = NetInfo.useNetInfo();
 
-  useEffect(() => {
+  if (!user) {
     determineIfJwtExists().catch(_ => setUserHasNoToken());
-  }, []);
+  }
 
   async function determineIfJwtExists() {
     const jwt = await getJwt();
@@ -49,17 +49,21 @@ export default function AuthWrapper() {
   }
 
   function setUserHasToken(): void {
-    setState({
-      hasToken: true,
-      isLoading: false
-    });
+    if (!state.hasToken || state.isLoading) {
+      setState({
+        hasToken: true,
+        isLoading: false
+      });
+    }
   }
 
   function setUserHasNoToken(): void {
-    setState({
-      hasToken: false,
-      isLoading: false
-    });
+    if (state.hasToken || state.isLoading) {
+      setState({
+        hasToken: false,
+        isLoading: false
+      });
+    }
   }
 
 

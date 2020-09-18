@@ -1,0 +1,16 @@
+fragment toApproveTasksOfUser on TaskType {
+    id
+    taskGroup {
+        id
+    }
+    name
+    periodEnd
+    state
+    approvals {
+        user {
+            id
+            publicName
+        }
+        state
+    }
+}

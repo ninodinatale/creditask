@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # TODO SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '@eqg_!)c!**p#&e&g(j7*o#51_1#wrg2nym%xy18f0s(f=%r8r'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# TODO SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']

@@ -34,7 +34,7 @@ export type ApprovalType = {
   createdAt: Scalars['DateTime'];
   createdBy: UserType;
   isDeleted: Scalars['Boolean'];
-  state: Scalars['String'];
+  state: ApprovalState;
   task: TaskType;
   user: UserType;
 };
@@ -49,6 +49,13 @@ export enum ChangeableTaskProperty {
   PeriodEnd = 'PeriodEnd',
   Approval = 'Approval'
 }
+
+export type CurrentUserType = {
+   __typename?: 'CurrentUserType';
+  id: Scalars['ID'];
+  email: Scalars['String'];
+  publicName: Scalars['String'];
+};
 
 
 
@@ -101,6 +108,7 @@ export type Query = {
    __typename?: 'Query';
   task: TaskType;
   todoTasksOfUser: Array<TaskType>;
+  toApproveTasksOfUser: Array<TaskType>;
   taskGroup?: Maybe<TaskGroupType>;
   user?: Maybe<UserType>;
   users?: Maybe<Array<UserType>>;
@@ -114,6 +122,11 @@ export type QueryTaskArgs = {
 
 
 export type QueryTodoTasksOfUserArgs = {
+  userEmail: Scalars['String'];
+};
+
+
+export type QueryToApproveTasksOfUserArgs = {
   userEmail: Scalars['String'];
 };
 
@@ -224,7 +237,7 @@ export type UserType = {
 
 export type Verify = {
    __typename?: 'Verify';
-  payload?: Maybe<Scalars['GenericScalar']>;
+  user?: Maybe<CurrentUserType>;
 };
 
 export type TokenAuthMutationVariables = {
@@ -365,6 +378,35 @@ export type UnapprovedTasksOfUserFragment = (
   ) }
 );
 
+export type ToApproveTasksOfUserQueryVariables = {
+  email: Scalars['String'];
+};
+
+
+export type ToApproveTasksOfUserQuery = (
+  { __typename?: 'Query' }
+  & { toApproveTasksOfUser: Array<(
+    { __typename?: 'TaskType' }
+    & ToApproveTasksOfUserFragment
+  )> }
+);
+
+export type ToApproveTasksOfUserFragment = (
+  { __typename?: 'TaskType' }
+  & Pick<TaskType, 'id' | 'name' | 'periodEnd' | 'state'>
+  & { taskGroup: (
+    { __typename?: 'TaskGroupType' }
+    & Pick<TaskGroupType, 'id'>
+  ), approvals: Array<(
+    { __typename?: 'ApprovalType' }
+    & Pick<ApprovalType, 'state'>
+    & { user: (
+      { __typename?: 'UserType' }
+      & Pick<UserType, 'id' | 'publicName'>
+    ) }
+  )> }
+);
+
 export type TodoTasksOfUserQueryVariables = {
   email: Scalars['String'];
 };
@@ -461,6 +503,24 @@ export const UnapprovedTasksOfUserFragmentDoc = gql`
   name
   periodEnd
   state
+}
+    `;
+export const ToApproveTasksOfUserFragmentDoc = gql`
+    fragment toApproveTasksOfUser on TaskType {
+  id
+  taskGroup {
+    id
+  }
+  name
+  periodEnd
+  state
+  approvals {
+    user {
+      id
+      publicName
+    }
+    state
+  }
 }
     `;
 export const UsersFragmentDoc = gql`
@@ -677,6 +737,39 @@ export function useOtherUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type OtherUsersQueryHookResult = ReturnType<typeof useOtherUsersQuery>;
 export type OtherUsersLazyQueryHookResult = ReturnType<typeof useOtherUsersLazyQuery>;
 export type OtherUsersQueryResult = ApolloReactCommon.QueryResult<OtherUsersQuery, OtherUsersQueryVariables>;
+export const ToApproveTasksOfUserDocument = gql`
+    query toApproveTasksOfUser($email: String!) {
+  toApproveTasksOfUser(userEmail: $email) {
+    ...toApproveTasksOfUser
+  }
+}
+    ${ToApproveTasksOfUserFragmentDoc}`;
+
+/**
+ * __useToApproveTasksOfUserQuery__
+ *
+ * To run a query within a React component, call `useToApproveTasksOfUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useToApproveTasksOfUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useToApproveTasksOfUserQuery({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useToApproveTasksOfUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ToApproveTasksOfUserQuery, ToApproveTasksOfUserQueryVariables>) {
+        return ApolloReactHooks.useQuery<ToApproveTasksOfUserQuery, ToApproveTasksOfUserQueryVariables>(ToApproveTasksOfUserDocument, baseOptions);
+      }
+export function useToApproveTasksOfUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ToApproveTasksOfUserQuery, ToApproveTasksOfUserQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ToApproveTasksOfUserQuery, ToApproveTasksOfUserQueryVariables>(ToApproveTasksOfUserDocument, baseOptions);
+        }
+export type ToApproveTasksOfUserQueryHookResult = ReturnType<typeof useToApproveTasksOfUserQuery>;
+export type ToApproveTasksOfUserLazyQueryHookResult = ReturnType<typeof useToApproveTasksOfUserLazyQuery>;
+export type ToApproveTasksOfUserQueryResult = ApolloReactCommon.QueryResult<ToApproveTasksOfUserQuery, ToApproveTasksOfUserQueryVariables>;
 export const TodoTasksOfUserDocument = gql`
     query todoTasksOfUser($email: String!) {
   todoTasksOfUser(userEmail: $email) {

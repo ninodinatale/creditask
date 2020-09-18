@@ -20,7 +20,7 @@ type ApprovalType {
   createdAt: DateTime!
   createdBy: UserType!
   isDeleted: Boolean!
-  state: String!
+  state: ApprovalState!
   task: TaskType!
   user: UserType!
 }
@@ -34,6 +34,12 @@ enum ChangeableTaskProperty {
   PeriodStart
   PeriodEnd
   Approval
+}
+
+type CurrentUserType {
+  id: ID!
+  email: String!
+  publicName: String!
 }
 
 scalar CustomFloat
@@ -62,6 +68,7 @@ type ObtainJSONWebToken {
 type Query {
   task(taskGroupId: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
+  toApproveTasksOfUser(userEmail: String!): [TaskType!]!
   taskGroup(id: ID!): TaskGroupType
   user(id: Int!): UserType
   users: [UserType!]
@@ -152,5 +159,5 @@ type UserType {
 }
 
 type Verify {
-  payload: GenericScalar
+  user: CurrentUserType
 }

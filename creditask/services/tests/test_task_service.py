@@ -6,16 +6,15 @@ from unittest.mock import MagicMock
 from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase
 
-from creditask.models import Task, User, TaskGroup, Approval, TaskState, \
+from creditask.models import Task, User, Approval, TaskState, \
     ApprovalState
 from creditask.models.enums.changeable_task_property import \
     ChangeableTaskProperty
 from creditask.models.task_change import TaskChange
 from creditask.services.task_service import get_task_by_id, \
-    get_todo_tasks_by_user_email, save_task, get_task_by_task_group_id, \
+    get_todo_tasks_by_user_email, save_task, \
     validate_state_change, validate_task_properties, merge_values, \
-    get_task_changes, \
-    copy_approvals, get_to_approve_tasks_of_user
+    get_to_approve_tasks_of_user
 
 
 class TestTaskService(TransactionTestCase):
@@ -32,76 +31,59 @@ class TestTaskService(TransactionTestCase):
         self.assertEquals(mock_fn.call_args[1]['id'], mock_task.id)
         self.assertTrue(1, len(mock_fn.call_args[1]))
 
-    def test_get_task_by_task_group_id(self):
-        task_group_1 = TaskGroup.objects.create()
-        task_group_2 = TaskGroup.objects.create()
+    def test_get_task_by_id(self):
         user = User.objects.create(
             email='test_get_task_by_task_group_id@user.com',
             password='password'
         )
 
         task_0 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
             created_by=user,
 
         )
         task_1 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_2 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_3 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_4 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_5 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_6 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
         task_7 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
             created_by=user
         )
 
-        task = get_task_by_task_group_id(task_group_1.id)
+        task = get_task_by_id(task_6.id)
 
         self.assertEquals(task_6.id, task.id)
 
     def test_get_todo_tasks_by_user_email(self):
-        task_group_1 = TaskGroup.objects.create()
-        task_group_2 = TaskGroup.objects.create()
-        task_group_3 = TaskGroup.objects.create()
-        task_group_4 = TaskGroup.objects.create()
-        task_group_5 = TaskGroup.objects.create()
-        task_group_6 = TaskGroup.objects.create()
-
         user_1 = User.objects.create(
             email='test_get_task_by_task_group_id@user_1.com',
             password='password'
@@ -111,13 +93,8 @@ class TestTaskService(TransactionTestCase):
             password='password'
         )
 
-        """
-        task group 1: newest task has wrong state, therefore should not be
-        returned
-        """
         # all good
         task_1 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
             user=user_1,
@@ -127,7 +104,6 @@ class TestTaskService(TransactionTestCase):
 
         # all good
         task_2 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
 
@@ -138,7 +114,6 @@ class TestTaskService(TransactionTestCase):
 
         # wrong state
         task_3 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
 
@@ -147,13 +122,8 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.APPROVED
         )
 
-        """
-        task group 2: newest task has all good, therefore should be
-        returned
-        """
-        # all good
+        # wrong user
         task_4 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
 
@@ -162,9 +132,8 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.TO_DO
         )
 
-        # all good
+        # wrong state
         task_5 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
 
@@ -173,24 +142,17 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.APPROVED
         )
 
-        # wrong state
+        # all good
         task_6 = Task.objects.create(
-            task_group=task_group_2,
             needed_time_seconds=0,
             name='name',
-
             user=user_1,
             created_by=user_1,
             state=TaskState.TO_DO
         )
 
-        """
-        task group 3: newest task has wrong user, therefore should not be
-        returned
-        """
-        # all good
+        # wrong user
         task_7 = Task.objects.create(
-            task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
 
@@ -201,7 +163,6 @@ class TestTaskService(TransactionTestCase):
 
         # all good
         task_8 = Task.objects.create(
-            task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
 
@@ -210,9 +171,8 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.TO_DO
         )
 
-        # wrong state
+        # wrong user
         task_9 = Task.objects.create(
-            task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
 
@@ -221,13 +181,8 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.TO_DO
         )
 
-        """
-        task group 4: all are good, therefore newest should be
-        returned
-        """
         # all good
         task_10 = Task.objects.create(
-            task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
 
@@ -238,7 +193,6 @@ class TestTaskService(TransactionTestCase):
 
         # all good
         task_11 = Task.objects.create(
-            task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
 
@@ -247,9 +201,8 @@ class TestTaskService(TransactionTestCase):
             state=TaskState.TO_DO
         )
 
-        # wrong state
+        # all good
         task_12 = Task.objects.create(
-            task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
 
@@ -260,18 +213,16 @@ class TestTaskService(TransactionTestCase):
 
         tasks = get_todo_tasks_by_user_email(user_1.email)
 
-        self.assertEquals(2, len(tasks))
-        self.assertEquals(task_6.id, tasks[0].id)
-        self.assertEquals(task_12.id, tasks[1].id)
+        self.assertEquals(7, len(tasks))
+        self.assertIn(task_1, tasks)
+        self.assertIn(task_2, tasks)
+        self.assertIn(task_6, tasks)
+        self.assertIn(task_8, tasks)
+        self.assertIn(task_10, tasks)
+        self.assertIn(task_11, tasks)
+        self.assertIn(task_12, tasks)
 
     def test_get_to_approve_tasks_of_user(self):
-        task_group_1 = TaskGroup.objects.create()
-        task_group_2 = TaskGroup.objects.create()
-        task_group_3 = TaskGroup.objects.create()
-        task_group_4 = TaskGroup.objects.create()
-        task_group_5 = TaskGroup.objects.create()
-        task_group_6 = TaskGroup.objects.create()
-
         user_1 = User.objects.create(
             email='test_get_task_by_task_group_id@user_1.com',
             password='password'
@@ -281,63 +232,10 @@ class TestTaskService(TransactionTestCase):
             password='password'
         )
 
-        """
-        task group 1: newest task has wrong state, therefore should not be
-        returned
-        """
-        # all good
-        task_1 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='name',
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
-        # all good
-        task_2 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
         # wrong state
         task_3 = Task.objects.create(
-            task_group=task_group_1,
             needed_time_seconds=0,
             name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_DO
-        )
-
-        """
-        task group 2: newest task has all good, therefore should be
-        returned
-        """
-        # wrong user
-        task_4 = Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_1,
-            created_by=user_1,
-            state=TaskState.TO_APPROVE
-        )
-
-        # wrong state
-        task_5 = Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=0,
-            name='name',
-
             user=user_2,
             created_by=user_2,
             state=TaskState.TO_DO
@@ -345,33 +243,6 @@ class TestTaskService(TransactionTestCase):
 
         # all good
         task_6 = Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
-        """
-        task group 3: newest task has wrong user, therefore should not be
-        returned
-        """
-        # all good
-        task_7 = Task.objects.create(
-            task_group=task_group_3,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
-        # all good
-        task_8 = Task.objects.create(
-            task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
 
@@ -382,47 +253,17 @@ class TestTaskService(TransactionTestCase):
 
         # wrong user
         task_9 = Task.objects.create(
-            task_group=task_group_3,
             needed_time_seconds=0,
             name='name',
-
             user=user_1,
             created_by=user_1,
             state=TaskState.TO_APPROVE
         )
 
-        """
-        task group 4: all are good, therefore newest should be
-        returned
-        """
-        # all good
-        task_10 = Task.objects.create(
-            task_group=task_group_4,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
-        # all good
-        task_11 = Task.objects.create(
-            task_group=task_group_4,
-            needed_time_seconds=0,
-            name='name',
-
-            user=user_2,
-            created_by=user_2,
-            state=TaskState.TO_APPROVE
-        )
-
         # all good
         task_12 = Task.objects.create(
-            task_group=task_group_4,
             needed_time_seconds=0,
             name='name',
-
             user=user_2,
             created_by=user_2,
             state=TaskState.TO_APPROVE
@@ -431,20 +272,18 @@ class TestTaskService(TransactionTestCase):
         tasks = get_to_approve_tasks_of_user(user_1.email)
 
         self.assertEquals(2, len(tasks))
-        self.assertEquals(task_6.id, tasks[0].id)
-        self.assertEquals(task_12.id, tasks[1].id)
+        self.assertIn(task_6, tasks)
+        self.assertIn(task_12, tasks)
 
-    @mock.patch('creditask.services.task_service.copy_approvals')
     @mock.patch('creditask.services.task_service.validate_task_properties')
-    @mock.patch('creditask.services.task_service.get_task_by_task_group_id')
+    @mock.patch('creditask.services.task_service.get_task_by_id')
     @mock.patch('creditask.services.task_service.validate_new_properties_based_'
                 'on_task_state')
     @mock.patch('creditask.services.task_service.Task.save')
     def test_save_task(self, mock_save,
                        mock_get_task_by_task_group_id,
                        mock_validate_new_properties_based_on_task_state,
-                       mock_validate_task_properties,
-                       copy_approvals):
+                       mock_validate_task_properties):
         mock_user = User(email='user@email.com')
         args = {
             'name': 'created_task',
@@ -552,388 +391,6 @@ class TestTaskService(TransactionTestCase):
                               return_value.needed_time_seconds)
             self.assertEquals(values_to_merge.get('state'),
                               return_value.state)
-
-    def test_copy_approvals(self):
-        with self.subTest('should copy all approvals to new task'):
-            task_group = TaskGroup.objects.create()
-            user_1 = User.objects.create(
-                email='test_copy_approvals@user_1.com', password='password'
-            )
-            user_2 = User.objects.create(
-                email='test_copy_approvals@user_2.com', password='password'
-            )
-            user_3 = User.objects.create(
-                email='test_copy_approvals@user_3.com', password='password'
-            )
-            old_task = Task.objects.create(task_group=task_group,
-                                           needed_time_seconds=0,
-                                           name='name',
-                                           created_by=user_1)
-            approval_1 = Approval.objects.create(state=ApprovalState.NONE,
-                                                 user=user_1,
-                                                 task=old_task,
-                                                 created_by=user_1)
-            approval_2 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                                 user=user_2,
-                                                 task=old_task,
-                                                 created_by=user_2)
-            approval_3 = Approval.objects.create(state=ApprovalState.DECLINED,
-                                                 user=user_3,
-                                                 task=old_task,
-                                                 created_by=user_3)
-
-            new_task = Task.objects.create(task_group=task_group,
-                                           needed_time_seconds=0,
-                                           name='name',
-                                           created_by=user_1)
-
-            copy_approvals(old_task, new_task)
-
-            old_approvals = list((approval_1, approval_2, approval_3))
-            copied_approvals = list(Approval.objects.filter(task=new_task))
-
-            self.assertEquals(3, len(copied_approvals))
-
-            for index, old_approval in enumerate(old_approvals):
-                self.assertEqual(old_approval.state,
-                                 copied_approvals[index].state)
-                self.assertEqual(old_approval.user,
-                                 copied_approvals[index].user)
-                self.assertEqual(old_approval.created_by,
-                                 copied_approvals[index].created_by)
-                self.assertEqual(new_task,
-                                 copied_approvals[index].task)
-
-    def test_get_changes(self):
-        task_group_1 = TaskGroup.objects.create()
-        task_group_2 = TaskGroup.objects.create()
-        user_1 = User.objects.create(
-            email='test_get_changes@user_1.com',
-            password='password'
-        )
-        user_2 = User.objects.create(
-            email='test_get_changes@user_2.com',
-            password='password'
-        )
-        user_3 = User.objects.create(
-            email='test_get_changes@user_3.com',
-            password='password'
-        )
-
-        now = datetime.date(2020, 1, 1)
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # created
-        task_0 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='name',
-
-            created_by=user_1,
-            factor=1.1,
-            period_start=now,
-            period_end=now,
-            state=TaskState.TO_DO,
-            user=user_1
-        )
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # factor
-        task_1 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='name',
-
-            created_by=user_2,
-            factor=1.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.TO_DO,
-            user=user_1
-        )
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # name + approval
-        task_2 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='new name',
-
-            created_by=user_3,
-            factor=1.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.TO_DO,
-            user=user_1
-        )
-        approval_0 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_2, user=user_1,
-                                             created_by=user_1)
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # period_end
-        task_3 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=0,
-            name='new name',
-
-            created_by=user_1,
-            factor=1.2,
-            period_start=now,
-            period_end=now + datetime.timedelta(days=1),
-            state=TaskState.TO_DO,
-            user=user_1
-        )
-        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_3, user=user_1,
-                                             created_by=user_1)
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # state + needed_time_seconds
-        task_4 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=120,
-            name='new name',
-
-            created_by=user_2,
-            factor=1.2,
-            period_start=now,
-            period_end=now + datetime.timedelta(days=1),
-            state=TaskState.TO_APPROVE,
-            user=user_1
-        )
-        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_4, user=user_1,
-                                             created_by=user_1)
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        # user
-        task_5 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=120,
-            name='new name',
-
-            created_by=user_3,
-            factor=1.2,
-            period_start=now,
-            period_end=now + datetime.timedelta(days=1),
-            state=TaskState.TO_APPROVE,
-            user=user_2
-        )
-        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_5, user=user_1,
-                                             created_by=user_1)
-
-        # approval
-        task_6 = Task.objects.create(
-            task_group=task_group_1,
-            needed_time_seconds=120,
-            name='new name',
-
-            created_by=user_3,
-            factor=1.2,
-            period_start=now,
-            period_end=now + datetime.timedelta(days=1),
-            state=TaskState.TO_APPROVE,
-            user=user_2
-        )
-
-        # no change!
-        approval_1 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_6, user=user_1,
-                                             created_by=user_1)
-
-        # no change!
-        approval_2 = Approval.objects.create(state=ApprovalState.NONE,
-                                             task=task_6, user=user_2,
-                                             created_by=user_2)
-
-        # change!
-        approval_3 = Approval.objects.create(state=ApprovalState.APPROVED,
-                                             task=task_6, user=user_3,
-                                             created_by=user_3)
-
-        # change!
-        approval_4 = Approval.objects.create(state=ApprovalState.DECLINED,
-                                             task=task_6, user=user_1,
-                                             created_by=user_1)
-
-        # change!
-        approval_5 = Approval.objects.create(state=ApprovalState.DECLINED,
-                                             task=task_6, user=user_2,
-                                             created_by=user_2)
-
-        Task.objects.create(
-            task_group=task_group_2,
-            needed_time_seconds=200,
-            name='abc',
-
-            created_by=user_1,
-            factor=2.2,
-            period_start=now,
-            period_end=now,
-            state=TaskState.APPROVED,
-            user=user_3
-        )
-
-        task_changes = get_task_changes(task_5)
-        self.assertEquals(11, len(task_changes))
-
-        expected_result = list((
-            TaskChange(
-                current_value=None,
-                previous_value=None,
-                user=task_0.created_by,
-                timestamp=task_0.created_at,
-                changed_property=None
-            ),
-            TaskChange(
-                current_value=str(task_1.factor),
-                previous_value=str(task_0.factor),
-                user=task_1.created_by,
-                timestamp=task_1.created_at,
-                changed_property=ChangeableTaskProperty.Factor
-            ),
-            TaskChange(
-                current_value=str(task_2.name),
-                previous_value=str(task_1.name),
-                user=task_2.created_by,
-                timestamp=task_2.created_at,
-                changed_property=ChangeableTaskProperty.Name
-            ),
-            TaskChange(
-                current_value=approval_0.state.value,
-                previous_value=ApprovalState.NONE.value,
-                user=approval_0.created_by,
-                timestamp=approval_0.created_at,
-                changed_property=ChangeableTaskProperty.Approval
-            ),
-            TaskChange(
-                current_value=str(task_3.period_end),
-                previous_value=str(task_2.period_end),
-                user=task_3.created_by,
-                timestamp=task_3.created_at,
-                changed_property=ChangeableTaskProperty.PeriodEnd
-            ),
-            TaskChange(
-                current_value=str(task_4.needed_time_seconds),
-                previous_value=str(task_3.needed_time_seconds),
-                user=task_4.created_by,
-                timestamp=task_4.created_at,
-                changed_property=ChangeableTaskProperty.NeededTimeSeconds
-            ),
-            TaskChange(
-                current_value=str(task_4.state),
-                previous_value=str(task_3.state),
-                user=task_4.created_by,
-                timestamp=task_4.created_at,
-                changed_property=ChangeableTaskProperty.State
-            ),
-            TaskChange(
-                current_value=str(task_5.user.id),
-                previous_value=str(task_4.user.id),
-                user=task_5.created_by,
-                timestamp=task_5.created_at,
-                changed_property=ChangeableTaskProperty.UserId
-            ),
-            TaskChange(
-                current_value=approval_3.state.value,
-                previous_value=ApprovalState.NONE.value,
-                user=approval_3.created_by,
-                timestamp=approval_3.created_at,
-                changed_property=ChangeableTaskProperty.Approval
-            ),
-            TaskChange(
-                current_value=approval_4.state.value,
-                previous_value=approval_1.state.value,
-                user=approval_4.created_by,
-                timestamp=approval_4.created_at,
-                changed_property=ChangeableTaskProperty.Approval
-            ),
-            TaskChange(
-                current_value=approval_5.state.value,
-                previous_value=approval_2.state.value,
-                user=approval_5.created_by,
-                timestamp=approval_5.created_at,
-                changed_property=ChangeableTaskProperty.Approval
-            ),
-
-        ))
-        expected_result.reverse()
-
-        self.assertListEqual(expected_result, task_changes)
 
 
 def test_validate_state_change(self):

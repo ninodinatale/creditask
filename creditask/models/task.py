@@ -3,7 +3,6 @@ import datetime
 from django.db import models
 
 from .user import User
-from .task_group import TaskGroup
 from .base import BaseModel
 
 
@@ -15,7 +14,6 @@ class TaskState(models.TextChoices):
 
 
 class Task(BaseModel):
-    task_group = models.ForeignKey(TaskGroup, on_delete=models.CASCADE)
     name: str = models.CharField(max_length=30)
     needed_time_seconds: int = models.IntegerField()
     state = models.CharField(choices=TaskState.choices,

@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../NavigationWrapper';
 import { StackNavigationProp } from '@react-navigation/stack/lib/typescript/src/types';
-import { RefreshControl, View } from 'react-native';
+import { RefreshControl, View, ScrollView } from 'react-native';
 import { Avatar, List, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import {
   getTaskStateIconProps,
@@ -133,7 +133,7 @@ export default function UserTodoTasks(props: any) {
     return (
         <RefreshControl colors={[theme.colors.primary]} onRefresh={onRefresh}
                         refreshing={refreshing}>
-          <View>
+          <ScrollView>
             {
               toApproveTasks.length > 0 &&
               toApproveTasks.map((task, index) => getItem({
@@ -168,7 +168,7 @@ export default function UserTodoTasks(props: any) {
               fartherTasks.length > 0 &&
               fartherTasks.map((task, index) => getItem({task, headerText: 'Später', index}))
             }
-          </View>
+          </ScrollView>
         </RefreshControl>
     )
   }

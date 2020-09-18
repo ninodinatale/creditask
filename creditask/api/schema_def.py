@@ -4,18 +4,24 @@ import graphql
 import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
-    TaskGroup, Task
+    Task
 from creditask.models.enums import ChangeableTaskProperty
 from .scalars import custom_string, custom_float
-from ..services import get_task_changes, get_approvals_by_task_group, \
-    get_task_by_task_group_id, get_todo_tasks_by_user_email, \
-    get_to_approve_tasks_of_user, save_task, save_approval, get_users, \
+from ..services import get_task_changes, save_approval, \
+     get_todo_tasks_by_user_email, get_task_by_id, \
+    get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users
 
 
 class UserType(graphene_django.DjangoObjectType):
     class Meta:
         model = User
+
+
+class CurrentUserType(graphene.ObjectType):
+    id = graphene.NonNull(graphene.ID)
+    email = graphene.NonNull(graphene.String)
+    public_name = graphene.NonNull(graphene.String)
 
 
 class TaskChangeType(graphene.ObjectType):
@@ -29,7 +35,7 @@ class TaskChangeType(graphene.ObjectType):
 
 class ApprovalScalars:
     state = graphene.Enum.from_enum(ApprovalState)
-    task_group_id = graphene.ID
+    task_id = graphene.ID
     user_id = graphene.ID
 
 
@@ -39,7 +45,7 @@ class ApprovalType(graphene_django.DjangoObjectType):
     # `CharField`'s `choices` and actual enum. This is only a problem because
     # we use the scalar "task state" for inputs as well. This makes sure that
     # we can use the same enum for the query and the mutation.
-    state = graphene.Enum.from_enum(ApprovalState)
+    state = graphene.NonNull(ApprovalScalars.state)
 
     class Meta:
         convert_choices_to_enum = False
@@ -47,7 +53,7 @@ class ApprovalType(graphene_django.DjangoObjectType):
 
 
 class TaskScalars:
-    task_group_id = graphene.ID
+    id = graphene.ID
     state = graphene.Enum.from_enum(TaskState)
     name = custom_string(min_len=3, max_len=30)
     factor = custom_float(min_value=1)
@@ -76,7 +82,7 @@ class TaskType(graphene_django.DjangoObjectType):
     @staticmethod
     @graphql_jwt.decorators.login_required
     def resolve_approvals(parent: Task, info: graphql.ResolveInfo):
-        return get_approvals_by_task_group(parent.task_group)
+        return parent.approvals.all()
 
     class Meta:
         convert_choices_to_enum = False
@@ -84,8 +90,7 @@ class TaskType(graphene_django.DjangoObjectType):
 
 
 class TaskQuery:
-    task = graphene.NonNull(TaskType,
-                            task_group_id=graphene.NonNull(graphene.ID))
+    task = graphene.NonNull(TaskType, id=graphene.NonNull(graphene.ID))
     todo_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
@@ -96,7 +101,7 @@ class TaskQuery:
     @staticmethod
     @graphql_jwt.decorators.login_required
     def resolve_task(self, info, **kwargs):
-        return get_task_by_task_group_id(kwargs.get('task_group_id'))
+        return get_task_by_id(kwargs.get('id'))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -118,7 +123,7 @@ class TaskInputCreate(graphene.InputObjectType):
 
 
 class TaskInputUpdate(graphene.InputObjectType):
-    task_group_id = graphene.NonNull(TaskScalars.task_group_id)  # TODO test
+    id = graphene.NonNull(TaskScalars.id)  # TODO test
     state = TaskScalars.state()
     name = TaskScalars.name()
     factor = TaskScalars.factor()
@@ -161,9 +166,8 @@ class TaskMutation:
 
 
 class ApprovalInput(graphene.InputObjectType):
-    state = graphene.NonNull(graphene.Enum.from_enum(ApprovalState))
-    task_group_id = graphene.NonNull(ApprovalScalars.task_group_id)
-    user_id = graphene.NonNull(graphene.ID)
+    id = graphene.NonNull(graphene.ID)
+    state = graphene.NonNull(ApprovalScalars.state)
 
 
 # TODO TEST
@@ -179,9 +183,7 @@ class SaveApproval(graphene.Mutation):
         if info.context.user.id is not approval_input.user_id:
             raise AssertionError(
                 'logged in user must be the same as the user\'s approval')
-        approval = save_approval(approval_input.task_group_id,
-                                 info.context.user.id,
-                                 approval_input.state)
+        approval = save_approval(approval_input.id, approval_input.state)
         return SaveApproval(approval=approval)
 
 
@@ -206,16 +208,7 @@ class UserQuery:
         return get_other_users(kwargs.get('user_email'))
 
 
-class TaskGroupType(graphene_django.DjangoObjectType):
-    class Meta:
-        model = TaskGroup
-
-
-class TaskGroupQuery:
-    task_group = graphene.Field(TaskGroupType, id=graphene.NonNull(graphene.ID))
-
-
-class Query(UserQuery, TaskGroupQuery, TaskQuery, graphene.ObjectType):
+class Query(UserQuery, TaskQuery, graphene.ObjectType):
     pass
 
 
@@ -227,9 +220,45 @@ class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
         return cls(user=info.context.user)
 
 
+class VerifyJSONWebToken(graphql_jwt.Verify):
+    user = graphene.Field(UserType)
+
+    # @classmethod
+    # def mutate(cls, root, info, token, **kwargs):
+    #     value = super().mutate(root, info, token, **kwargs)
+    #     return cls(user=value.payload)
+    #
+    @staticmethod
+    def resolve_user(parent, info: graphql.ResolveInfo):
+        return parent.user
+
+
+class Verify(graphene.Mutation, graphene.ObjectType):
+    user = graphene.Field(CurrentUserType)
+
+    class Arguments:
+        token = graphene.String(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, token, **kwargs):
+        payload = graphql_jwt.utils.get_payload(token, info.context)
+        return cls(user=User(id=payload.get('id'),
+                             email=payload.get('email'),
+                             public_name=payload.get('publicName')))
+
+    @staticmethod
+    def resolve_user(parent: 'Verify', info: graphql.ResolveInfo):
+        return parent.user
+
+
 class Mutation(TaskMutation, ApprovalMutation, graphene.ObjectType):
     token_auth = ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
+
+    # custom verify! This replaces graphql_jwt.Verify because its payload
+    # is a generic scalar and has no type safety. The custom is beneficial for
+    # type safety with Artemis on the frontend
+    verify_token = Verify.Field()
+
     refresh_token = graphql_jwt.Refresh.Field()
 
 

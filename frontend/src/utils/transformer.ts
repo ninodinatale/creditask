@@ -50,6 +50,19 @@ export function getTaskStateIconProps(taskState: TaskState, theme: Theme): { ico
   }
 }
 
+export function getApprovalStateIconProps(approvalState: ApprovalState, theme: Theme): { icon: string, color?: string } {
+  switch (approvalState) {
+    case ApprovalState.None:
+      return {icon: 'checkbox-blank-circle-outline', color: theme.colors.onSurface};
+    case ApprovalState.Approved:
+      return {icon: 'check-circle-outline', color: Colors.green900};
+    case ApprovalState.Declined:
+      return {icon: 'close-circle-outline', color: Colors.red900};
+    default:
+      return {icon: 'help-circle-outline', color: theme.colors.onSurface};
+  }
+}
+
 export function transformTaskState(taskState: TaskState): string {
   switch (taskState) {
     case TaskState.ToDo:

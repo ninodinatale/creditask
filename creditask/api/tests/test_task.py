@@ -15,8 +15,8 @@ class ResolveTaskTest(CreditaskTestBase):
     def setUp(self):
         self.query_under_test = \
             '''
-            query task($taskGroupId: ID!) {
-                task(taskGroupId: $taskGroupId) {
+            query task($id: ID!) {
+                task(id: $id) {
                     id
                     name
                 }
@@ -37,25 +37,24 @@ class ResolveTaskTest(CreditaskTestBase):
 
     def test_should_require_login(self):
         self.should_require_login(self.query_under_test, op_name=self.op_name,
-                                  variables={'taskGroupId': '1'})
+                                  variables={'id': '1'})
 
     def test_should_require_task_id(self):
         response = self.gql(self.query_under_test,
                             op_name=self.op_name,
-                            variables={'taskGroupId': None})
+                            variables={'id': None})
 
         self.assertEquals(response.status_code, 400)
 
-    @mock.patch('creditask.api.schema_def.get_task_by_task_group_id')
+    @mock.patch('creditask.api.schema_def.get_task_by_id')
     def test_should_succeed(self, mock_get_task_by_id: MagicMock):
         mock_task = Task(id=random.randint(1, 9999),
-                         task_group_id=random.randint(1, 9999),
                          name='name')
         mock_get_task_by_id.return_value = mock_task
 
         response = self.gql(self.query_under_test,
                             op_name=self.op_name,
-                            variables={'taskGroupId': str(mock_task.id)})
+                            variables={'id': str(mock_task.id)})
 
         self.assertResponseNoErrors(response)
 
@@ -273,7 +272,7 @@ class TaskMutationTests(CreditaskTestBase):
                                                     factor=1),
                                            'updateInput':
                                                dict(name='Task Name',
-                                                    taskGroupId=1234567,
+                                                    id=1234567,
                                                     factor=1)})
 
             response_content: dict = json.loads(response.content)
@@ -492,7 +491,7 @@ class TaskMutationTests(CreditaskTestBase):
         with self.subTest('test_name_should_be_nullable'):
             update_input = dict(
                 factor=1,
-                taskGroupId=random.randint(1, 9999)
+                id=random.randint(1, 9999)
             )
 
             response = self.gql(self.query_under_test,
@@ -505,7 +504,7 @@ class TaskMutationTests(CreditaskTestBase):
             update_input = dict(
                 name='Task Name',
                 factor='abc',
-                taskGroupId=random.randint(1, 9999)
+                id=random.randint(1, 9999)
             )
 
             response = self.gql(self.query_under_test,
@@ -523,7 +522,7 @@ class TaskMutationTests(CreditaskTestBase):
         with self.subTest('test_factor_should_have_min_value_of_0'):
             update_input = dict(name='Task Name',
                                 factor=-1,
-                                taskGroupId=random.randint(1, 9999)
+                                id=random.randint(1, 9999)
                                 )
 
             response = self.gql(self.query_under_test,
@@ -540,7 +539,7 @@ class TaskMutationTests(CreditaskTestBase):
 
         with self.subTest('test_factor_should_be_nullable'):
             update_input = dict(name='Task Name', factor=None,
-                                taskGroupId=random.randint(1, 9999)
+                                id=random.randint(1, 9999)
                                 )
 
             response = self.gql(self.query_under_test,
@@ -551,7 +550,7 @@ class TaskMutationTests(CreditaskTestBase):
 
         with self.subTest('test_user_id_can_be_string'):
             update_input = dict(name='Task Name', factor=1, userId='2',
-                                taskGroupId=random.randint(1, 9999)
+                                id=random.randint(1, 9999)
                                 )
 
             response = self.gql(self.query_under_test,
@@ -596,14 +595,13 @@ class TaskMutationTests(CreditaskTestBase):
         with self.subTest('test_should_succeed'):
             update_input = dict(
                                 name='Task Name',
-                                taskGroupId=1234567.0,
+                                id=1234567.0,
                                 factor=1.0
             )
 
             mock_task = Task(id=random.randint(1, 9999),
                              name=update_input.get('name'),
-                             factor=update_input.get('factor'),
-                             task_group_id=update_input.get('taskGroupId'))
+                             factor=update_input.get('factor'))
 
             mock_fn.call_count = 0
             mock_fn.return_value = mock_task
@@ -624,8 +622,8 @@ class TaskMutationTests(CreditaskTestBase):
             self.assertEqual(len(update_input), len(first_call_args))
 
             expected_call_args = dict(
+                id=str(update_input.get('id')),
                 name=update_input.get('name'),
-                task_group_id=str(update_input.get('taskGroupId')),
                 factor=update_input.get('factor')
             )
             self.assertEqual(expected_call_args, first_call_args)
