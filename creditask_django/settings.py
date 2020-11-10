@@ -122,7 +122,8 @@ WSGI_APPLICATION = 'creditask_django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# only for local development, this will be overwritten by heroku
+# only for local development and github actions, this will be overwritten by
+# heroku on deployment
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
