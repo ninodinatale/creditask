@@ -15,24 +15,18 @@ enum ApprovalState {
 }
 
 type ApprovalType {
-  id: ID!
   createdAt: DateTime!
   createdBy: UserType!
   isDeleted: Boolean!
+  id: ID!
   state: ApprovalState!
   task: TaskType!
   user: UserType!
 }
 
-enum ChangeableTaskProperty {
-  Name
-  NeededTimeSeconds
-  State
-  Factor
-  UserId
-  PeriodStart
-  PeriodEnd
-  Approval
+enum CreditsCalc {
+  BY_FACTOR
+  FIXED
 }
 
 type CurrentUserType {
@@ -41,7 +35,9 @@ type CurrentUserType {
   publicName: String!
 }
 
-scalar CustomFloat
+scalar CustomFloatFactor
+
+scalar CustomFloatFixedCredits
 
 scalar CustomString
 
@@ -52,7 +48,7 @@ scalar DateTime
 scalar GenericScalar
 
 type Mutation {
-  saveApproval(input: ApprovalInput!): SaveApproval
+  saveApproval(approvalInput: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
   verifyToken(token: String!): Verify
@@ -61,13 +57,15 @@ type Mutation {
 
 type ObtainJSONWebToken {
   token: String
-  user: UserType
+  user: CurrentUserType
 }
 
 type Query {
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
+  doneTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
+  unassignedTasks: [TaskType!]!
   user(id: Int!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
@@ -86,17 +84,37 @@ type SaveTask {
   task: TaskType!
 }
 
+enum TaskChangeChangedProperty {
+  NAME
+  NEEDED_TIME_SECONDS
+  STATE
+  CREDITS_CALC
+  FIXED_CREDITS
+  FACTOR
+  USER_ID
+  PERIOD_START
+  PERIOD_END
+  APPROVAL
+}
+
 type TaskChangeType {
+  id: ID!
+  createdAt: DateTime!
+  createdBy: UserType!
+  isDeleted: Boolean!
   currentValue: String
   previousValue: String
   user: UserType!
+  task: TaskType!
   timestamp: DateTime!
-  changedProperty: ChangeableTaskProperty
+  changedProperty: TaskChangeChangedProperty
 }
 
 input TaskInputCreate {
   name: CustomString!
-  factor: CustomFloat!
+  creditsCalc: CreditsCalc!
+  fixedCredits: CustomFloatFixedCredits
+  factor: CustomFloatFactor
   userId: ID
   periodStart: Date
   periodEnd: Date
@@ -106,7 +124,9 @@ input TaskInputUpdate {
   id: ID!
   state: TaskState
   name: CustomString
-  factor: CustomFloat
+  creditsCalc: CreditsCalc
+  fixedCredits: CustomFloatFixedCredits
+  factor: CustomFloatFactor
   userId: ID
   neededTimeSeconds: Int
   periodStart: Date
@@ -118,6 +138,7 @@ enum TaskState {
   TO_APPROVE
   DECLINED
   APPROVED
+  DONE
 }
 
 type TaskType {
@@ -128,11 +149,14 @@ type TaskType {
   name: String!
   neededTimeSeconds: Int!
   state: TaskState!
+  creditsCalc: CreditsCalc!
   factor: Float!
+  fixedCredits: Int!
   user: UserType
   periodStart: Date!
   periodEnd: Date!
   approvals: [ApprovalType!]!
+  taskChanges: [TaskChangeType!]!
   changes: [TaskChangeType!]!
 }
 
@@ -148,6 +172,7 @@ type UserType {
   isActive: Boolean!
   taskSet: [TaskType!]!
   approvalSet: [ApprovalType!]!
+  taskchangeSet: [TaskChangeType!]!
 }
 
 type Verify {

@@ -1,5 +1,0 @@
-query todoTasksOfUser($email: String!) {
-    todoTasksOfUser(userEmail: $email) {
-        ...unapprovedTasksOfUser
-    }
-}

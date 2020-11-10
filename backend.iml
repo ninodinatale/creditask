@@ -16,10 +16,10 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/creditask" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/creditask_django" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/creditask_django" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
-      <excludeFolder url="file://$MODULE_DIR$/env" />
       <excludeFolder url="file://$MODULE_DIR$/_frontend_old" />
+      <excludeFolder url="file://$MODULE_DIR$/env" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (creditask_django)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

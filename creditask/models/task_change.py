@@ -1,13 +1,32 @@
 from datetime import datetime
-from typing import TypedDict, Optional
 
-from . import User
-from .enums.changeable_task_property import ChangeableTaskProperty
+from django.db import models
+
+from . import User, BaseModel, Task
 
 
-class TaskChange(TypedDict):
-    current_value: Optional[str]
-    previous_value: Optional[str]
-    user: User
-    timestamp: datetime
-    changed_property: Optional[ChangeableTaskProperty]
+class ChangeableTaskProperty(models.TextChoices):
+    Name = 'NAME'
+    NeededTimeSeconds = 'NEEDED_TIME_SECONDS'
+    State = 'STATE'
+    CreditsCalc = 'CREDITS_CALC'
+    FixedCredits = 'FIXED_CREDITS'
+    Factor = 'FACTOR'
+    UserId = 'USER_ID'
+    PeriodStart = 'PERIOD_START'
+    PeriodEnd = 'PERIOD_END'
+    Approval = 'APPROVAL'
+
+
+class TaskChange(BaseModel):
+    current_value: str = models.CharField(max_length=120, null=True)
+    previous_value: str = models.CharField(max_length=120, null=True)
+    user: User = models.ForeignKey(User, on_delete=models.CASCADE)
+    task: Task = models.ForeignKey(Task, on_delete=models.CASCADE,
+                                   related_name='task_changes')
+    timestamp: datetime.timestamp = models.DateTimeField()
+    changed_property = models.CharField(choices=ChangeableTaskProperty.choices,
+                                        null=True, max_length=30)
+
+    class Meta:
+        db_table = 'task_changes'

@@ -10,7 +10,7 @@ from creditask.api.scalars import custom_float
 class TestFloat(TestCase):
 
     def test_custom_float_min_value(self):
-        scalar = custom_float(min_value=10)
+        scalar = custom_float('for_test', min_value=10)
 
         with self.assertRaises(ValidationError):
             scalar.parse_value(-1)
@@ -30,7 +30,7 @@ class TestFloat(TestCase):
                       "unexpectedly")
 
     def test_custom_float_max_value(self):
-        scalar = custom_float(max_value=20)
+        scalar = custom_float('for_test', max_value=20)
 
         with self.assertRaises(ValidationError):
             scalar.parse_value(20.0001)
@@ -46,7 +46,7 @@ class TestFloat(TestCase):
             self.fail("custom_float scalar raised ValidationError unexpectedly")
 
     def test_custom_float_max_value_and_min_value(self):
-        scalar = custom_float(min_value=10, max_value=20)
+        scalar = custom_float('for_test', min_value=10, max_value=20)
 
         with self.assertRaises(ValidationError):
             scalar.parse_value(-1)
