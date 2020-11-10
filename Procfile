@@ -1,1 +1,1 @@
-web: gunicorn creditask.wsgipip install gunicorn
+web: gunicorn creditask.wsgi
