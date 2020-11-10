@@ -1,1 +1,1 @@
-web: gunicorn myproject.wsgipip install gunicorn
+web: gunicorn creditask.wsgipip install gunicorn
