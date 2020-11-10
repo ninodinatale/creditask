@@ -1,1 +1,1 @@
-web: gunicorn creditask.wsgi
+web: gunicorn creditask_django.wsgi
