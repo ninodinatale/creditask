@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from calendar import timegm
@@ -21,11 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# TODO SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '@eqg_!)c!**p#&e&g(j7*o#51_1#wrg2nym%xy18f0s(f=%r8r'
+SECRET_KEY = os.environ['SECRET_KEY']
 
-# TODO SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['DEBUG']
 
 ALLOWED_HOSTS = ['*']
 
@@ -171,3 +170,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# activate Django-Heroku
+django_heroku.settings(locals())
