@@ -21,19 +21,19 @@ class Command(BaseCommand):
         all_user: List[User] = [
             User.objects.create(group=group_1, email='nino@mail.com',
                                 public_name='Nino',
-                                password='pbkdf2_sha256$180000$90119QHZv'
-                                         'rGj$JOnEzcVSYNLjlcSALoDdl2+oUm'
-                                         '3NrYBrnmEkMjT3ecs='),
+                                password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+                                         'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+                                         'O10='),
             User.objects.create(group=group_1, email='moro@mail.com',
                                 public_name='Moro',
-                                password='pbkdf2_sha256$180000$90119QHZv'
-                                         'rGj$JOnEzcVSYNLjlcSALoDdl2+oUm'
-                                         '3NrYBrnmEkMjT3ecs='),
+                                password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+                                         'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+                                         'O10='),
             User.objects.create(group=group_1, email='anna@mail.com',
                                 public_name='Anna',
-                                password='pbkdf2_sha256$180000$90119QHZv'
-                                         'rGj$JOnEzcVSYNLjlcSALoDdl2+oUm'
-                                         '3NrYBrnmEkMjT3ecs=')
+                                password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+                                         'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+                                         'O10=')
         ]
 
         rounded_now = datetime.datetime(
