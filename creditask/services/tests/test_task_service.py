@@ -12,7 +12,7 @@ from creditask.services.task_service import get_task_by_id, \
     get_to_approve_tasks_of_user, get_done_tasks_to_approve_by_user_email, \
     get_unassigned_tasks, validate_new_properties_based_on_task_state, \
     get_task_changes_by_task_id, get_task_changes_by_task, \
-    get_task_approvals_by_task
+    get_task_approvals_by_task, get_all_todo_tasks
 from creditask.tests.test_utils import create_user, create_task, create_group, \
     create_approval
 
@@ -207,6 +207,25 @@ class TestTaskService(TestCase):
         self.assertEquals(expected_call_count,
                           mock_task.objects.filter.call_count)
         self.assertEquals(dict(group_id=group_id, user=None),
+                          mock_task.objects.filter.call_args.kwargs)
+        self.assertEquals(1,
+                          mock_task.objects.filter.return_value.order_by.call_count)
+        self.assertEquals(('period_end',),
+                          mock_task.objects.filter.return_value.order_by.call_args.args)
+        self.assertEquals(mock_return_value, return_value)
+
+    @mock.patch('creditask.services.task_service.Task')
+    def test_get_all_todo_tasks(self, mock_task):
+        group_id = 123456789
+        mock_return_value = ['some', 'return', 'value']
+        mock_task.objects.filter().order_by.return_value = mock_return_value
+
+        expected_call_count = mock_task.objects.filter.call_count + 1
+        return_value = get_all_todo_tasks(group_id)
+
+        self.assertEquals(expected_call_count,
+                          mock_task.objects.filter.call_count)
+        self.assertEquals(dict(group_id=group_id, state=TaskState.TO_DO),
                           mock_task.objects.filter.call_args.kwargs)
         self.assertEquals(1,
                           mock_task.objects.filter.return_value.order_by.call_count)

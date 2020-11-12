@@ -11,7 +11,7 @@ from creditask.services import get_task_changes_by_task, save_approval, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, \
     get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
-    get_unassigned_tasks
+    get_unassigned_tasks, get_all_todo_tasks
 
 
 class UserType(graphene_django.DjangoObjectType):
@@ -111,6 +111,8 @@ class TaskQuery:
         user_email=graphene.NonNull(graphene.String))
     unassigned_tasks = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)))
+    all_todo_tasks = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskType)))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -136,6 +138,11 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_unassigned_tasks(self, info, **kwargs):
         return get_unassigned_tasks(info.context.user.group_id)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_all_todo_tasks(self, info, **kwargs):
+        return get_all_todo_tasks(info.context.user.group_id)
 
 
 class TaskInputCreate(graphene.InputObjectType):
