@@ -16,6 +16,7 @@ class ChangeableTaskProperty(models.TextChoices):
     PeriodStart = 'PERIOD_START'
     PeriodEnd = 'PERIOD_END'
     Approval = 'APPROVAL'
+    CreatedById = 'CREATED_BY_ID'
 
 
 class TaskChange(BaseModel):

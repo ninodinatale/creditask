@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from creditask.models import Task, ApprovalState, User, TaskState, \
+from creditask.models import ApprovalState, User, TaskState, \
     ChangeableTaskProperty
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, \
@@ -222,7 +222,9 @@ class TestTaskService(TestCase):
     @mock.patch('creditask.services.task_service.Approval')
     @mock.patch('creditask.services.task_service.User')
     @mock.patch('creditask.services.task_service.Task')
-    def test_save_task(self, mock_task_model, mock_user_model,
+    @mock.patch('creditask.services.task_service.TaskChange')
+    def test_save_task(self, mock_task_change_model, mock_task_model,
+                       mock_user_model,
                        mock_approval_model,
                        mock_validate_task_properties,
                        mock_validate_state_change,
@@ -350,6 +352,26 @@ class TestTaskService(TestCase):
                 save_task(mock_current_user)
                 self.assertEquals(expected_call_count,
                                   mock_task_model.return_value.save.call_count)
+
+            with self.subTest('Should create task change entry for type '
+                              '"created"'):
+                expected_call_count = mock_task_change_model.objects.create.call_count + 1
+                with mock.patch(
+                        'creditask.services.task_service.datetime') as  datetime_mock:
+                    datetime_mock.utcnow.return_value = 'some timestamp'
+                    save_task(mock_current_user)
+                    self.assertEquals(expected_call_count,
+                                      mock_task_change_model.objects.create.call_count)
+                    self.assertDictEqual(dict(
+                        task_id=mock_task_model.return_value.id,
+                        user=mock_current_user,
+                        created_by=mock_current_user,
+                        previous_value=None,
+                        current_value=mock_current_user.id,
+                        changed_property=ChangeableTaskProperty.CreatedById,
+                        timestamp=datetime_mock.utcnow.return_value
+                    ),
+                        mock_task_change_model.objects.create.call_args.kwargs)
 
             with self.subTest('should create approvals for users in group'):
                 mock_users = [Mock(), Mock(), Mock()]

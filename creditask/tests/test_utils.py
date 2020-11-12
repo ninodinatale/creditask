@@ -1,10 +1,7 @@
 import inspect
+import uuid
 
 from creditask.models import User, Task, Group, Approval
-
-user_count = 0
-task_count = 0
-dummy_created_by_user = None
 
 
 def create_user(**kwargs):
@@ -21,32 +18,29 @@ def create_user(**kwargs):
     assert not ('group' in kwargs and 'group_id' in kwargs)
     assert 'group' in kwargs or 'group_id' in kwargs
 
-    global user_count
-    user_count += 1
-
     if 'email' not in kwargs:
-        caller_fn_name = inspect.stack()[1].function
-        short_caller_fn_name = (caller_fn_name[:15]) if len(
-            caller_fn_name) > 15 else caller_fn_name
-        email = f'{short_caller_fn_name}_{user_count}@user.com'
+        unique_id = str(uuid.uuid1())
+        unique_id = (unique_id[:15]) if len(
+            unique_id) > 15 else unique_id
+        email = f'{unique_id}@user.com'
     else:
         email = kwargs.get('email')
     if 'public_name' not in kwargs:
-        caller_fn_name = inspect.stack()[1].function
-        short_caller_fn_name = (caller_fn_name[:15]) if len(
-            caller_fn_name) > 15 else caller_fn_name
-        public_name = f'user_{short_caller_fn_name}_{user_count}'
-    else:
-        public_name = kwargs.get('public_name')
+        unique_id = inspect.stack()[1].function
+        unique_id = (unique_id[:15]) if len(
+            unique_id) > 15 else unique_id
+        kwargs.update(public_name=f'user_{unique_id}')
     if 'password' not in kwargs:
         password = ''
     else:
         password = kwargs.get('password')
 
-    return User.objects.create(
-        email=email,
-        public_name=public_name,
-        password=password,
+    kwargs.pop('email', None)
+    kwargs.pop('password', None)
+
+    return User.objects.create_user(
+        email,
+        password,
         **kwargs
     )
 
@@ -56,14 +50,11 @@ def create_task(**kwargs):
     assert not ('group' in kwargs and 'group_id' in kwargs)
     assert ('group' in kwargs) or ('group_id' in kwargs)
 
-    global task_count
-    task_count += 1
-
     if 'name' not in kwargs:
-        caller_fn_name = inspect.stack()[1].function
-        short_caller_fn_name = (caller_fn_name[:15]) if len(
-            caller_fn_name) > 15 else caller_fn_name
-        kwargs['name'] = f'task_{short_caller_fn_name}_{task_count}'
+        unique_id = str(uuid.uuid1())
+        unique_id = (unique_id[:15]) if len(
+            unique_id) > 15 else unique_id
+        kwargs['name'] = f'task_{unique_id}'
 
     return Task.objects.create(
         created_by_id=get_created_by_id(**kwargs),
@@ -89,15 +80,10 @@ def get_created_by_id(**kwargs):
         else:
             return kwargs.get('created_by_id')
     else:
-        return get_dummy_user().id
+        return User.objects.first().id
 
 
 def create_group(**kwargs) -> Group:
     return Group.objects.create(**kwargs)
 
 
-def get_dummy_user() -> User:
-    global dummy_created_by_user
-    if dummy_created_by_user is None:
-        dummy_created_by_user = create_user(group=create_group())
-    return dummy_created_by_user

@@ -1,3 +1,5 @@
+from math import ceil
+
 from django.core.exceptions import ValidationError
 
 from creditask.models import Approval, ApprovalState, User, TaskState, \
@@ -44,12 +46,12 @@ def save_approval(current_user: User, approval_id: int,
         if all(a.state == ApprovalState.APPROVED for a in approvals):
             approval.task.state = TaskState.APPROVED
             if approval.task.credits_calc == CreditsCalc.FIXED:
-                new_credits = (approval.task.user.credits +
-                               approval.task.fixed_credits)
+                new_credits = ceil((approval.task.user.credits +
+                               approval.task.fixed_credits))
             elif approval.task.credits_calc == CreditsCalc.BY_FACTOR:
-                new_credits = approval.task.user.credits + (
+                new_credits = ceil(approval.task.user.credits + (
                         approval.task.factor * (
-                        approval.task.needed_time_seconds * 60))
+                        approval.task.needed_time_seconds / 60)))
             else:
                 raise ValidationError(
                     'credits_calc of task has unknown value: cannot calculate '

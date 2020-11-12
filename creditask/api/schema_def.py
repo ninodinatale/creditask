@@ -33,7 +33,6 @@ class TaskChangeType(graphene_django.DjangoObjectType):
 class ApprovalScalars:
     state = graphene.Enum.from_enum(ApprovalState)
     task_id = graphene.ID
-    user_id = graphene.ID
 
 
 class ApprovalType(graphene_django.DjangoObjectType):
@@ -63,7 +62,7 @@ class TaskScalars:
 
 
 class TaskType(graphene_django.DjangoObjectType):
-    changes = graphene.NonNull(graphene.List(graphene.NonNull(TaskChangeType)))
+    task_changes = graphene.NonNull(graphene.List(graphene.NonNull(TaskChangeType)))
     approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
 
     # implicitly declaring state here instead of inheriting from model Task
@@ -76,7 +75,7 @@ class TaskType(graphene_django.DjangoObjectType):
 
     @staticmethod
     @graphql_jwt.decorators.login_required
-    def resolve_changes(parent: Task, info: graphql.ResolveInfo):
+    def resolve_task_changes(parent: Task, info: graphql.ResolveInfo):
         return get_task_changes_by_task(parent)
 
     @staticmethod
@@ -89,7 +88,6 @@ class TaskType(graphene_django.DjangoObjectType):
         model = Task
 
 
-# TODO test
 class TaskChangeQuery:
     task_changes = graphene.NonNull(TaskChangeType,
                                     task_id=graphene.NonNull(graphene.ID))
@@ -198,7 +196,6 @@ class SaveTask(graphene.Mutation):
 
         new_task_props: dict = create_input or update_input or dict()
 
-        # TODO this line not tested: removing entries where value is null
         new_task_props = {key: value for key, value in new_task_props.items() if
                           value is not None}
 
@@ -218,7 +215,6 @@ class ApprovalInput(graphene.InputObjectType):
     state = graphene.NonNull(ApprovalScalars.state)
 
 
-# TODO TEST
 class SaveApproval(graphene.Mutation):
     class Arguments:
         approval_input = graphene.NonNull(ApprovalInput)
@@ -230,8 +226,8 @@ class SaveApproval(graphene.Mutation):
     def mutate(root, info, approval_input: ApprovalInput()):
         approval = save_approval(
             info.context.user,
-            Approval(id=approval_input.id, state=approval_input.state,
-                     created_by=info.context.user))
+            approval_input.id,
+            approval_input.state)
         return SaveApproval(approval=approval)
 
 
@@ -240,10 +236,15 @@ class ApprovalMutation:
 
 
 class UserQuery:
-    user = graphene.Field(UserType, id=graphene.NonNull(graphene.Int))
+    user = graphene.Field(UserType, id=graphene.NonNull(graphene.ID))
     users = graphene.List(graphene.NonNull(UserType))
     other_users = graphene.List(graphene.NonNull(UserType),
                                 user_email=graphene.NonNull(graphene.String))
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_user(self, info, **kwargs):
+        return User.objects.get(id=kwargs.get('id'))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -271,11 +272,6 @@ class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
 class VerifyJSONWebToken(graphql_jwt.Verify):
     user = graphene.Field(UserType)
 
-    # @classmethod
-    # def mutate(cls, root, info, token, **kwargs):
-    #     value = super().mutate(root, info, token, **kwargs)
-    #     return cls(user=value.payload)
-    #
     @staticmethod
     def resolve_user(parent, info: graphql.ResolveInfo):
         return parent.user

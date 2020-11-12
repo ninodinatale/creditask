@@ -95,6 +95,15 @@ def save_task(current_user: User, **kwargs) -> Task:
         else:
             task_to_save.group = current_user.group
         task_to_save.save()
+        TaskChange.objects.create(
+            task_id=task_to_save.id,
+            user=current_user,
+            created_by=current_user,
+            previous_value=None,
+            current_value=current_user.id,
+            changed_property=ChangeableTaskProperty.CreatedById,
+            timestamp=datetime.utcnow()
+        )
 
         # creating approvals for new task
         users = User.objects.filter(group_id=task_to_save.group_id)
