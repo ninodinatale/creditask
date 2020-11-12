@@ -52,12 +52,14 @@ type Mutation {
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
   verifyToken(token: String!): Verify
-  refreshToken(token: String!): Refresh
+  refreshToken(token: String): Refresh
 }
 
 type ObtainJSONWebToken {
-  token: String
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
   user: CurrentUserType
+  token: String!
 }
 
 type Query {
@@ -66,14 +68,15 @@ type Query {
   doneTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
   unassignedTasks: [TaskType!]!
-  user(id: Int!): UserType
+  user(id: ID!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
 }
 
 type Refresh {
-  token: String
-  payload: GenericScalar
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
 }
 
 type SaveApproval {
@@ -95,6 +98,7 @@ enum TaskChangeChangedProperty {
   PERIOD_START
   PERIOD_END
   APPROVAL
+  CREATED_BY_ID
 }
 
 type TaskChangeType {
@@ -157,7 +161,6 @@ type TaskType {
   periodEnd: Date!
   approvals: [ApprovalType!]!
   taskChanges: [TaskChangeType!]!
-  changes: [TaskChangeType!]!
 }
 
 type UserType {
