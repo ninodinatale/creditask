@@ -180,6 +180,7 @@ class ResolveOtherUsersTest(CreditaskTestBase):
 
         self.assertIsNotNone(users)
         self.assertEquals(3, len(users))
-        self.assertEquals(int(users[0].get('id')), correct_user_1.id)
-        self.assertEquals(int(users[1].get('id')), correct_user_2.id)
-        self.assertEquals(int(users[2].get('id')), correct_user_3.id)
+
+        self.assertCountEqual(
+            [correct_user_1.id, correct_user_2.id, correct_user_3.id],
+            list(map(lambda u: int(u.get('id')), users)))

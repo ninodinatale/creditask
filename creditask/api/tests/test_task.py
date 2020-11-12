@@ -1102,7 +1102,7 @@ class SaveTaskTest(CreditaskTestBase):
             self.assertEqual(task.get('name'), create_input.get('name'))
             self.assertEqual(task.get('state'), TaskState.TO_DO)
             self.assertEqual(task.get('user'), None)
-            self.assertListEqual(task.get('approvals'), [
+            self.assertCountEqual(task.get('approvals'), [
                 dict(user=dict(id=str(self.current_user.id),
                                publicName=self.current_user.public_name),
                      state=ApprovalState.NONE),
@@ -1122,7 +1122,7 @@ class SaveTaskTest(CreditaskTestBase):
             self.assertEqual(task.get('factor'), 1)
             self.assertEqual(task.get('fixedCredits'),
                              create_input.get('fixedCredits'))
-            self.assertListEqual(task.get('taskChanges'), [
+            self.assertCountEqual(task.get('taskChanges'), [
                 dict(changedProperty=ChangeableTaskProperty.CreatedById,
                      previousValue=None,
                      currentValue=str(self.current_user.id)),
@@ -1343,7 +1343,7 @@ class SaveTaskTest(CreditaskTestBase):
             self.assertEqual(task.get('name'), new_name)
             self.assertEqual(task.get('state'), TaskState.TO_DO)
             self.assertEqual(task.get('user'), None)
-            self.assertListEqual(list(map(
+            self.assertCountEqual(list(map(
                 lambda a: dict(state=a.get('state'),
                                user_id=a.get('user').get('id'),
                                public_name=a.get('user').get('publicName')),
@@ -1365,7 +1365,7 @@ class SaveTaskTest(CreditaskTestBase):
                              str(CreditsCalc.BY_FACTOR))
             self.assertEqual(task.get('factor'), 1)
             self.assertEqual(task.get('fixedCredits'), 0)
-            self.assertListEqual(task.get('taskChanges'), [
+            self.assertCountEqual(task.get('taskChanges'), [
                 dict(changedProperty=str(ChangeableTaskProperty.Name),
                      previousValue='this name should be updated',
                      currentValue=new_name),
@@ -1406,7 +1406,7 @@ class SaveTaskTest(CreditaskTestBase):
             self.assertEqual(task.get('state'), new_state)
             self.assertEqual(task.get('user').get('id'), new_user_id)
             self.assertEqual(task.get('factor'), new_factor)
-            self.assertListEqual(list(map(
+            self.assertCountEqual(list(map(
                 lambda a: dict(state=a.get('state'),
                                user_id=a.get('user').get('id'),
                                public_name=a.get('user').get('publicName')),
