@@ -1,12 +1,10 @@
 import json
-import sys
 from typing import List
-from unittest.mock import Mock
 
 from django.test import tag
 from graphene_django.utils import GraphQLTestCase
 
-from tests import PreventStdErr
+from creditask.tests import PreventStdErr
 
 
 @tag('integration')
