@@ -1,0 +1,8 @@
+mutation updateDetailTask($createInput: TaskInputCreate, $updateInput: TaskInputUpdate) {
+    saveTask(createInput: $createInput, updateInput: $updateInput) {
+        task {
+            ...detailTask
+        }
+    }
+}
+

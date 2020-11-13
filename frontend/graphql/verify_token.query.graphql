@@ -1,0 +1,7 @@
+mutation verifyToken($token: String!) {
+    verifyToken(token: $token) {
+        user {
+            ...currentUser
+        }
+    }
+}

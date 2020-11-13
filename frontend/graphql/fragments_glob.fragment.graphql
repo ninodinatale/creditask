@@ -1,0 +1,78 @@
+fragment currentUser on CurrentUserType {
+    id
+    publicName
+    email
+}
+
+fragment simpleUser on UserType {
+    id
+    publicName
+}
+
+fragment creditsUser on UserType {
+    ...simpleUser
+    credits
+}
+
+fragment simpleApproval on ApprovalType {
+    id
+    user {
+        ...simpleUser
+    }
+    state
+}
+
+fragment usersDoneToApproveTask on TaskType {
+    ...taskWithApprovals
+}
+
+fragment detailTask on TaskType {
+    __typename
+    id
+    creditsCalc
+    fixedCredits
+    factor
+    name
+    neededTimeSeconds
+    periodStart
+    periodEnd
+    state
+    user {
+        ...simpleUser
+    }
+    approvals {
+        ...simpleApproval
+    }
+}
+
+fragment taskChanges on TaskChangeType {
+    changedProperty
+    currentValue
+    previousValue
+    timestamp
+    user {
+        ...simpleUser
+    }
+}
+
+fragment simpleTask on TaskType {
+    id
+    name
+    periodEnd
+    state
+    user {
+        publicName
+    }
+}
+
+fragment toApproveTasksOfUser on TaskType {
+    ...taskWithApprovals
+}
+
+fragment taskWithApprovals on TaskType {
+    __typename
+    ...simpleTask
+    approvals {
+        ...simpleApproval
+    }
+}

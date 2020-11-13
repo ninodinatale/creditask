@@ -1,0 +1,8 @@
+mutation updateApproval($approval: ApprovalInput!) {
+    saveApproval(approvalInput: $approval) {
+        approval {
+            id
+            state
+        }
+    }
+}

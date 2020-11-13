@@ -1,0 +1,27 @@
+targets:
+  $default:
+    sources:
+      - lib/**
+      - graphql/**
+      - schema.graphql
+    builders:
+      artemis:
+        options:
+          fragments_glob: graphql/**.fragment.graphql
+          schema_mapping:
+            - schema: schema.graphql
+              queries_glob: graphql/**.query.graphql
+              mutations_glob: graphql/**.mutation.graphql
+              output: lib/graphql/api.dart
+              naming_scheme: pathedWithFields
+          scalar_mapping:
+            - graphql_type: DateTime
+              dart_type: String
+            - graphql_type: Date
+              dart_type: String
+            - graphql_type: CustomString
+              dart_type: String
+            - graphql_type: CustomFloatFactor
+              dart_type: double
+            - graphql_type: CustomFloatFixedCredits
+              dart_type: double

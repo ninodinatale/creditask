@@ -1,0 +1,5 @@
+query usersDoneToApproveTasks($email: String!) {
+    doneTasksOfUser(userEmail: $email) {
+        ...usersDoneToApproveTask
+    }
+}

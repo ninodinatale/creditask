@@ -1,0 +1,5 @@
+query allTodoTasks {
+    allTodoTasks {
+        ...simpleTask
+    }
+}

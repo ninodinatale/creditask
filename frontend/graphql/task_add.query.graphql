@@ -1,0 +1,8 @@
+mutation saveTask($createInput: TaskInputCreate, $updateInput: TaskInputUpdate) {
+    saveTask(createInput: $createInput, updateInput: $updateInput) {
+        task {
+            ...simpleTask
+        }
+    }
+}
+
