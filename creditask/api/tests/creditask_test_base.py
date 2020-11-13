@@ -1,8 +1,12 @@
 import json
+import sys
 from typing import List
+from unittest.mock import Mock
 
 from django.test import tag
 from graphene_django.utils import GraphQLTestCase
+
+from tests import PreventStdErr
 
 
 @tag('integration')
@@ -93,7 +97,8 @@ class CreditaskTestBase(GraphQLTestCase):
         """
         self.logout()
 
-        response = self.gql(query, op_name=op_name, variables=variables)
+        with PreventStdErr():
+            response = self.gql(query, op_name=op_name, variables=variables)
 
         response_content: dict = json.loads(response.content)
         errors: List = response_content.get('errors')

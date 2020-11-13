@@ -17,6 +17,8 @@ import django_heroku
 from calendar import timegm
 from datetime import datetime
 
+from django.utils.timezone import utc
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -85,7 +87,7 @@ def jwt_payload_handler(user, context=None):
         user.USERNAME_FIELD: username,
         'publicName': user.public_name,
         'groupId': group_id,
-        'origIat': timegm(datetime.utcnow().utctimetuple())
+        'origIat': timegm(datetime.utcnow().replace(tzinfo=utc).utctimetuple())
     }
 
     return payload

@@ -377,7 +377,7 @@ class TestTaskService(TestCase):
                 expected_call_count = mock_task_change_model.objects.create.call_count + 1
                 with mock.patch(
                         'creditask.services.task_service.datetime') as  datetime_mock:
-                    datetime_mock.utcnow.return_value = 'some timestamp'
+                    datetime_mock.utcnow().replace.return_value = 'some timestamp'
                     save_task(mock_current_user)
                     self.assertEquals(expected_call_count,
                                       mock_task_change_model.objects.create.call_count)
@@ -388,7 +388,7 @@ class TestTaskService(TestCase):
                         previous_value=None,
                         current_value=mock_current_user.id,
                         changed_property=ChangeableTaskProperty.CreatedById,
-                        timestamp=datetime_mock.utcnow.return_value
+                        timestamp=datetime_mock.utcnow.return_value.replace.return_value
                     ),
                         mock_task_change_model.objects.create.call_args.kwargs)
 
@@ -527,7 +527,7 @@ class TestTaskService(TestCase):
             current_user_mock = Mock()
             user_1_mock = Mock(id=123456789)
             user_2_mock = Mock()
-            datetime_mock.utcnow.return_value = 'some timestamp'
+            datetime_mock.utcnow().replace.return_value = 'some timestamp'
             values_to_merge = dict(needed_time_seconds=2,
                                    state=TaskState.TO_APPROVE,
                                    id=200000,
@@ -550,7 +550,7 @@ class TestTaskService(TestCase):
                          'needed_time_seconds'),
                      current_value=values_to_merge.get('needed_time_seconds'),
                      changed_property=ChangeableTaskProperty.NeededTimeSeconds,
-                     timestamp=datetime_mock.utcnow.return_value),
+                     timestamp=datetime_mock.utcnow.return_value.replace.return_value),
                 task_change_model_mock.objects.create.call_args_list[0].kwargs)
             self.assertDictEqual(
                 dict(task_id=task_to_merge_into_mock.id,
@@ -559,7 +559,7 @@ class TestTaskService(TestCase):
                      previous_value=changing_attributes.get('state'),
                      current_value=values_to_merge.get('state'),
                      changed_property=ChangeableTaskProperty.State,
-                     timestamp=datetime_mock.utcnow.return_value),
+                     timestamp=datetime_mock.utcnow.return_value.replace.return_value),
                 task_change_model_mock.objects.create.call_args_list[1].kwargs)
             self.assertDictEqual(
                 dict(task_id=task_to_merge_into_mock.id,
@@ -568,7 +568,7 @@ class TestTaskService(TestCase):
                      previous_value=None,
                      current_value=values_to_merge.get('user').id,
                      changed_property=ChangeableTaskProperty.UserId,
-                     timestamp=datetime_mock.utcnow.return_value),
+                     timestamp=datetime_mock.utcnow.return_value.replace.return_value),
                 task_change_model_mock.objects.create.call_args_list[2].kwargs)
 
     def test_validate_state_change(self):

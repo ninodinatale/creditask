@@ -114,10 +114,17 @@ class ResolveUsersTest(CreditaskTestBase):
 
         self.assertIsNotNone(users)
         self.assertEquals(4, len(users))
-        self.assertEquals(int(users[0].get('id')), self.current_user.id)
-        self.assertEquals(int(users[1].get('id')), correct_user_1.id)
-        self.assertEquals(int(users[2].get('id')), correct_user_2.id)
-        self.assertEquals(int(users[3].get('id')), correct_user_3.id)
+        self.assertCountEqual([
+            int(users[0].get('id')),
+            int(users[1].get('id')),
+            int(users[2].get('id')),
+            int(users[3].get('id')),
+        ], [
+            self.current_user.id,
+            correct_user_1.id,
+            correct_user_2.id,
+            correct_user_3.id,
+        ])
 
 
 @tag('integration')

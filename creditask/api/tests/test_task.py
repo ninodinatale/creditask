@@ -4,13 +4,14 @@ import random
 from typing import List
 
 from django.test import tag
+from django.utils.timezone import utc
 
 from creditask.api import schema
 from creditask.api.tests.creditask_test_base import CreditaskTestBase
 from creditask.models import TaskState, ApprovalState, CreditsCalc, \
     ChangeableTaskProperty
 from creditask.tests import create_user, create_group, create_task, \
-    create_approval
+    create_approval, PreventStdErr
 
 
 @tag('integration')
@@ -117,7 +118,7 @@ class ResolveTodoTasksOfUserTest(CreditaskTestBase):
         user_1 = create_user(group=group)
         user_2 = create_user(group=group)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().replace(tzinfo=utc).replace(tzinfo=utc)
 
         # all good
         task_1 = create_task(
@@ -465,7 +466,7 @@ class ResolveDoneTasksOfUserTest(CreditaskTestBase):
         user_1 = create_user(group=group)
         user_2 = create_user(group=group)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
         # all good
         task_1 = create_task(
@@ -624,7 +625,7 @@ class ResolveUnassignedTest(CreditaskTestBase):
         user_2 = create_user(group=self.current_user.group)
         user_3 = create_user(group=self.current_user.group)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
         # wrong user
         task_1 = create_task(
@@ -744,7 +745,7 @@ class ResolveAllTasksTest(CreditaskTestBase):
         user_2 = create_user(group=self.current_user.group)
         user_3 = create_user(group=self.current_user.group)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
         # ok
         task_1 = create_task(
@@ -924,12 +925,13 @@ class SaveTaskTest(CreditaskTestBase):
               }}
             }}
             '''
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name,
-                                variables=dict(createInput={
-                                    **self.get_valid_create_input()},
-                                    updateInput={
-                                        **self.get_valid_update_input()}))
+            with PreventStdErr():
+                response = self.gql(self.query_under_test,
+                                    op_name=self.op_name,
+                                    variables=dict(createInput={
+                                        **self.get_valid_create_input()},
+                                        updateInput={
+                                            **self.get_valid_update_input()}))
 
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')
@@ -951,8 +953,9 @@ class SaveTaskTest(CreditaskTestBase):
               }}
             }}
             '''
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name, )
+            with PreventStdErr():
+                response = self.gql(self.query_under_test,
+                                    op_name=self.op_name, )
 
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')
@@ -975,13 +978,14 @@ class SaveTaskTest(CreditaskTestBase):
               }}
             }}
             '''
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name,
-                                variables=dict(createInput=dict(
-                                    **self.get_valid_create_input(
-                                        credits_calc=CreditsCalc.FIXED,
-                                        fixed_credits=None),
-                                    factor=1)))
+            with PreventStdErr():
+                response = self.gql(self.query_under_test,
+                                    op_name=self.op_name,
+                                    variables=dict(createInput=dict(
+                                        **self.get_valid_create_input(
+                                            credits_calc=CreditsCalc.FIXED,
+                                            fixed_credits=None),
+                                        factor=1)))
 
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')
@@ -1004,13 +1008,14 @@ class SaveTaskTest(CreditaskTestBase):
               }}
             }}
             '''
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name,
-                                variables={'createInput':
-                                    dict(
-                                        **self.get_valid_create_input(
-                                            credits_calc=CreditsCalc.BY_FACTOR,
-                                            fixed_credits=100))})
+            with PreventStdErr():
+                response = self.gql(self.query_under_test,
+                                    op_name=self.op_name,
+                                    variables={'createInput':
+                                        dict(
+                                            **self.get_valid_create_input(
+                                                credits_calc=CreditsCalc.BY_FACTOR,
+                                                fixed_credits=100))})
 
             response_content: dict = json.loads(response.content)
             errors: List = response_content.get('errors')

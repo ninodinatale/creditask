@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from django.core.exceptions import ValidationError
+from django.utils.timezone import utc
 
 from creditask.models import Task, User, Approval, TaskState, TaskChange, \
     ApprovalState, ChangeableTaskProperty
@@ -108,7 +109,7 @@ def save_task(current_user: User, **kwargs) -> Task:
             previous_value=None,
             current_value=current_user.id,
             changed_property=ChangeableTaskProperty.CreatedById,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow().replace(tzinfo=utc)
         )
 
         # creating approvals for new task
@@ -144,7 +145,7 @@ def merge_values(task_to_merge_into: Task,
                     previous_value=getattr(task_to_merge_into, key),
                     current_value=value,
                     changed_property=changed_property,
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.utcnow().replace(tzinfo=utc)
                 )
         except ValueError:
             # if there's a value error, the enum does not contain a value for

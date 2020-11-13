@@ -37,7 +37,7 @@ class Command(BaseCommand):
         ]
 
         rounded_now = datetime.datetime(
-            *datetime.datetime.utcnow().timetuple()[:3])
+            *datetime.datetime.utcnow().replace(tzinfo=utc).timetuple()[:3])
 
         all_tasks: List[Task] = [
             Task.objects.create(

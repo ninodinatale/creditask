@@ -1,7 +1,23 @@
 import inspect
+import sys
 import uuid
+from unittest.mock import Mock
 
 from creditask.models import User, Task, Group, Approval
+
+
+class PreventStdErr:
+    """
+    Prevent errors outputs from statements inside this context to have a clean
+    console where `with self.assertRaises(Exception)` does not work.
+    """
+    def __enter__(self):
+        self.stderr_cache = sys.stderr
+        sys.stderr = Mock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        sys.stderr = self.stderr_cache
 
 
 def create_user(**kwargs):
