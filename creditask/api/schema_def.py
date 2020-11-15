@@ -4,14 +4,14 @@ import graphql
 import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
-    Task, TaskChange, CreditsCalc
-from .scalars import custom_string, custom_float
+    Task, TaskChange, CreditsCalc, Grocery
 from creditask.services import get_task_changes_by_task, save_approval, \
     get_todo_tasks_by_user_email, get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, \
     get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
-    get_unassigned_tasks, get_all_todo_tasks
+    get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery
+from .scalars import custom_string, custom_float
 
 
 class UserType(graphene_django.DjangoObjectType):
@@ -31,6 +31,11 @@ class TaskChangeType(graphene_django.DjangoObjectType):
 
 
 class ApprovalScalars:
+    state = graphene.Enum.from_enum(ApprovalState)
+    task_id = graphene.ID
+
+
+class GroceryScalars:
     state = graphene.Enum.from_enum(ApprovalState)
     task_id = graphene.ID
 
@@ -62,7 +67,8 @@ class TaskScalars:
 
 
 class TaskType(graphene_django.DjangoObjectType):
-    task_changes = graphene.NonNull(graphene.List(graphene.NonNull(TaskChangeType)))
+    task_changes = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskChangeType)))
     approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
 
     # implicitly declaring state here instead of inheriting from model Task
@@ -203,11 +209,31 @@ class SaveTask(graphene.Mutation):
 
         new_task_props: dict = create_input or update_input or dict()
 
-        new_task_props = {key: value for key, value in new_task_props.items() if
-                          value is not None}
+        new_task_props = _remove_none_values(new_task_props)
 
         task = save_task(info.context.user, **new_task_props)
         return SaveTask(task=task)
+
+
+# TODO test explicitly?
+def _remove_none_values(dict_to_remove_Nones: dict) -> dict:
+    return {key: value for key, value in dict_to_remove_Nones.items() if
+            value is not None}
+
+
+class GroceryType(graphene_django.DjangoObjectType):
+    class Meta:
+        model = Grocery
+
+
+class GroceryQuery:
+    all_not_in_cart = graphene.NonNull(
+        graphene.List(graphene.NonNull(GroceryType)))
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_all_not_in_cart(self, info, **kwargs):
+        return get_all_not_in_cart(group_id=info.context.user.group_id)
 
 
 #
@@ -215,6 +241,52 @@ class SaveTask(graphene.Mutation):
 #
 class TaskMutation:
     save_task = SaveTask.Field()
+
+
+class GroceryCreateInput(graphene.InputObjectType):
+    name = graphene.NonNull(graphene.String)
+    info = graphene.NonNull(graphene.String)
+
+
+class GroceryUpdateInput(graphene.InputObjectType):
+    id = graphene.NonNull(graphene.ID)
+    name = graphene.String()
+    info = graphene.String()
+    in_cart = graphene.Boolean()
+
+
+class CreateGrocery(graphene.Mutation):
+    class Arguments:
+        input = graphene.NonNull(GroceryCreateInput)
+
+    grocery = graphene.NonNull(GroceryType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, input: GroceryCreateInput()):
+        input = _remove_none_values(input)
+        grocery = save_grocery(
+            info.context.user, **input)
+        return CreateGrocery(grocery=grocery)
+
+
+class UpdateGrocery(graphene.Mutation):
+    class Arguments:
+        input = graphene.NonNull(GroceryUpdateInput)
+
+    grocery = graphene.NonNull(GroceryType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, input: GroceryUpdateInput()):
+        input = _remove_none_values(input)
+        grocery = save_grocery(info.context.user, **input)
+        return UpdateGrocery(grocery=grocery)
+
+
+class GroceryMutation:
+    create_grocery = CreateGrocery.Field()
+    update_grocery = UpdateGrocery.Field()
 
 
 class ApprovalInput(graphene.InputObjectType):
@@ -264,7 +336,7 @@ class UserQuery:
         return get_other_users(kwargs.get('user_email'))
 
 
-class Query(UserQuery, TaskQuery, graphene.ObjectType):
+class Query(UserQuery, TaskQuery, GroceryQuery, graphene.ObjectType):
     pass
 
 
@@ -302,7 +374,8 @@ class Verify(graphene.Mutation, graphene.ObjectType):
         return parent.user
 
 
-class Mutation(TaskMutation, ApprovalMutation, graphene.ObjectType):
+class Mutation(TaskMutation, ApprovalMutation, GroceryMutation,
+               graphene.ObjectType):
     token_auth = ObtainJSONWebToken.Field()
 
     # custom verify! This replaces graphql_jwt.Verify because its payload

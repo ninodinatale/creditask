@@ -2,10 +2,11 @@ import datetime
 from typing import List
 
 from django.core.management.base import BaseCommand
+from django.utils.timezone import utc
 
 import creditask_django.settings as settings
 from creditask.models import Group, User, Task, TaskState, TaskChange, \
-    ChangeableTaskProperty, Approval, CreditsCalc
+    ChangeableTaskProperty, Approval, CreditsCalc, Grocery
 
 
 class Command(BaseCommand):
@@ -167,6 +168,56 @@ class Command(BaseCommand):
                 created_by=all_user[0],
                 current_value=all_user[2].public_name
             )
+
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Milch',
+            in_cart=False,
+            info='1 Liter',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Poulet',
+            in_cart=True,
+            info='500g',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Kornflakes',
+            in_cart=False,
+            info='1 Pkg',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Tomatensauce',
+            in_cart=False,
+            info='2x Bolognese, 2x Napoletana',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Früchte',
+            in_cart=True,
+            info='Äpfel, Birnen, Bananen',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Spaghetti',
+            in_cart=False,
+            info='2 Packungen',
+            group=group_1
+        )
+        Grocery.objects.create(
+            created_by=all_user[0],
+            name='Käse',
+            in_cart=True,
+            info='',
+            group=group_1
+        )
 
     def handle(self, *args, **options):
         if getattr(settings, 'DEBUG') is True:

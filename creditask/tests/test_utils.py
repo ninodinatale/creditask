@@ -1,9 +1,8 @@
-import inspect
 import sys
 import uuid
 from unittest.mock import Mock
 
-from creditask.models import User, Task, Group, Approval
+from creditask.models import User, Task, Group, Approval, Grocery
 
 
 class PreventStdErr:
@@ -11,6 +10,7 @@ class PreventStdErr:
     Prevent errors outputs from statements inside this context to have a clean
     console where `with self.assertRaises(Exception)` does not work.
     """
+
     def __enter__(self):
         self.stderr_cache = sys.stderr
         sys.stderr = Mock()
@@ -35,17 +35,11 @@ def create_user(**kwargs):
     assert 'group' in kwargs or 'group_id' in kwargs
 
     if 'email' not in kwargs:
-        unique_id = str(uuid.uuid1())
-        unique_id = (unique_id[:15]) if len(
-            unique_id) > 15 else unique_id
-        email = f'{unique_id}@user.com'
+        email = f'{_get_unique_id(15)}@user.com'
     else:
         email = kwargs.get('email')
     if 'public_name' not in kwargs:
-        unique_id = inspect.stack()[1].function
-        unique_id = (unique_id[:15]) if len(
-            unique_id) > 15 else unique_id
-        kwargs.update(public_name=f'user_{unique_id}')
+        kwargs.update(public_name=f'user_{_get_unique_id(15)}')
     if 'password' not in kwargs:
         password = ''
     else:
@@ -67,10 +61,7 @@ def create_task(**kwargs):
     assert ('group' in kwargs) or ('group_id' in kwargs)
 
     if 'name' not in kwargs:
-        unique_id = str(uuid.uuid1())
-        unique_id = (unique_id[:15]) if len(
-            unique_id) > 15 else unique_id
-        kwargs['name'] = f'task_{unique_id}'
+        kwargs['name'] = f'task_{_get_unique_id(15)}'
 
     return Task.objects.create(
         created_by_id=get_created_by_id(**kwargs),
@@ -103,3 +94,19 @@ def create_group(**kwargs) -> Group:
     return Group.objects.create(**kwargs)
 
 
+def create_grocery(**kwargs) -> Grocery:
+    assert not ('group' in kwargs and 'group_id' in kwargs)
+    assert ('group' in kwargs) or ('group_id' in kwargs)
+
+    if 'name' not in kwargs:
+        kwargs.update(name=f'grocery_{_get_unique_id(15)}')
+
+    return Grocery.objects.create(
+        created_by_id=get_created_by_id(**kwargs),
+        **kwargs)
+
+
+def _get_unique_id(max_len: int):
+    unique_id = str(uuid.uuid1())
+    return (unique_id[:max_len]) if len(
+        unique_id) > max_len else unique_id

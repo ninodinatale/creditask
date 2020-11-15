@@ -24,6 +24,10 @@ type ApprovalType {
   user: UserType!
 }
 
+type CreateGrocery {
+  grocery: GroceryType!
+}
+
 enum CreditsCalc {
   BY_FACTOR
   FIXED
@@ -47,7 +51,31 @@ scalar DateTime
 
 scalar GenericScalar
 
+input GroceryCreateInput {
+  name: String!
+  info: String!
+}
+
+type GroceryType {
+  createdAt: DateTime!
+  createdBy: UserType!
+  isDeleted: Boolean!
+  id: ID!
+  name: String!
+  inCart: Boolean!
+  info: String!
+}
+
+input GroceryUpdateInput {
+  id: ID!
+  name: String
+  info: String
+  inCart: Boolean
+}
+
 type Mutation {
+  createGrocery(input: GroceryCreateInput!): CreateGrocery
+  updateGrocery(input: GroceryUpdateInput!): UpdateGrocery
   saveApproval(approvalInput: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
@@ -63,6 +91,7 @@ type ObtainJSONWebToken {
 }
 
 type Query {
+  allNotInCart: [GroceryType!]!
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
   doneTasksOfUser(userEmail: String!): [TaskType!]!
@@ -162,6 +191,10 @@ type TaskType {
   periodEnd: Date!
   approvals: [ApprovalType!]!
   taskChanges: [TaskChangeType!]!
+}
+
+type UpdateGrocery {
+  grocery: GroceryType!
 }
 
 type UserType {
