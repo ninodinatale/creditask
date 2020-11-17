@@ -1,0 +1,7 @@
+mutation updateGrocery($input: GroceryUpdateInput!) {
+    updateGrocery(input: $input) {
+        grocery {
+            __typename
+        }
+    }
+}

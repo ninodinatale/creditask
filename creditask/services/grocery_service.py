@@ -10,6 +10,11 @@ def get_all_not_in_cart(group_id: int) -> List[Grocery]:
                                   in_cart=False)
 
 
+def get_all_in_cart(group_id: int) -> List[Grocery]:
+    return Grocery.objects.filter(group_id=group_id,
+                                  in_cart=True)
+
+
 # TODO test
 def save_grocery(current_user: User, **kwargs):
     if current_user is None:

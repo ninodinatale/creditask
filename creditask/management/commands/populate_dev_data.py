@@ -20,17 +20,17 @@ class Command(BaseCommand):
         group_1 = Group.objects.create()
 
         all_user: List[User] = [
-            User.objects.create(group=group_1, email='nino@mail.com',
+            User.objects.create(group=group_1, email='nino',
                                 public_name='Nino',
                                 password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
                                          'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
                                          'O10='),
-            User.objects.create(group=group_1, email='moro@mail.com',
+            User.objects.create(group=group_1, email='moro',
                                 public_name='Moro',
                                 password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
                                          'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
                                          'O10='),
-            User.objects.create(group=group_1, email='anna@mail.com',
+            User.objects.create(group=group_1, email='anna',
                                 public_name='Anna',
                                 password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
                                          'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'

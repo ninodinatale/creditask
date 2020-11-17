@@ -76,3 +76,11 @@ fragment taskWithApprovals on TaskType {
         ...simpleApproval
     }
 }
+
+fragment grocery on GroceryType {
+    id
+    name
+    info
+    inCart
+    __typename
+}

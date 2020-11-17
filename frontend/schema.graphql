@@ -76,6 +76,7 @@ input GroceryUpdateInput {
 type Mutation {
   createGrocery(input: GroceryCreateInput!): CreateGrocery
   updateGrocery(input: GroceryUpdateInput!): UpdateGrocery
+  updateGroceries(input: [GroceryUpdateInput]!): UpdateGroceries
   saveApproval(approvalInput: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
@@ -92,6 +93,7 @@ type ObtainJSONWebToken {
 
 type Query {
   allNotInCart: [GroceryType!]!
+  allInCart: [GroceryType!]!
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
   doneTasksOfUser(userEmail: String!): [TaskType!]!
@@ -191,6 +193,10 @@ type TaskType {
   periodEnd: Date!
   approvals: [ApprovalType!]!
   taskChanges: [TaskChangeType!]!
+}
+
+type UpdateGroceries {
+  groceries: [GroceryType!]!
 }
 
 type UpdateGrocery {

@@ -164,6 +164,43 @@ Map<String, dynamic> _$SimpleTaskMixin$UserToJson(
       'publicName': instance.publicName,
     };
 
+AllGroceriesInCart$Query$AllInCart _$AllGroceriesInCart$Query$AllInCartFromJson(
+    Map<String, dynamic> json) {
+  return AllGroceriesInCart$Query$AllInCart()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$AllGroceriesInCart$Query$AllInCartToJson(
+        AllGroceriesInCart$Query$AllInCart instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+      '__typename': instance.$$typename,
+    };
+
+AllGroceriesInCart$Query _$AllGroceriesInCart$QueryFromJson(
+    Map<String, dynamic> json) {
+  return AllGroceriesInCart$Query()
+    ..allInCart = (json['allInCart'] as List)
+        ?.map((e) => e == null
+            ? null
+            : AllGroceriesInCart$Query$AllInCart.fromJson(
+                e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$AllGroceriesInCart$QueryToJson(
+        AllGroceriesInCart$Query instance) =>
+    <String, dynamic>{
+      'allInCart': instance.allInCart?.map((e) => e?.toJson())?.toList(),
+    };
+
 ToApproveTasksOfUser$Query$ToApproveTasksOfUser
     _$ToApproveTasksOfUser$Query$ToApproveTasksOfUserFromJson(
         Map<String, dynamic> json) {
@@ -293,6 +330,70 @@ TokenAuth$Mutation _$TokenAuth$MutationFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$TokenAuth$MutationToJson(TokenAuth$Mutation instance) =>
     <String, dynamic>{
       'tokenAuth': instance.tokenAuth?.toJson(),
+    };
+
+CreateGrocery$Mutation$CreateGrocery$Grocery
+    _$CreateGrocery$Mutation$CreateGrocery$GroceryFromJson(
+        Map<String, dynamic> json) {
+  return CreateGrocery$Mutation$CreateGrocery$Grocery()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$CreateGrocery$Mutation$CreateGrocery$GroceryToJson(
+        CreateGrocery$Mutation$CreateGrocery$Grocery instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+      '__typename': instance.$$typename,
+    };
+
+CreateGrocery$Mutation$CreateGrocery
+    _$CreateGrocery$Mutation$CreateGroceryFromJson(Map<String, dynamic> json) {
+  return CreateGrocery$Mutation$CreateGrocery()
+    ..grocery = json['grocery'] == null
+        ? null
+        : CreateGrocery$Mutation$CreateGrocery$Grocery.fromJson(
+            json['grocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$CreateGrocery$Mutation$CreateGroceryToJson(
+        CreateGrocery$Mutation$CreateGrocery instance) =>
+    <String, dynamic>{
+      'grocery': instance.grocery?.toJson(),
+    };
+
+CreateGrocery$Mutation _$CreateGrocery$MutationFromJson(
+    Map<String, dynamic> json) {
+  return CreateGrocery$Mutation()
+    ..createGrocery = json['createGrocery'] == null
+        ? null
+        : CreateGrocery$Mutation$CreateGrocery.fromJson(
+            json['createGrocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$CreateGrocery$MutationToJson(
+        CreateGrocery$Mutation instance) =>
+    <String, dynamic>{
+      'createGrocery': instance.createGrocery?.toJson(),
+    };
+
+GroceryCreateInput _$GroceryCreateInputFromJson(Map<String, dynamic> json) {
+  return GroceryCreateInput(
+    name: json['name'] as String,
+    info: json['info'] as String,
+  );
+}
+
+Map<String, dynamic> _$GroceryCreateInputToJson(GroceryCreateInput instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'info': instance.info,
     };
 
 UpdateDetailTask$Mutation$SaveTask$Task
@@ -630,6 +731,66 @@ Map<String, dynamic> _$TaskChangesMixin$UserToJson(
       'publicName': instance.publicName,
     };
 
+UpdateGrocery$Mutation$UpdateGrocery$Grocery
+    _$UpdateGrocery$Mutation$UpdateGrocery$GroceryFromJson(
+        Map<String, dynamic> json) {
+  return UpdateGrocery$Mutation$UpdateGrocery$Grocery()
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$UpdateGrocery$Mutation$UpdateGrocery$GroceryToJson(
+        UpdateGrocery$Mutation$UpdateGrocery$Grocery instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+    };
+
+UpdateGrocery$Mutation$UpdateGrocery
+    _$UpdateGrocery$Mutation$UpdateGroceryFromJson(Map<String, dynamic> json) {
+  return UpdateGrocery$Mutation$UpdateGrocery()
+    ..grocery = json['grocery'] == null
+        ? null
+        : UpdateGrocery$Mutation$UpdateGrocery$Grocery.fromJson(
+            json['grocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$UpdateGrocery$Mutation$UpdateGroceryToJson(
+        UpdateGrocery$Mutation$UpdateGrocery instance) =>
+    <String, dynamic>{
+      'grocery': instance.grocery?.toJson(),
+    };
+
+UpdateGrocery$Mutation _$UpdateGrocery$MutationFromJson(
+    Map<String, dynamic> json) {
+  return UpdateGrocery$Mutation()
+    ..updateGrocery = json['updateGrocery'] == null
+        ? null
+        : UpdateGrocery$Mutation$UpdateGrocery.fromJson(
+            json['updateGrocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$UpdateGrocery$MutationToJson(
+        UpdateGrocery$Mutation instance) =>
+    <String, dynamic>{
+      'updateGrocery': instance.updateGrocery?.toJson(),
+    };
+
+GroceryUpdateInput _$GroceryUpdateInputFromJson(Map<String, dynamic> json) {
+  return GroceryUpdateInput(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    info: json['info'] as String,
+    inCart: json['inCart'] as bool,
+  );
+}
+
+Map<String, dynamic> _$GroceryUpdateInputToJson(GroceryUpdateInput instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+    };
+
 UsersDoneToApproveTasks$Query$DoneTasksOfUser
     _$UsersDoneToApproveTasks$Query$DoneTasksOfUserFromJson(
         Map<String, dynamic> json) {
@@ -681,6 +842,52 @@ Map<String, dynamic> _$UsersDoneToApproveTasks$QueryToJson(
           instance.doneTasksOfUser?.map((e) => e?.toJson())?.toList(),
     };
 
+UpdateGroceries$Mutation$UpdateGroceries$Groceries
+    _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesFromJson(
+        Map<String, dynamic> json) {
+  return UpdateGroceries$Mutation$UpdateGroceries$Groceries()
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesToJson(
+        UpdateGroceries$Mutation$UpdateGroceries$Groceries instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+    };
+
+UpdateGroceries$Mutation$UpdateGroceries
+    _$UpdateGroceries$Mutation$UpdateGroceriesFromJson(
+        Map<String, dynamic> json) {
+  return UpdateGroceries$Mutation$UpdateGroceries()
+    ..groceries = (json['groceries'] as List)
+        ?.map((e) => e == null
+            ? null
+            : UpdateGroceries$Mutation$UpdateGroceries$Groceries.fromJson(
+                e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$UpdateGroceries$Mutation$UpdateGroceriesToJson(
+        UpdateGroceries$Mutation$UpdateGroceries instance) =>
+    <String, dynamic>{
+      'groceries': instance.groceries?.map((e) => e?.toJson())?.toList(),
+    };
+
+UpdateGroceries$Mutation _$UpdateGroceries$MutationFromJson(
+    Map<String, dynamic> json) {
+  return UpdateGroceries$Mutation()
+    ..updateGroceries = json['updateGroceries'] == null
+        ? null
+        : UpdateGroceries$Mutation$UpdateGroceries.fromJson(
+            json['updateGroceries'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$UpdateGroceries$MutationToJson(
+        UpdateGroceries$Mutation instance) =>
+    <String, dynamic>{
+      'updateGroceries': instance.updateGroceries?.toJson(),
+    };
+
 VerifyToken$Mutation$VerifyToken$User
     _$VerifyToken$Mutation$VerifyToken$UserFromJson(Map<String, dynamic> json) {
   return VerifyToken$Mutation$VerifyToken$User()
@@ -724,6 +931,40 @@ Map<String, dynamic> _$VerifyToken$MutationToJson(
         VerifyToken$Mutation instance) =>
     <String, dynamic>{
       'verifyToken': instance.verifyToken?.toJson(),
+    };
+
+Grocery$Query$AllNotInCart _$Grocery$Query$AllNotInCartFromJson(
+    Map<String, dynamic> json) {
+  return Grocery$Query$AllNotInCart()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$Grocery$Query$AllNotInCartToJson(
+        Grocery$Query$AllNotInCart instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+      '__typename': instance.$$typename,
+    };
+
+Grocery$Query _$Grocery$QueryFromJson(Map<String, dynamic> json) {
+  return Grocery$Query()
+    ..allNotInCart = (json['allNotInCart'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Grocery$Query$AllNotInCart.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$Grocery$QueryToJson(Grocery$Query instance) =>
+    <String, dynamic>{
+      'allNotInCart': instance.allNotInCart?.map((e) => e?.toJson())?.toList(),
     };
 
 UnassignedTasks$Query$UnassignedTasks
@@ -936,6 +1177,21 @@ Map<String, dynamic> _$TokenAuthArgumentsToJson(TokenAuthArguments instance) =>
       'password': instance.password,
     };
 
+CreateGroceryArguments _$CreateGroceryArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return CreateGroceryArguments(
+    input: json['input'] == null
+        ? null
+        : GroceryCreateInput.fromJson(json['input'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$CreateGroceryArgumentsToJson(
+        CreateGroceryArguments instance) =>
+    <String, dynamic>{
+      'input': instance.input?.toJson(),
+    };
+
 UpdateDetailTaskArguments _$UpdateDetailTaskArgumentsFromJson(
     Map<String, dynamic> json) {
   return UpdateDetailTaskArguments(
@@ -979,6 +1235,21 @@ Map<String, dynamic> _$TaskChangesArgumentsToJson(
       'id': instance.id,
     };
 
+UpdateGroceryArguments _$UpdateGroceryArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return UpdateGroceryArguments(
+    input: json['input'] == null
+        ? null
+        : GroceryUpdateInput.fromJson(json['input'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$UpdateGroceryArgumentsToJson(
+        UpdateGroceryArguments instance) =>
+    <String, dynamic>{
+      'input': instance.input?.toJson(),
+    };
+
 UsersDoneToApproveTasksArguments _$UsersDoneToApproveTasksArgumentsFromJson(
     Map<String, dynamic> json) {
   return UsersDoneToApproveTasksArguments(
@@ -990,6 +1261,23 @@ Map<String, dynamic> _$UsersDoneToApproveTasksArgumentsToJson(
         UsersDoneToApproveTasksArguments instance) =>
     <String, dynamic>{
       'email': instance.email,
+    };
+
+UpdateGroceriesArguments _$UpdateGroceriesArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return UpdateGroceriesArguments(
+    input: (json['input'] as List)
+        ?.map((e) => e == null
+            ? null
+            : GroceryUpdateInput.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$UpdateGroceriesArgumentsToJson(
+        UpdateGroceriesArguments instance) =>
+    <String, dynamic>{
+      'input': instance.input?.map((e) => e?.toJson())?.toList(),
     };
 
 VerifyTokenArguments _$VerifyTokenArgumentsFromJson(Map<String, dynamic> json) {

@@ -1,0 +1,7 @@
+mutation createGrocery($input: GroceryCreateInput!) {
+    createGrocery(input: $input) {
+        grocery {
+            ...grocery
+        }
+    }
+}

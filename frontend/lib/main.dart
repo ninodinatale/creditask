@@ -1,7 +1,6 @@
 import 'package:creditask/providers/auth.dart';
 import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/widgets/_shared/error_screen.dart';
-import 'package:creditask/widgets/_shared/loadnig_button_content.dart';
 import 'package:creditask/widgets/app_container.dart';
 import 'package:creditask/widgets/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -15,17 +14,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final base = ThemeData.light();
     return ChangeNotifierProvider(
         create: (context) => AuthProvider(),
         child: GraphqlProvider(
             child: MaterialApp(
                 title: 'Flutter Demo',
-                theme: ThemeData.dark().copyWith(
-                    primaryColor: Colors.purple,
-                    accentColor: Colors.amber,
-                    buttonTheme: ButtonThemeData(
-                        colorScheme: ColorScheme.fromSwatch(
-                            primarySwatch: Colors.purple))),
+                theme: base.copyWith(
+                  buttonTheme: base.buttonTheme.copyWith(
+                    buttonColor: base.primaryColor,
+                    textTheme: ButtonTextTheme.primary,
+                  ),
+                ),
                 home: AuthContainer())));
   }
 }
@@ -37,15 +37,17 @@ class AuthContainer extends StatelessWidget {
     return FutureBuilder<bool>(
         future: auth.isLoggedIn(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
             return snapshot.data ? AppContainer() : LoginScreen();
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return snapshot.hasData ? LoginScreen() :
-            Center(
-              child: FlutterLogo(
-                size: 100,
-              ),
-            );
+            return snapshot.hasData
+                ? LoginScreen()
+                : Center(
+                    child: FlutterLogo(
+                      size: 100,
+                    ),
+                  );
           } else if (snapshot.hasError) {
             return ErrorDialog(snapshot.error.toString());
           } else {

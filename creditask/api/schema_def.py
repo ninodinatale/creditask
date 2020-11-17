@@ -10,7 +10,8 @@ from creditask.services import get_task_changes_by_task, save_approval, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, \
     get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
-    get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery
+    get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
+    get_all_in_cart
 from .scalars import custom_string, custom_float
 
 
@@ -229,11 +230,18 @@ class GroceryType(graphene_django.DjangoObjectType):
 class GroceryQuery:
     all_not_in_cart = graphene.NonNull(
         graphene.List(graphene.NonNull(GroceryType)))
+    all_in_cart = graphene.NonNull(
+        graphene.List(graphene.NonNull(GroceryType)))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
     def resolve_all_not_in_cart(self, info, **kwargs):
         return get_all_not_in_cart(group_id=info.context.user.group_id)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_all_in_cart(self, info, **kwargs):
+        return get_all_in_cart(group_id=info.context.user.group_id)
 
 
 #
@@ -284,9 +292,26 @@ class UpdateGrocery(graphene.Mutation):
         return UpdateGrocery(grocery=grocery)
 
 
+class UpdateGroceries(graphene.Mutation):
+    class Arguments:
+        input = graphene.NonNull(graphene.List(GroceryUpdateInput))
+
+    groceries = graphene.NonNull(graphene.List(graphene.NonNull(GroceryType)))
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, input):
+        groceries = []
+        for inp in input:
+            inp = _remove_none_values(inp)
+            groceries.append(save_grocery(info.context.user, **inp))
+        return UpdateGroceries(groceries=groceries)
+
+
 class GroceryMutation:
     create_grocery = CreateGrocery.Field()
     update_grocery = UpdateGrocery.Field()
+    update_groceries = UpdateGroceries.Field()
 
 
 class ApprovalInput(graphene.InputObjectType):

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CreditaskDrawer extends StatelessWidget {
+
+  const CreditaskDrawer();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -16,7 +19,13 @@ class CreditaskDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text(auth.currentUser.publicName),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Creditask', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30, color: theme.colorScheme.surface)),
+                Text(auth.currentUser.publicName, style: TextStyle(color: theme.colorScheme.surface)),
+              ],
+            ),
             decoration: BoxDecoration(
               color: theme.primaryColor,
             ),
@@ -59,4 +68,5 @@ class CreditaskDrawer extends StatelessWidget {
       ),
     );
   }
+
 }

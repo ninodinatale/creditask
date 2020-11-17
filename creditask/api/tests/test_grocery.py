@@ -112,6 +112,108 @@ class ResolveAllNotInCartTest(CreditaskTestBase):
 
 
 @tag('integration')
+class ResolveAllInCartTest(CreditaskTestBase):
+    GRAPHQL_SCHEMA = schema
+
+    def setUp(self):
+        self.op_name = 'allInCart'
+        self.query_under_test = \
+            f'''
+            query {self.op_name} {{
+              {self.op_name} {{
+                id
+                name
+                inCart
+                info
+              }}
+            }}
+            '''
+
+        self.current_user_credentials = {
+            'email': 'current_user@email.com',
+            'password': 'pwuser1'
+        }
+        self.current_user = create_user(group=create_group(),
+                                        **self.current_user_credentials)
+
+        self.login(self.current_user_credentials.get('email'),
+                   self.current_user_credentials.get('password'))
+
+    def test_should_require_login(self):
+        self.should_require_login(self.query_under_test, op_name=self.op_name,
+                                  variables={'id': '1'})
+
+    def test_should_return_expected_results(self):
+        group_1 = create_group()
+
+        # ok
+        grocery_1 = create_grocery(
+            group=self.current_user.group,
+            in_cart=True,
+        )
+
+        # wrong group
+        grocery_2 = create_grocery(
+            group=group_1,
+            in_cart=True,
+        )
+
+        # ok
+        grocery_3 = create_grocery(
+            group=self.current_user.group,
+            in_cart=True,
+        )
+
+        # wrong in_cart
+        grocery_4 = create_grocery(
+            group=group_1,
+            in_cart=False,
+        )
+
+        # ok
+        grocery_5 = create_grocery(
+            group=self.current_user.group,
+            in_cart=True,
+        )
+
+        # wrong group
+        grocery_6 = create_grocery(
+            group=group_1,
+            in_cart=True,
+        )
+
+        # ok
+        grocery_7 = create_grocery(
+            group=self.current_user.group,
+            in_cart=True,
+        )
+
+        # wrong in_cart
+        grocery_8 = create_grocery(
+            group=group_1,
+            in_cart=False,
+        )
+
+        response = self.gql(self.query_under_test,
+                            op_name=self.op_name)
+
+        self.assertResponseNoErrors(response)
+
+        groceries: dict = json.loads(response.content).get(
+            'data').get(self.op_name)
+
+        self.assertIsNotNone(groceries)
+        self.assertEquals(4, len(groceries))
+        self.assertCountEqual(list(map(lambda g: int(g.get('id')), groceries)),
+                              [
+                                  grocery_1.id,
+                                  grocery_3.id,
+                                  grocery_5.id,
+                                  grocery_7.id,
+                              ])
+
+
+@tag('integration')
 class CreateGroceryTest(CreditaskTestBase):
     GRAPHQL_SCHEMA = schema
 
@@ -318,3 +420,139 @@ class UpdateGroceryTest(CreditaskTestBase):
         self.assertEqual(grocery.get('name'), 'updated name')
         self.assertEqual(grocery.get('info'), 'updated info')
         self.assertEqual(grocery.get('inCart'), True)
+
+
+@tag('integration')
+class UpdateGroceriesTest(CreditaskTestBase):
+    GRAPHQL_SCHEMA = schema
+
+    def get_valid_input(self):
+        return dict(
+            id=self.existing_grocery.id
+        )
+
+    def setUp(self):
+        self.op_name = 'updateGroceries'
+        self.query_under_test = \
+            f'''
+            mutation {self.op_name}($input: [GroceryUpdateInput!]!) {{
+                {self.op_name}(input: $input) {{
+                    groceries {{
+                        id
+                        name
+                        info
+                        inCart
+                    }}
+                }}
+            }}            '''
+
+        self.current_user_credentials = {
+            'email': 'current_user@email.com',
+            'password': 'pwuser1'
+        }
+        self.current_user = self.current_user = create_user(
+            group=create_group(),
+            **self.current_user_credentials)
+
+        self.existing_grocery = create_grocery(group=self.current_user.group)
+
+        self.login(self.current_user_credentials.get('email'),
+                   self.current_user_credentials.get('password'))
+
+    def test_should_require_login(self):
+        self.should_require_login(self.query_under_test, op_name=self.op_name,
+                                  variables=dict(input=[{
+                                      **self.get_valid_input()}])),
+
+    def test_validation(self):
+        with self.subTest('id should be non null'):
+            with PreventStdErr():
+                response = self.gql(self.query_under_test,
+                                    op_name=self.op_name,
+                                    variables=dict(
+                                        input=[dict(id=None)]))
+
+            response_content: dict = json.loads(response.content)
+            errors: List = response_content.get('errors')
+
+            self.assertIsNotNone(errors)
+            self.assertIn('In field "id": Expected "ID!", found null.',
+                          errors[0].get('message'))
+
+        with self.subTest('info should be nullable'):
+            response = self.gql(self.query_under_test,
+                                op_name=self.op_name,
+                                variables=dict(
+                                    input=[dict(**self.get_valid_input(),
+                                                info=None)]))
+
+            response_content: dict = json.loads(response.content)
+            errors: List = response_content.get('errors')
+
+            self.assertResponseNoErrors(response)
+
+        with self.subTest('name should be nullable'):
+            response = self.gql(self.query_under_test,
+                                op_name=self.op_name,
+                                variables=dict(
+                                    input=[dict(
+                                        **self.get_valid_input(), name=None)]))
+
+            response_content: dict = json.loads(response.content)
+            errors: List = response_content.get('errors')
+
+            self.assertResponseNoErrors(response)
+
+        with self.subTest('in_cart should be nullable'):
+            response = self.gql(self.query_under_test,
+                                op_name=self.op_name,
+                                variables=dict(
+                                    input=[dict(
+                                        **self.get_valid_input(),
+                                        inCart=None)]))
+
+            response_content: dict = json.loads(response.content)
+            errors: List = response_content.get('errors')
+
+            self.assertResponseNoErrors(response)
+
+    def test_should_return_expected_results(self):
+        existing_groceries = [
+            create_grocery(group=self.current_user.group,
+                           name='grocery1',
+                           info='info1', in_cart=False),
+            create_grocery(group=self.current_user.group,
+                           name='grocery2',
+                           info='info2', in_cart=True),
+            create_grocery(group=self.current_user.group,
+                           name='grocery3',
+                           info='info3', in_cart=False),
+        ]
+        response = self.gql(self.query_under_test,
+                            op_name=self.op_name,
+                            variables=dict(
+                                input=list(map(lambda g: dict(id=g.id,
+                                                              name=f'{g.name}_updated',
+                                                              info=f'{g.info}_updated',
+                                                              inCart=not g.in_cart),
+                                               existing_groceries))))
+
+        self.assertResponseNoErrors(response)
+
+        groceries: dict = json.loads(response.content).get(
+            'data').get(self.op_name).get('groceries')
+
+        self.assertIsNotNone(groceries)
+        self.assertEqual(len(groceries), 3)
+        expected = list(map(lambda g: dict(id=str(g.id),
+                                           name=f'{g.name}_updated',
+                                           info=f'{g.info}_updated',
+                                           inCart=not g.in_cart),
+                            existing_groceries))
+        self.assertCountEqual(groceries, expected)
+        for grocery in existing_groceries:
+            grocery.refresh_from_db()
+            g = next(gr for gr in expected if gr.get('id') == str(grocery.id))
+            self.assertEqual(g.get('name'), grocery.name)
+            self.assertEqual(g.get('info'), grocery.info)
+            self.assertEqual(g.get('inCart'), grocery.in_cart)

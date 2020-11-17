@@ -9,12 +9,13 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 String get _host {
+  final _prodUrl = 'https://creditask.herokuapp.com';
   if (Platform.isAndroid) {
-    // return 'http://10.0.2.2:8000';
-    return 'https://creditask.herokuapp.com';
+    return 'http://10.0.2.2:8000'; // for development
+    // return _prodUrl;
   } else {
-    // return 'http://localhost:8000';
-    return 'https://creditask.herokuapp.com';
+    return 'http://localhost:8000'; // for development
+    // return _prodUrl;
   }
 }
 
