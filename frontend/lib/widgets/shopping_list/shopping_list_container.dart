@@ -17,6 +17,7 @@ class ShoppingListContainer extends StatefulWidget {
 class _ShoppingListContainerState extends State<ShoppingListContainer> {
   RunMutation _runMutation;
   List<AllGroceriesInCart$Query$AllInCart> _groceries;
+  String _queryKey;
 
   StreamSubscription<void> _subscription;
 
@@ -38,7 +39,8 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
               Icons.check,
               color: theme.colorScheme.surface,
             ),
-            onPressed: () => _runMutation(
+            onPressed: () {
+              return _runMutation(
                 UpdateGroceriesArguments(
                         input: _groceries
                             .map((e) => GroceryUpdateInput(
@@ -48,7 +50,8 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                                 name: e.name))
                             .toList())
                     .toJson(),
-                optimisticResult: _groceries)),
+                optimisticResult: _groceries);
+            }),
         drawer: const CreditaskDrawer(),
         appBar: AppBar(
           title: Text('Einkaufsliste'),
@@ -58,12 +61,13 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                 onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AddGroceryScreen())))
+                        builder: (context) => AddGroceryScreen(_queryKey))))
           ],
         ),
         body: Mutation(
           options: MutationOptions(
               documentNode: mutation.document,
+              fetchPolicy: FetchPolicy.cacheAndNetwork,
               update: (Cache cache, QueryResult result) {
                 if (result.hasException) {
                   // TODO
@@ -89,10 +93,10 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
               }),
           builder: (runMutation, result) {
             _runMutation = runMutation;
+            var _queryOptions = QueryOptions(documentNode: query.document);
+            _queryKey = _queryOptions.toKey();
             return Query(
-              options: QueryOptions(
-                documentNode: query.document,
-              ),
+              options: _queryOptions,
               builder: (QueryResult result,
                   {VoidCallback refetch, FetchMore fetchMore}) {
                 if (result.hasException) {
@@ -108,14 +112,14 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
 
                 AllGroceriesInCart$Query queryData = query.parse(result.data);
 
-                if (queryData.allInCart.length < 1) {
+                _groceries = queryData.allInCart
+                    .where((element) => element.inCart)
+                    .toList();
+                if (_groceries.length < 1) {
                   return Center(
                     child: const Text('Keine Einkäufe zu machen 😎'),
                   );
                 } else {
-                  _groceries = queryData.allInCart
-                      .where((element) => element.inCart)
-                      .toList();
                   return StatefulBuilder(
                       builder: (context, setState) => ListView.builder(
                           scrollDirection: Axis.vertical,

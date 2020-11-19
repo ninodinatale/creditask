@@ -1,7 +1,7 @@
 mutation updateGroceries($input: [GroceryUpdateInput!]!) {
     updateGroceries(input: $input) {
         groceries {
-            __typename
+            ...grocery
         }
     }
 }

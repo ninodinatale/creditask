@@ -8,18 +8,11 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
-String get _host {
-  final _prodUrl = 'https://creditask.herokuapp.com';
-  if (Platform.isAndroid) {
-    return 'http://10.0.2.2:8000'; // for development
-    // return _prodUrl;
-  } else {
-    return 'http://localhost:8000'; // for development
-    // return _prodUrl;
-  }
-}
+const _ENVIRONMENT = String.fromEnvironment('ENVIRONMENT');
+const _PROD_URL = 'https://creditask.herokuapp.com';
+final _host = _ENVIRONMENT != 'develop' ? _PROD_URL : Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
 
-String get _graphqlUri => '$_host/graphql';
+final _graphqlUri = '$_host/graphql';
 
 ArtemisClient artemisClient;
 

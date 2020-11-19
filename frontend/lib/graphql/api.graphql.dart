@@ -674,7 +674,8 @@ class TaskChangesMixin$User with EquatableMixin, SimpleUserMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
-class UpdateGrocery$Mutation$UpdateGrocery$Grocery with EquatableMixin {
+class UpdateGrocery$Mutation$UpdateGrocery$Grocery
+    with EquatableMixin, GroceryMixin {
   UpdateGrocery$Mutation$UpdateGrocery$Grocery();
 
   factory UpdateGrocery$Mutation$UpdateGrocery$Grocery.fromJson(
@@ -682,11 +683,7 @@ class UpdateGrocery$Mutation$UpdateGrocery$Grocery with EquatableMixin {
       _$UpdateGrocery$Mutation$UpdateGrocery$GroceryFromJson(json);
 
   @override
-  @JsonKey(name: '__typename')
-  String $$typename;
-
-  @override
-  List<Object> get props => [$$typename];
+  List<Object> get props => [id, name, info, inCart, $$typename];
   Map<String, dynamic> toJson() =>
       _$UpdateGrocery$Mutation$UpdateGrocery$GroceryToJson(this);
 }
@@ -776,7 +773,8 @@ class UsersDoneToApproveTasks$Query with EquatableMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
-class UpdateGroceries$Mutation$UpdateGroceries$Groceries with EquatableMixin {
+class UpdateGroceries$Mutation$UpdateGroceries$Groceries
+    with EquatableMixin, GroceryMixin {
   UpdateGroceries$Mutation$UpdateGroceries$Groceries();
 
   factory UpdateGroceries$Mutation$UpdateGroceries$Groceries.fromJson(
@@ -784,11 +782,7 @@ class UpdateGroceries$Mutation$UpdateGroceries$Groceries with EquatableMixin {
       _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesFromJson(json);
 
   @override
-  @JsonKey(name: '__typename')
-  String $$typename;
-
-  @override
-  List<Object> get props => [$$typename];
+  List<Object> get props => [id, name, info, inCart, $$typename];
   Map<String, dynamic> toJson() =>
       _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesToJson(this);
 }
@@ -2422,14 +2416,48 @@ class UpdateGroceryMutation
                     arguments: [],
                     directives: [],
                     selectionSet: SelectionSetNode(selections: [
-                      FieldNode(
-                          name: NameNode(value: '__typename'),
-                          alias: null,
-                          arguments: [],
-                          directives: [],
-                          selectionSet: null)
+                      FragmentSpreadNode(
+                          name: NameNode(value: 'grocery'), directives: [])
                     ]))
               ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'grocery'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'GroceryType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'name'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'info'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'inCart'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: '__typename'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null)
         ]))
   ]);
 
@@ -2697,14 +2725,48 @@ class UpdateGroceriesMutation
                     arguments: [],
                     directives: [],
                     selectionSet: SelectionSetNode(selections: [
-                      FieldNode(
-                          name: NameNode(value: '__typename'),
-                          alias: null,
-                          arguments: [],
-                          directives: [],
-                          selectionSet: null)
+                      FragmentSpreadNode(
+                          name: NameNode(value: 'grocery'), directives: [])
                     ]))
               ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'grocery'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'GroceryType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'name'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'info'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'inCart'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: '__typename'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null)
         ]))
   ]);
 

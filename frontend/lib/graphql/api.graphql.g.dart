@@ -735,12 +735,20 @@ UpdateGrocery$Mutation$UpdateGrocery$Grocery
     _$UpdateGrocery$Mutation$UpdateGrocery$GroceryFromJson(
         Map<String, dynamic> json) {
   return UpdateGrocery$Mutation$UpdateGrocery$Grocery()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
     ..$$typename = json['__typename'] as String;
 }
 
 Map<String, dynamic> _$UpdateGrocery$Mutation$UpdateGrocery$GroceryToJson(
         UpdateGrocery$Mutation$UpdateGrocery$Grocery instance) =>
     <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
       '__typename': instance.$$typename,
     };
 
@@ -846,12 +854,20 @@ UpdateGroceries$Mutation$UpdateGroceries$Groceries
     _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesFromJson(
         Map<String, dynamic> json) {
   return UpdateGroceries$Mutation$UpdateGroceries$Groceries()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
     ..$$typename = json['__typename'] as String;
 }
 
 Map<String, dynamic> _$UpdateGroceries$Mutation$UpdateGroceries$GroceriesToJson(
         UpdateGroceries$Mutation$UpdateGroceries$Groceries instance) =>
     <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
       '__typename': instance.$$typename,
     };
 

@@ -1,5 +1,4 @@
 import 'package:creditask/graphql/api.dart';
-import 'package:creditask/services/shopping_list.dart';
 import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/_shared/loadnig_button_content.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class AddGroceryScreen extends StatefulWidget {
+  final String _queryKey;
+
+  const AddGroceryScreen(this._queryKey);
+
   @override
   _AddGroceryScreenState createState() => _AddGroceryScreenState();
 }
@@ -23,45 +26,6 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
   bool _isNewGrocery() {
     return _existingGroceryId == null;
   }
-
-  // void onStepFinish(BuildContext context) async {
-  //   final currentStepFormKey = _stepInfo[_currentStep].key;
-  //   if (currentStepFormKey.currentState.validate()) {
-  //     currentStepFormKey.currentState.save();
-  //
-  //     this.setState(() {
-  //       this.isLoading = true;
-  //     });
-  //
-  //     await artemisClient
-  //         .execute(SaveTaskMutation(
-  //         variables: SaveTaskArguments(
-  //             createInput: TaskInputCreate(
-  //                 creditsCalc: creditsCalc,
-  //                 fixedCredits: int.parse(fixedCredits).toDouble(),
-  //                 factor: double.parse(factor),
-  //                 name: name,
-  //                 userId: userId,
-  //                 periodStart: dateTimeToIsoDateString(period.start),
-  //                 periodEnd: dateTimeToIsoDateString(period.end)))))
-  //         .catchError((error) =>
-  //         Navigator.push(
-  //             context,
-  //             MaterialPageRoute(
-  //                 builder: (context) => ErrorDialog(error.toString()))))
-  //         .then((result) {
-  //       if (result.hasErrors) {
-  //         Navigator.push(
-  //             context,
-  //             MaterialPageRoute(
-  //                 builder: (context) => ErrorDialog(result.errors.toString())));
-  //       } else {
-  //         Navigator.pop(context);
-  //         emitTaskDidChange();
-  //       }
-  //     });
-  //   }
-  // }
 
   Widget _getListTile(Grocery$Query$AllNotInCart grocery) {
     if (grocery == null) {
@@ -86,7 +50,9 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
         title: Text('Einkauf hinzufügen'),
       ),
       body: Query(
-          options: QueryOptions(documentNode: query.document, fetchPolicy: FetchPolicy.networkOnly),
+          options: QueryOptions(
+              documentNode: query.document,
+              fetchPolicy: FetchPolicy.networkOnly),
           builder: (QueryResult result,
               {VoidCallback refetch, FetchMore fetchMore}) {
             if (result.hasException) {
@@ -110,15 +76,27 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                     _scaffoldKey.currentState.showSnackBar(
                       SnackBar(
                           content: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Änderung gespeichert'),
-                              Icon(Icons.check, color: Colors.green)
-                            ],
-                          )),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Änderung gespeichert'),
+                          Icon(Icons.check, color: Colors.green)
+                        ],
+                      )),
                     );
+                    AllGroceriesInCart$Query _queryToUpdate =
+                        AllGroceriesInCart$Query.fromJson(
+                            cache.read(widget._queryKey));
+
+                    _queryToUpdate.allInCart.add(
+                        AllGroceriesInCart$Query$AllInCart.fromJson(
+                            UpdateGrocery$Mutation.fromJson(result.data)
+                                .updateGrocery
+                                .grocery
+                                .toJson()));
+                    cache.write(widget._queryKey, _queryToUpdate.toJson());
+
                     Navigator.of(context).pop();
-                    emitGroceryDidChange();
+                    // emitGroceryDidChange();
                   }
                 },
                 onError: (OperationException error) {
@@ -156,14 +134,16 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                             onSuggestionSelected: (grocery) {
                               if (grocery == null) {
                                 setState(() {
-                                  mutationOptions.documentNode = _createMutation.document;
+                                  mutationOptions.documentNode =
+                                      _createMutation.document;
                                   _infoCtrl.text = '';
                                   _existingGroceryId = null;
                                   _infoFocusNode.requestFocus();
                                 });
                               } else {
                                 setState(() {
-                                  mutationOptions.documentNode = _updateMutation.document;
+                                  mutationOptions.documentNode =
+                                      _updateMutation.document;
                                   _nameCtrl.text = grocery.name;
                                   _infoCtrl.text = grocery.info;
                                   _existingGroceryId = grocery.id;
