@@ -42,36 +42,29 @@ class _TaskAssigneeInputState extends State<TaskAssigneeInput> {
 
           Users$Query queryData = query.parse(result.data);
 
-          return ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: queryData.users.length+1,
-              itemBuilder: (context, index) {
-                String title;
-                String value;
-                if (index == 0) {
-                  title = 'Keine Zuweisung';
-                  value = null;
-                } else {
-                  // index 0 is for null assignment, so we need to index-1 to
-                  // still get the first user
-                  title = queryData.users[index-1].publicName;
-                  value = queryData.users[index-1].id;
-                }
-                  return ListTile(
-                    title: Text(title),
-                    leading: Radio<String>(
-                        activeColor: themeData.accentColor,
-                        value: value,
-                        groupValue: _selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedValue = value;
-                          });
-                          onChanged(value);
-                        }),
-                  );
-              });
+          return DropdownButtonFormField(
+            decoration: InputDecoration(
+                labelText: 'Zuweisung'
+            ),
+            value: _selectedValue,
+              onChanged: (value) {
+                setState(() {
+                  _selectedValue = value;
+                });
+                onChanged(int.parse(value) < 0 ? null : value);
+              },
+              items: [
+              DropdownMenuItem(
+                child: Text('Keine Zuweisung'),
+                // we cannot set value to null since the input thinks there
+                // is no input in the field, fucking up the decorations
+                value: '-1',
+              ),
+              ...queryData.users.map((e) =>
+                  DropdownMenuItem(child: Text(e.publicName), value: e.id,))
+                  .toList()
+            ],
+          );
         });
   }
 }

@@ -15,49 +15,51 @@ class TasksContainer extends StatelessWidget {
     TextStyle textStyle = TextStyle(fontSize: 12);
     return DefaultTabController(
       length: 6,
-      child: Scaffold(
-        drawer: const CreditaskDrawer(),
-        appBar: AppBar(
-          title: Text('Aufgaben'),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddTaskScreen())))
-          ],
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(
-                child: Text('Zu machen', style: textStyle),
-              ),
-              Tab(
-                child: Text('Gemacht', style: textStyle),
-              ),
-              Tab(
-                child: Text('Zu bestätigen', style: textStyle),
-              ),
-              Tab(
-                child: Text('Nicht zugewiesen', style: textStyle),
-              ),
-              Tab(
-                child: Text('Alle offenen', style: textStyle),
-              ),
-              Tab(
-                child: Text('Credits', style: textStyle),
-              ),
+      child: SafeArea(
+        child: Scaffold(
+          drawer: const CreditaskDrawer(),
+          appBar: AppBar(
+            title: Text('Aufgaben'),
+            actions: [
+              IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AddTaskScreen())))
+            ],
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: [
+                Tab(
+                  child: Text('Zu machen', style: textStyle),
+                ),
+                Tab(
+                  child: Text('Gemacht', style: textStyle),
+                ),
+                Tab(
+                  child: Text('Zu bestätigen', style: textStyle),
+                ),
+                Tab(
+                  child: Text('Nicht zugewiesen', style: textStyle),
+                ),
+                Tab(
+                  child: Text('Alle offenen', style: textStyle),
+                ),
+                Tab(
+                  child: Text('Credits', style: textStyle),
+                ),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              TasksToDoScreen(),
+              TasksDoneScreen(),
+              TasksToApproveScreen(),
+              UnassignedTasksScreen(),
+              AllTasksScreen(),
+              CreditsScreen(),
             ],
           ),
-        ),
-        body: TabBarView(
-          children: [
-            TasksToDoScreen(),
-            TasksDoneScreen(),
-            TasksToApproveScreen(),
-            UnassignedTasksScreen(),
-            AllTasksScreen(),
-            CreditsScreen(),
-          ],
         ),
       ),
     );

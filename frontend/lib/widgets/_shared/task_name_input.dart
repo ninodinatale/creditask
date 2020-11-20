@@ -11,7 +11,7 @@ class TaskNameInput extends TextFormField {
             autofocus: autofocus,
             onSaved: onSaved,
             decoration: InputDecoration(
-              hintText: 'Name',
+                labelText: 'Name'
             ),
             validator: (value) {
               if (value.isEmpty) {

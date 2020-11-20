@@ -41,7 +41,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => TaskDetailScreen(task.id))),
-                leading: UserAvatar(),
+                leading: UserAvatar(task.user?.publicName),
                 title: Text(task.name),
                 subtitle: Text(
                     'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',

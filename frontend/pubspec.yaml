@@ -23,8 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^3.0.0
-  flutter_secure_storage: ^3.3.3
+  provider: ^4.3.2+2
+  flutter_secure_storage: ^3.3.5
   graphql_flutter: ^3.0.0
   build_runner: 1.10.0
   json_serializable: ^3.0.0

@@ -37,27 +37,6 @@ class CreditaskDrawer extends StatelessWidget {
               // TODO
             },
           ),
-          ListTile(
-            title: Text('Einstellungen'),
-            leading: Icon(Icons.settings),
-            onTap: () => {
-              // TODO
-            },
-          ),
-          ListTile(
-            title: Text('Einstellungen'),
-            leading: Icon(Icons.settings),
-            onTap: () => {
-              // TODO
-            },
-          ),
-          ListTile(
-            title: Text('Einstellungen'),
-            leading: Icon(Icons.settings),
-            onTap: () => {
-              // TODO
-            },
-          ),
           Divider(),
           ListTile(
             title: Text('Ausloggen'),

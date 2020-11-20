@@ -14,7 +14,7 @@ class FactorInput extends TextFormField {
             keyboardType: TextInputType.number,
             onSaved: onSaved,
             decoration: const InputDecoration(
-              hintText: 'Faktor',
+              labelText: 'Faktor',
             ),
             validator: (value) {
               if (value.isEmpty) {

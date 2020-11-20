@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TokenAuthArguments(email: username, password: password)))
           .catchError((error) {
         this.setState(() {
-          this.loginError = 'Ein Verbindungsfehler ist aufgetreten';
+          this.loginError = 'Ein Verbindungsfehler ist aufgetreten:\n${error.toString()}';
           this.isLoading = false;
         });
       }).then((result) async {
@@ -58,69 +58,71 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = Provider.of<AuthProvider>(context);
-    return Scaffold(
-        body: Center(
-            child: SizedBox(
-                width: 300,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Text('Login',
-                              style: TextStyle(
-                                  fontSize: 30, fontWeight: FontWeight.bold))),
-                      TextFormField(
-                        onSaved: (value) => username = value,
-                        decoration: const InputDecoration(
-                          hintText: 'Benutzername',
+    return SafeArea(
+      child: Scaffold(
+          body: Center(
+              child: SizedBox(
+                  width: 300,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Text('Login',
+                                style: TextStyle(
+                                    fontSize: 30, fontWeight: FontWeight.bold))),
+                        TextFormField(
+                          onSaved: (value) => username = value,
+                          decoration: const InputDecoration(
+                            hintText: 'Benutzername',
+                          ),
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Eingabe darf nicht leer sein';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Eingabe darf nicht leer sein';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        onSaved: (value) => password = value,
-                        decoration: const InputDecoration(
-                          hintText: 'Passwort',
+                        TextFormField(
+                          onSaved: (value) => password = value,
+                          decoration: const InputDecoration(
+                            hintText: 'Passwort',
+                          ),
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Eingabe darf nicht leer sein';
+                            }
+                            return null;
+                          },
+                          obscureText: true,
                         ),
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Eingabe darf nicht leer sein';
-                          }
-                          return null;
-                        },
-                        obscureText: true,
-                      ),
-                      Container(
-                        child: Padding(
-                            padding:
-                                const EdgeInsets.only(top: 30.0, bottom: 15),
-                            child: this.loginError != null
-                                ? Text(
-                                    this.loginError,
-                                    style: TextStyle(
-                                        color: Theme.of(context).errorColor),
-                                  )
-                                : null),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: RaisedButton(
-                          onPressed: this.isLoading
-                              ? null
-                              : () => onLoginPressed(auth),
-                          child: LoadingButtonContent(isLoading, 'Login'),
+                        Container(
+                          child: Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 30.0, bottom: 15),
+                              child: this.loginError != null
+                                  ? Text(
+                                      this.loginError,
+                                      style: TextStyle(
+                                          color: Theme.of(context).errorColor),
+                                    )
+                                  : null),
                         ),
-                      ),
-                    ],
-                  ),
-                ))));
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: RaisedButton(
+                            onPressed: this.isLoading
+                                ? null
+                                : () => onLoginPressed(auth),
+                            child: LoadingButtonContent(isLoading, 'Login'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )))),
+    );
   }
 }

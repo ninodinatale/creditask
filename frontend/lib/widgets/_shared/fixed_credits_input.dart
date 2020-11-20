@@ -14,7 +14,7 @@ class FixedCreditsInput extends TextFormField {
             keyboardType: TextInputType.number,
             onSaved: onSaved,
             decoration: const InputDecoration(
-              hintText: 'Pauschale Credits',
+              labelText: 'Pauschale Credits',
             ),
             validator: (value) {
               if (value.isEmpty) {

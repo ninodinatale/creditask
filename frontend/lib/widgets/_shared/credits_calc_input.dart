@@ -22,28 +22,27 @@ class _CreditsCalcInputState extends State<CreditsCalcInput> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-
-    return ListView.builder(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        // artemisUnknown shouldn't be listed, therefore -1
-        itemCount: CreditsCalc.values.length - 1,
-        itemBuilder: (context, index) {
-          return ListTile(
-            // TODO do this with creditscalc values and translations
-            title: Text(index == 0 ? 'Anhand Minuten' : 'Pauschal'),
-            leading: Radio<CreditsCalc>(
-                activeColor: themeData.accentColor,
-                value: CreditsCalc.values[index],
-                groupValue: _selectedValue,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedValue = value;
-                  });
-                  onChanged(value);
-                }),
-          );
+    return DropdownButtonFormField(
+      decoration: InputDecoration(
+        labelText: 'Credits Berechnung'
+      ),
+      value: _selectedValue,
+      onChanged: (value) {
+        setState(() {
+          _selectedValue = value;
         });
+        onChanged(value);
+      },
+      items: [
+        DropdownMenuItem(
+          child: Text('Anhand Minuten'),
+          value: CreditsCalc.byFactor,
+        ),
+        DropdownMenuItem(
+          child: Text('Pauschal'),
+          value: CreditsCalc.fixed,
+        ),
+      ],
+    );
   }
 }

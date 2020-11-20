@@ -48,7 +48,7 @@ class PeriodInput extends StatelessWidget {
         onTap: () => showPicker(context),
         readOnly: true,
         decoration: const InputDecoration(
-          hintText: 'Frühestens machen am',
+          labelText: 'Frühestens machen am',
         ),
         validator: (value) {
           if (value.isEmpty) {

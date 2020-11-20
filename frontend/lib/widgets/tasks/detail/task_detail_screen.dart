@@ -52,25 +52,27 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
         return DefaultTabController(
             length: 2,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(queryData.task.name),
-                bottom: TabBar(
-                  tabs: [
-                    Tab(
-                        child: Text('Details', style: textStyle),
-                        icon: Icon(Icons.details)),
-                    Tab(
-                        child: Text('Änderungen', style: textStyle),
-                        icon: Icon(Icons.history)),
+            child: SafeArea(
+              child: Scaffold(
+                appBar: AppBar(
+                  title: Text(queryData.task.name),
+                  bottom: TabBar(
+                    tabs: [
+                      Tab(
+                          child: Text('Details', style: textStyle),
+                          icon: Icon(Icons.details)),
+                      Tab(
+                          child: Text('Änderungen', style: textStyle),
+                          icon: Icon(Icons.history)),
+                    ],
+                  ),
+                ),
+                body: TabBarView(
+                  children: [
+                    TaskDetail(queryData.task),
+                    TaskChanges(taskId),
                   ],
                 ),
-              ),
-              body: TabBarView(
-                children: [
-                  TaskDetail(queryData.task),
-                  TaskChanges(taskId),
-                ],
               ),
             ));
       },

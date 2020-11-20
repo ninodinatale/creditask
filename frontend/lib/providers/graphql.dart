@@ -12,7 +12,7 @@ const _ENVIRONMENT = String.fromEnvironment('ENVIRONMENT');
 const _PROD_URL = 'https://creditask.herokuapp.com';
 final _host = _ENVIRONMENT != 'develop' ? _PROD_URL : Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
 
-final _graphqlUri = '$_host/graphql';
+final _graphqlUri = 'https://creditask.herokuapp.com/graphql';
 
 ArtemisClient artemisClient;
 
