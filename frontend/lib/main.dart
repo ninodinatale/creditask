@@ -4,6 +4,7 @@ import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/app_container.dart';
 import 'package:creditask/widgets/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -26,7 +27,15 @@ class MyApp extends StatelessWidget {
                     textTheme: ButtonTextTheme.primary,
                   ),
                 ),
-                home: AuthContainer())));
+
+                // adjusting status bar (iOS & Android) and navigation bar
+                // (Android) colors
+                home: AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: SystemUiOverlayStyle(
+                      statusBarColor: base.primaryColor,
+                      systemNavigationBarColor: base.primaryColor,
+                    ),
+                    child: AuthContainer()))));
   }
 }
 
