@@ -35,7 +35,7 @@
       <excludeFolder url="file://$MODULE_DIR$/frontend/ios/.symlinks/plugins/path_provider/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/ios/.symlinks/plugins/path_provider/example/build" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
