@@ -15,8 +15,9 @@ import '../../../graphql/api.dart';
 
 class TaskToApprove extends StatefulWidget {
   final ToApproveTasksOfUser$Query$ToApproveTasksOfUser _task;
+  final Request _request;
 
-  const TaskToApprove(this._task);
+  const TaskToApprove(this._task, this._request);
 
   @override
   _TaskToApproveState createState() => _TaskToApproveState();
@@ -77,8 +78,8 @@ class _TaskToApproveState extends State<TaskToApprove> {
     UpdateApprovalMutation mutation = UpdateApprovalMutation();
     return Mutation(
       options: MutationOptions(
-          documentNode: mutation.document,
-          update: (Cache cache, QueryResult result) {
+          document: mutation.document,
+          update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {
               // TODO
             } else {
@@ -95,7 +96,7 @@ class _TaskToApproveState extends State<TaskToApprove> {
                   .firstWhere((element) => element.id == updatedApproval.id)
                   .state = updatedApproval.state;
               final updatedTaskJson = clonedTask.toJson();
-              cache.write(uuidFromObject(updatedTaskJson), updatedTaskJson);
+              cache.writeQuery(widget._request, data: updatedTaskJson);
               emitTaskDidChange();
               Navigator.of(context).pop();
               Scaffold.of(context).showSnackBar(SnackBar(

@@ -34,9 +34,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var _queryOptions = QueryOptions(
+        document: query.document, variables: query.getVariablesMap());
     return Query(
-      options: QueryOptions(
-          documentNode: query.document, variables: query.getVariablesMap()),
+      options: _queryOptions,
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
         if (result.hasException) {
@@ -69,7 +70,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 ),
                 body: TabBarView(
                   children: [
-                    TaskDetail(queryData.task),
+                    TaskDetail(queryData.task, _queryOptions.asRequest),
                     TaskChanges(taskId),
                   ],
                 ),

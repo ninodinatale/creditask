@@ -8,6 +8,7 @@ import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/shopping_list/add/add_grocery_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class ShoppingListContainer extends StatefulWidget {
   @override
@@ -17,9 +18,10 @@ class ShoppingListContainer extends StatefulWidget {
 class _ShoppingListContainerState extends State<ShoppingListContainer> {
   RunMutation _runMutation;
   List<AllGroceriesInCart$Query$AllInCart> _groceries;
-  String _queryKey;
 
   StreamSubscription<void> _subscription;
+
+  QueryOptions _queryOptions;
 
   @override
   void dispose() {
@@ -62,21 +64,21 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                   onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => AddGroceryScreen(_queryKey))))
+                          builder: (context) => AddGroceryScreen(_queryOptions.asRequest))))
             ],
           ),
           body: Mutation(
             options: MutationOptions(
-                documentNode: mutation.document,
+                document: mutation.document,
                 fetchPolicy: FetchPolicy.cacheAndNetwork,
-                update: (Cache cache, QueryResult result) {
+                update: (GraphQLDataProxy cache, QueryResult result) {
                   if (result.hasException) {
                     // TODO
                   } else {
                     setState(() {
                       _groceries.forEach((e) {
                         final json = e.toJson();
-                        cache.write(uuidFromObject(json), json);
+                        cache.writeQuery(_queryOptions.asRequest, data: json);
                       });
                     });
                     Scaffold.of(context).showSnackBar(SnackBar(
@@ -94,8 +96,7 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                 }),
             builder: (runMutation, result) {
               _runMutation = runMutation;
-              var _queryOptions = QueryOptions(documentNode: query.document);
-              _queryKey = _queryOptions.toKey();
+              _queryOptions = QueryOptions(document: query.document);
               return Query(
                 options: _queryOptions,
                 builder: (QueryResult result,

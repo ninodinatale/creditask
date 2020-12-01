@@ -20,13 +20,11 @@ mixin GroceryMixin {
   String name;
   String info;
   bool inCart;
-  @override
   @JsonKey(name: '__typename')
   String $$typename;
 }
 mixin ToApproveTasksOfUserMixin {}
 mixin TaskWithApprovalsMixin {
-  @override
   @JsonKey(name: '__typename')
   String $$typename;
   List<TaskWithApprovalsMixin$Approvals> approvals;
@@ -47,7 +45,6 @@ mixin CurrentUserMixin {
   String email;
 }
 mixin DetailTaskMixin {
-  @override
   @JsonKey(name: '__typename')
   String $$typename;
   String id;

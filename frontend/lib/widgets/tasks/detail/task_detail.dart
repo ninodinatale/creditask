@@ -18,8 +18,9 @@ import 'factor_tile.dart';
 
 class TaskDetail extends StatefulWidget {
   final TaskDetail$Query$Task _task;
+  final Request _request;
 
-  TaskDetail(this._task);
+  TaskDetail(this._task, this._request);
 
   @override
   _TaskDetailState createState() => _TaskDetailState();
@@ -46,9 +47,9 @@ class _TaskDetailState extends State<TaskDetail> {
     UpdateDetailTaskMutation mutation = UpdateDetailTaskMutation();
     return Mutation(
       options: MutationOptions(
-          documentNode: mutation.document,
+          document: mutation.document,
           // will be called for both optimistic and final results
-          update: (Cache cache, QueryResult result) {
+          update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {
               return ErrorDialog(result.exception.toString());
             } else {
@@ -56,7 +57,7 @@ class _TaskDetailState extends State<TaskDetail> {
                   UpdateDetailTask$Mutation.fromJson(result.data).saveTask.task;
               var updatedTaskJson = widget._task.toJson()
                 ..addAll(updatedTask.toJson());
-              cache.write(uuidFromObject(updatedTaskJson), updatedTaskJson);
+              cache.writeQuery(widget._request, data: updatedTaskJson);
               emitTaskDidChange();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
@@ -94,7 +95,7 @@ class _TaskDetailState extends State<TaskDetail> {
             NeededTimeTile(widget._task, saveChanges),
             PeriodStartTile(widget._task, saveChanges),
             PeriodEndTile(widget._task, saveChanges),
-            ActionButtons(widget._task),
+            ActionButtons(widget._task, widget._request),
           ],
         );
       },

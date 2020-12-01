@@ -11,8 +11,9 @@ import '../../../graphql/api.dart';
 
 class ActionButtons extends StatefulWidget {
   final TaskDetail$Query$Task _task;
+  final Request _request;
 
-  ActionButtons(this._task);
+  ActionButtons(this._task, this._request);
 
   @override
   _ActionButtonsState createState() => _ActionButtonsState();
@@ -162,8 +163,8 @@ class _ActionButtonsState extends State<ActionButtons> {
       builder: (context, auth, child) {
         return Mutation(
           options: MutationOptions(
-              documentNode: approvalMutation.document,
-              update: (Cache cache, QueryResult result) {
+              document: approvalMutation.document,
+              update: (GraphQLDataProxy cache, QueryResult result) {
                 if (result.hasException) {
                   // TODO
                 } else {
@@ -181,7 +182,7 @@ class _ActionButtonsState extends State<ActionButtons> {
                       .state = newApprovalState;
 
                   var updatedTaskJson = updatedTask.toJson();
-                  cache.write(uuidFromObject(updatedTaskJson), updatedTaskJson);
+                  cache.writeQuery(widget._request, data: updatedTaskJson);
                   emitTaskDidChange();
                   Scaffold.of(context).showSnackBar(SnackBar(
                       content: Row(
@@ -200,8 +201,8 @@ class _ActionButtonsState extends State<ActionButtons> {
             this._runUpdateApprovalMutation = runUpdateApprovalMutation;
             return Mutation(
               options: MutationOptions(
-                  documentNode: taskMutation.document,
-                  update: (Cache cache, QueryResult result) {
+                  document: taskMutation.document,
+                  update: (GraphQLDataProxy cache, QueryResult result) {
                     if (result.hasException) {
                       // TODO
                     } else {
@@ -211,8 +212,8 @@ class _ActionButtonsState extends State<ActionButtons> {
                               .task;
                       var updatedTaskJson = widget._task.toJson()
                         ..addAll(updatedTask.toJson());
-                      cache.write(
-                          uuidFromObject(updatedTaskJson), updatedTaskJson);
+                      cache.writeQuery(
+                          widget._request, data: updatedTaskJson);
                       emitTaskDidChange();
                       Scaffold.of(context).showSnackBar(SnackBar(
                           content: Row(

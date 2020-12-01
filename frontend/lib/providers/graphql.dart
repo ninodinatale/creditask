@@ -39,33 +39,29 @@ String uuidFromObject(Object object) {
   return null;
 }
 
-final OptimisticCache cache = OptimisticCache(
+final GraphQLCache cache = GraphQLCache(
   dataIdFromObject: uuidFromObject,
 );
 
 ValueNotifier<GraphQLClient> clientFor({
   @required AuthProvider auth,
   @required String uri,
-  String subscriptionUri,
 }) {
-  HttpLink httpLink = HttpLink(uri: uri);
+  HttpLink httpLink = HttpLink(uri);
   AuthLink authLink = AuthLink(getToken: () async {
     return 'Jwt ${await auth.jwt}';
   });
 
   Link link = authLink.concat(httpLink);
 
-  if (subscriptionUri != null) {
-    final WebSocketLink websocketLink = WebSocketLink(
-      url: subscriptionUri,
-      config: SocketClientConfig(
-        autoReconnect: true,
-        inactivityTimeout: Duration(seconds: 30),
-      ),
-    );
-
-    link = link.concat(websocketLink);
-  }
+  // TODO implement websockets for updating UI after mutations
+  // final WebSocketLink websocketLink = WebSocketLink(
+  //   _websocketUri
+  // );
+  // split request based on type
+  // link = Link.split((request) {
+  //   return request.isSubscription;
+  // }, websocketLink, link);
 
   artemisClient = ArtemisClient(
     uri,
@@ -85,11 +81,9 @@ ValueNotifier<GraphQLClient> clientFor({
 class GraphqlProvider extends StatelessWidget {
   GraphqlProvider({
     @required this.child,
-    this.subscriptionUri,
   });
 
   final Widget child;
-  final String subscriptionUri;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +92,6 @@ class GraphqlProvider extends StatelessWidget {
       client: clientFor(
         auth: auth,
         uri: _graphqlUri,
-        subscriptionUri: subscriptionUri,
       ),
       child: child,
     );

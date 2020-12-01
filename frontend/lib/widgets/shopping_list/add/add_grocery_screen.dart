@@ -6,9 +6,9 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class AddGroceryScreen extends StatefulWidget {
-  final String _queryKey;
+  final Request _request;
 
-  const AddGroceryScreen(this._queryKey);
+  const AddGroceryScreen(this._request);
 
   @override
   _AddGroceryScreenState createState() => _AddGroceryScreenState();
@@ -70,7 +70,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                   documentNode: _isNewGrocery()
                       ? _createMutation.document
                       : _updateMutation.document,
-                  update: (Cache cache, QueryResult result) {
+                  update: (GraphQLDataProxy cache, QueryResult result) {
                     if (result.hasException) {
                       return ErrorDialog(result.exception.toString());
                     } else {
@@ -86,7 +86,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                       );
                       AllGroceriesInCart$Query _queryToUpdate =
                           AllGroceriesInCart$Query.fromJson(
-                              cache.read(widget._queryKey));
+                              cache.readQuery(widget._request));
 
                       _queryToUpdate.allInCart.add(
                           AllGroceriesInCart$Query$AllInCart.fromJson(
@@ -94,7 +94,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                                   .updateGrocery
                                   .grocery
                                   .toJson()));
-                      cache.write(widget._queryKey, _queryToUpdate.toJson());
+                      cache.writeQuery(widget._request, data: _queryToUpdate.toJson());
 
                       Navigator.of(context).pop();
                       // emitGroceryDidChange();
@@ -135,7 +135,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                               onSuggestionSelected: (grocery) {
                                 if (grocery == null) {
                                   setState(() {
-                                    mutationOptions.documentNode =
+                                    mutationOptions.document =
                                         _createMutation.document;
                                     _infoCtrl.text = '';
                                     _existingGroceryId = null;
@@ -143,7 +143,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                                   });
                                 } else {
                                   setState(() {
-                                    mutationOptions.documentNode =
+                                    mutationOptions.document =
                                         _updateMutation.document;
                                     _nameCtrl.text = grocery.name;
                                     _infoCtrl.text = grocery.info;

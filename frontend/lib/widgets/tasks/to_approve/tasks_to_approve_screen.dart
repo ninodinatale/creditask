@@ -31,9 +31,10 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
     ToApproveTasksOfUserQuery query = ToApproveTasksOfUserQuery(
         variables:
             ToApproveTasksOfUserArguments(email: auth.currentUser.email));
+    var _queryOptions = QueryOptions(
+        document: query.document, variables: query.getVariablesMap());
     return Query(
-        options: QueryOptions(
-            documentNode: query.document, variables: query.getVariablesMap()),
+        options: _queryOptions,
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
           if (_subscription == null) {
@@ -59,7 +60,7 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               children: ListTile.divideTiles(
                   context: context,
-                  tiles: tasks.map((task) => TaskToApprove(task))).toList(),
+                  tiles: tasks.map((task) => TaskToApprove(task, _queryOptions.asRequest))).toList(),
             );
           }
         });
