@@ -1,5 +1,4 @@
 import 'package:creditask/providers/auth.dart';
-import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/widgets/_shared/duration_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -175,23 +174,25 @@ class _ActionButtonsState extends State<ActionButtons> {
                           .state;
 
                   var updatedTask =
-                      TaskDetail$Query$Task.fromJson(widget._task.toJson());
-                  updatedTask.approvals
-                      .firstWhere(
-                          (element) => element.user.id == auth.currentUser.id)
-                      .state = newApprovalState;
+                      TaskDetail$Query$Task.fromJson(widget._task.toJson())
+                        ..approvals
+                            .firstWhere((element) =>
+                                element.user.id == auth.currentUser.id)
+                            .state = newApprovalState;
 
-                  var updatedTaskJson = updatedTask.toJson();
-                  cache.writeQuery(widget._request, data: updatedTaskJson);
+                  TaskDetail$Query query = TaskDetail$Query()
+                    ..task = updatedTask;
+
+                  cache.writeQuery(widget._request, data: query.toJson());
                   emitTaskDidChange();
                   Scaffold.of(context).showSnackBar(SnackBar(
                       content: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Änderung gespeichert'),
-                          Icon(Icons.check, color: Colors.green)
-                        ],
-                      )));
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Änderung gespeichert'),
+                      Icon(Icons.check, color: Colors.green)
+                    ],
+                  )));
                 }
               },
               onError: (OperationException error) {
@@ -206,23 +207,27 @@ class _ActionButtonsState extends State<ActionButtons> {
                     if (result.hasException) {
                       // TODO
                     } else {
-                      var updatedTask =
+                      UpdateDetailTask$Mutation$SaveTask$Task updatedTask =
                           UpdateDetailTask$Mutation.fromJson(result.data)
                               .saveTask
                               .task;
-                      var updatedTaskJson = widget._task.toJson()
-                        ..addAll(updatedTask.toJson());
-                      cache.writeQuery(
-                          widget._request, data: updatedTaskJson);
+
+                      widget._task.toJson()..addAll(updatedTask.toJson());
+                      TaskDetail$Query query = TaskDetail$Query()
+                        ..task = (TaskDetail$Query$Task.fromJson(
+                            widget._task.toJson()
+                              ..addAll(updatedTask.toJson())));
+
+                      cache.writeQuery(widget._request, data: query.toJson());
                       emitTaskDidChange();
                       Scaffold.of(context).showSnackBar(SnackBar(
                           content: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Änderung gespeichert'),
-                              Icon(Icons.check, color: Colors.green)
-                            ],
-                          )));
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Änderung gespeichert'),
+                          Icon(Icons.check, color: Colors.green)
+                        ],
+                      )));
                     }
                   },
                   onError: (OperationException error) {

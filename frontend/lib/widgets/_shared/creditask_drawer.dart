@@ -1,9 +1,9 @@
 import 'package:creditask/providers/auth.dart';
+import 'package:creditask/widgets/_shared/creditask_version.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CreditaskDrawer extends StatelessWidget {
-
   const CreditaskDrawer();
 
   @override
@@ -22,8 +22,30 @@ class CreditaskDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Creditask', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30, color: theme.colorScheme.surface)),
-                Text(auth.currentUser.publicName, style: TextStyle(color: theme.colorScheme.surface)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Creditask',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30,
+                            color: theme.colorScheme.surface)),
+                    Text(' ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30,
+                            color: theme.colorScheme.surface)),
+                    CreditaskVersion(
+                        style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            height: 3,
+                            fontSize: 10,
+                            color: theme.colorScheme.surface)),
+                  ],
+                ),
+                Text(auth.currentUser.publicName,
+                    style: TextStyle(color: theme.colorScheme.surface)),
               ],
             ),
             decoration: BoxDecoration(
@@ -47,5 +69,4 @@ class CreditaskDrawer extends StatelessWidget {
       ),
     );
   }
-
 }

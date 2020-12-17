@@ -49,6 +49,15 @@ scalar Date
 
 scalar DateTime
 
+type ErrorType {
+  id: ID!
+  createdAt: DateTime!
+  createdBy: UserType!
+  isDeleted: Boolean!
+  user: UserType!
+  stackTrace: String!
+}
+
 scalar GenericScalar
 
 input GroceryCreateInput {
@@ -74,6 +83,7 @@ input GroceryUpdateInput {
 }
 
 type Mutation {
+  saveError(stackTrace: String!): SaveError
   createGrocery(input: GroceryCreateInput!): CreateGrocery
   updateGrocery(input: GroceryUpdateInput!): UpdateGrocery
   updateGroceries(input: [GroceryUpdateInput]!): UpdateGroceries
@@ -115,6 +125,10 @@ type SaveApproval {
   approval: ApprovalType!
 }
 
+type SaveError {
+  error: ErrorType!
+}
+
 type SaveTask {
   task: TaskType!
 }
@@ -134,10 +148,10 @@ enum TaskChangeChangedProperty {
 }
 
 type TaskChangeType {
-  id: ID!
   createdAt: DateTime!
   createdBy: UserType!
   isDeleted: Boolean!
+  id: ID!
   currentValue: String
   previousValue: String
   user: UserType!
@@ -216,6 +230,7 @@ type UserType {
   taskSet: [TaskType!]!
   approvalSet: [ApprovalType!]!
   taskchangeSet: [TaskChangeType!]!
+  errorSet: [ErrorType!]!
 }
 
 type Verify {
