@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:creditask/graphql/api.dart';
-import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/services/shopping_list.dart';
 import 'package:creditask/widgets/_shared/creditask_drawer.dart';
 import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/shopping_list/add/add_grocery_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class ShoppingListContainer extends StatefulWidget {
@@ -17,7 +15,9 @@ class ShoppingListContainer extends StatefulWidget {
 
 class _ShoppingListContainerState extends State<ShoppingListContainer> {
   RunMutation _runMutation;
-  List<AllGroceriesInCart$Query$AllInCart> _groceries;
+  VoidCallback _refetch;
+  void Function(void Function()) _setFabState;
+  List<AllGroceriesInCart$Query$AllInCart> _groceries = List.empty();
 
   StreamSubscription<void> _subscription;
 
@@ -29,6 +29,10 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
     _subscription.cancel();
   }
 
+  bool _hasSelected() {
+    return _groceries.any((element) => !element.inCart);
+  }
+
   @override
   Widget build(BuildContext context) {
     final query = AllGroceriesInCartQuery();
@@ -36,25 +40,35 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
     final theme = Theme.of(context);
     return SafeArea(
       child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-              backgroundColor: theme.primaryColor,
-              child: Icon(
-                Icons.check,
-                color: theme.colorScheme.surface,
-              ),
-              onPressed: () {
-                return _runMutation(
-                  UpdateGroceriesArguments(
-                          input: _groceries
-                              .map((e) => GroceryUpdateInput(
-                                  id: e.id,
-                                  inCart: e.inCart,
-                                  info: e.info,
-                                  name: e.name))
-                              .toList())
-                      .toJson(),
-                  optimisticResult: _groceries);
-              }),
+          floatingActionButton: StatefulBuilder(
+            builder: (context, setState) {
+              _setFabState = setState;
+              return FloatingActionButton(
+                  backgroundColor:
+                      _hasSelected() ? theme.primaryColor : theme.disabledColor,
+                  child: Icon(
+                    Icons.check,
+                    color: theme.colorScheme.surface,
+                  ),
+                  onPressed: !_hasSelected()
+                      ? null
+                      : () {
+                          if (_hasSelected()) {
+                            _runMutation(
+                                UpdateGroceriesArguments(
+                                        input: _groceries
+                                            .map((e) => GroceryUpdateInput(
+                                                id: e.id,
+                                                inCart: e.inCart,
+                                                info: e.info,
+                                                name: e.name))
+                                            .toList())
+                                    .toJson(),
+                                optimisticResult: _groceries);
+                          }
+                        });
+            },
+          ),
           drawer: const CreditaskDrawer(),
           appBar: AppBar(
             title: Text('Einkaufsliste'),
@@ -64,7 +78,8 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                   onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => AddGroceryScreen(_queryOptions.asRequest))))
+                          builder: (context) =>
+                              AddGroceryScreen(_queryOptions.asRequest))))
             ],
           ),
           body: Mutation(
@@ -75,12 +90,17 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                   if (result.hasException) {
                     // TODO
                   } else {
-                    setState(() {
-                      _groceries.forEach((e) {
-                        final json = e.toJson();
-                        cache.writeQuery(_queryOptions.asRequest, data: json);
-                      });
-                    });
+                    // TODO this somehow does only work the first time, after that,
+                    //  `inCart` is still true even though it's set in `onChanged`
+                    //  down below. Just refetching for now, but updating cache
+                    //  is yet TODO
+                    // final _query = AllGroceriesInCart$Query()..allInCart = _groceries;
+                    //   cache.writeQuery(_queryOptions.asRequest,
+                    //       data: _query.toJson());
+
+                    // TODO remove refetch if issue above is resolved
+                    _refetch();
+
                     Scaffold.of(context).showSnackBar(SnackBar(
                         content: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,6 +121,7 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                 options: _queryOptions,
                 builder: (QueryResult result,
                     {VoidCallback refetch, FetchMore fetchMore}) {
+                  _refetch = refetch;
                   if (result.hasException) {
                     return ErrorDialog(result.exception.toString());
                   }
@@ -138,8 +159,11 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
                                     activeColor: theme.accentColor,
                                     value: !_groceries[i].inCart,
                                     selected: !_groceries[i].inCart,
-                                    onChanged: (value) => setState(
-                                        () => _groceries[i].inCart = !value),
+                                    onChanged: (value) {
+                                      setState(
+                                          () => _groceries[i].inCart = !value);
+                                      _setFabState(() {});
+                                    },
                                     title: Text(_groceries[i].name),
                                     subtitle: Text(_groceries[i].info),
                                   )));

@@ -27,19 +27,21 @@ class _TasksDoneScreenState extends State<TasksDoneScreen> {
   }
 
   Widget getTrailing(UsersDoneToApproveTasks$Query$DoneTasksOfUser task) {
-    if (task.approvals.firstWhere(
-            (element) => element.state == ApprovalState.declined,
-            orElse: () => null) !=
-        null) {
-      return IconButton(icon: Icon(Icons.add), onPressed: () => {});
-    } else if (task.approvals.firstWhere(
-            (element) => element.state == ApprovalState.none,
-            orElse: () => null) !=
-        null) {
-      return SizedBox.shrink();
-    } else {
-      return IconButton(icon: Icon(Icons.one_k), onPressed: () => {});
-    }
+    return null;
+    // TODO add quick actions below
+    // if (task.approvals.firstWhere(
+    //         (element) => element.state == ApprovalState.declined,
+    //         orElse: () => null) !=
+    //     null) {
+    //   return IconButton(icon: Icon(Icons.add), onPressed: () => {});
+    // } else if (task.approvals.firstWhere(
+    //         (element) => element.state == ApprovalState.none,
+    //         orElse: () => null) !=
+    //     null) {
+    //   return SizedBox.shrink();
+    // } else {
+    //   return IconButton(icon: Icon(Icons.one_k), onPressed: () => {});
+    // }
   }
 
   @override
