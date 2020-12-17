@@ -4,15 +4,20 @@ import graphql
 import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
-    Task, TaskChange, CreditsCalc, Grocery
+    Task, TaskChange, CreditsCalc, Grocery, Error
 from creditask.services import get_task_changes_by_task, save_approval, \
     get_todo_tasks_by_user_email, get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, \
     get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
-    get_all_in_cart
+    get_all_in_cart, save_error
 from .scalars import custom_string, custom_float
+
+
+class ErrorType(graphene_django.DjangoObjectType):
+    class Meta:
+        model = Error
 
 
 class UserType(graphene_django.DjangoObjectType):
@@ -175,6 +180,20 @@ class TaskInputUpdate(graphene.InputObjectType):
     period_end = TaskScalars.period_end()
 
 
+# TODO test
+class SaveError(graphene.Mutation):
+    class Arguments:
+        stack_trace = graphene.NonNull(graphene.String)
+
+    error = graphene.NonNull(ErrorType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, stack_trace: str):
+        error = save_error(info.context.user.id, stack_trace)
+        return SaveError(error=error)
+
+
 class SaveTask(graphene.Mutation):
     class Arguments:
         create_input = TaskInputCreate()
@@ -247,6 +266,11 @@ class GroceryQuery:
 #
 # Mutations
 #
+# TODO test
+class ErrorMutation:
+    save_error = SaveError.Field()
+
+
 class TaskMutation:
     save_task = SaveTask.Field()
 
@@ -399,7 +423,7 @@ class Verify(graphene.Mutation, graphene.ObjectType):
         return parent.user
 
 
-class Mutation(TaskMutation, ApprovalMutation, GroceryMutation,
+class Mutation(TaskMutation, ApprovalMutation, GroceryMutation, ErrorMutation,
                graphene.ObjectType):
     token_auth = ObtainJSONWebToken.Field()
 

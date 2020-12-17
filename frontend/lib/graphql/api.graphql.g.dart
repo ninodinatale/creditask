@@ -1139,6 +1139,30 @@ Map<String, dynamic> _$Users$QueryToJson(Users$Query instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
+Error$Mutation$SaveError _$Error$Mutation$SaveErrorFromJson(
+    Map<String, dynamic> json) {
+  return Error$Mutation$SaveError()..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$Error$Mutation$SaveErrorToJson(
+        Error$Mutation$SaveError instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+    };
+
+Error$Mutation _$Error$MutationFromJson(Map<String, dynamic> json) {
+  return Error$Mutation()
+    ..saveError = json['saveError'] == null
+        ? null
+        : Error$Mutation$SaveError.fromJson(
+            json['saveError'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$Error$MutationToJson(Error$Mutation instance) =>
+    <String, dynamic>{
+      'saveError': instance.saveError?.toJson(),
+    };
+
 UpdateApprovalArguments _$UpdateApprovalArgumentsFromJson(
     Map<String, dynamic> json) {
   return UpdateApprovalArguments(
@@ -1323,4 +1347,15 @@ Map<String, dynamic> _$SaveTaskArgumentsToJson(SaveTaskArguments instance) =>
     <String, dynamic>{
       'createInput': instance.createInput?.toJson(),
       'updateInput': instance.updateInput?.toJson(),
+    };
+
+ErrorArguments _$ErrorArgumentsFromJson(Map<String, dynamic> json) {
+  return ErrorArguments(
+    stackTrace: json['stackTrace'] as String,
+  );
+}
+
+Map<String, dynamic> _$ErrorArgumentsToJson(ErrorArguments instance) =>
+    <String, dynamic>{
+      'stackTrace': instance.stackTrace,
     };
