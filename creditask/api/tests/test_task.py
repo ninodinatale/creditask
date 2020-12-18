@@ -324,7 +324,6 @@ class ResolveToApproveTasksOfUserTest(CreditaskTestBase):
             user=user_1
         )
         create_approval(
-            created_by=user_1,
             state=ApprovalState.NONE,
             task=task_6,
             user=user_2

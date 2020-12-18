@@ -623,9 +623,18 @@ class TaskChanges$Query$Task$TaskChanges with EquatableMixin, TaskChangesMixin {
           Map<String, dynamic> json) =>
       _$TaskChanges$Query$Task$TaskChangesFromJson(json);
 
+  @JsonKey(name: '__typename')
+  String $$typename;
+
   @override
-  List<Object> get props =>
-      [changedProperty, currentValue, previousValue, timestamp, user];
+  List<Object> get props => [
+        changedProperty,
+        currentValue,
+        previousValue,
+        timestamp,
+        user,
+        $$typename
+      ];
   Map<String, dynamic> toJson() =>
       _$TaskChanges$Query$Task$TaskChangesToJson(this);
 }
@@ -637,10 +646,13 @@ class TaskChanges$Query$Task with EquatableMixin {
   factory TaskChanges$Query$Task.fromJson(Map<String, dynamic> json) =>
       _$TaskChanges$Query$TaskFromJson(json);
 
+  @JsonKey(name: '__typename')
+  String $$typename;
+
   List<TaskChanges$Query$Task$TaskChanges> taskChanges;
 
   @override
-  List<Object> get props => [taskChanges];
+  List<Object> get props => [$$typename, taskChanges];
   Map<String, dynamic> toJson() => _$TaskChanges$Query$TaskToJson(this);
 }
 
@@ -733,6 +745,35 @@ class GroceryUpdateInput with EquatableMixin {
   @override
   List<Object> get props => [id, name, info, inCart];
   Map<String, dynamic> toJson() => _$GroceryUpdateInputToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class Error$Mutation$SaveError with EquatableMixin {
+  Error$Mutation$SaveError();
+
+  factory Error$Mutation$SaveError.fromJson(Map<String, dynamic> json) =>
+      _$Error$Mutation$SaveErrorFromJson(json);
+
+  @JsonKey(name: '__typename')
+  String $$typename;
+
+  @override
+  List<Object> get props => [$$typename];
+  Map<String, dynamic> toJson() => _$Error$Mutation$SaveErrorToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class Error$Mutation with EquatableMixin {
+  Error$Mutation();
+
+  factory Error$Mutation.fromJson(Map<String, dynamic> json) =>
+      _$Error$MutationFromJson(json);
+
+  Error$Mutation$SaveError saveError;
+
+  @override
+  List<Object> get props => [saveError];
+  Map<String, dynamic> toJson() => _$Error$MutationToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -1006,35 +1047,6 @@ class Users$Query with EquatableMixin {
   @override
   List<Object> get props => [users];
   Map<String, dynamic> toJson() => _$Users$QueryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class Error$Mutation$SaveError with EquatableMixin {
-  Error$Mutation$SaveError();
-
-  factory Error$Mutation$SaveError.fromJson(Map<String, dynamic> json) =>
-      _$Error$Mutation$SaveErrorFromJson(json);
-
-  @JsonKey(name: '__typename')
-  String $$typename;
-
-  @override
-  List<Object> get props => [$$typename];
-  Map<String, dynamic> toJson() => _$Error$Mutation$SaveErrorToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class Error$Mutation with EquatableMixin {
-  Error$Mutation();
-
-  factory Error$Mutation.fromJson(Map<String, dynamic> json) =>
-      _$Error$MutationFromJson(json);
-
-  Error$Mutation$SaveError saveError;
-
-  @override
-  List<Object> get props => [saveError];
-  Map<String, dynamic> toJson() => _$Error$MutationToJson(this);
 }
 
 enum ApprovalState {
@@ -2305,11 +2317,23 @@ class TaskChangesQuery
               directives: [],
               selectionSet: SelectionSetNode(selections: [
                 FieldNode(
+                    name: NameNode(value: '__typename'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: null),
+                FieldNode(
                     name: NameNode(value: 'taskChanges'),
                     alias: null,
                     arguments: [],
                     directives: [],
                     selectionSet: SelectionSetNode(selections: [
+                      FieldNode(
+                          name: NameNode(value: '__typename'),
+                          alias: null,
+                          arguments: [],
+                          directives: [],
+                          selectionSet: null),
                       FragmentSpreadNode(
                           name: NameNode(value: 'taskChanges'), directives: [])
                     ]))
@@ -2498,6 +2522,73 @@ class UpdateGroceryMutation
   @override
   UpdateGrocery$Mutation parse(Map<String, dynamic> json) =>
       UpdateGrocery$Mutation.fromJson(json);
+}
+
+@JsonSerializable(explicitToJson: true)
+class ErrorArguments extends JsonSerializable with EquatableMixin {
+  ErrorArguments({@required this.stackTrace});
+
+  @override
+  factory ErrorArguments.fromJson(Map<String, dynamic> json) =>
+      _$ErrorArgumentsFromJson(json);
+
+  final String stackTrace;
+
+  @override
+  List<Object> get props => [stackTrace];
+  @override
+  Map<String, dynamic> toJson() => _$ErrorArgumentsToJson(this);
+}
+
+class ErrorMutation extends GraphQLQuery<Error$Mutation, ErrorArguments> {
+  ErrorMutation({this.variables});
+
+  @override
+  final DocumentNode document = DocumentNode(definitions: [
+    OperationDefinitionNode(
+        type: OperationType.mutation,
+        name: NameNode(value: 'error'),
+        variableDefinitions: [
+          VariableDefinitionNode(
+              variable: VariableNode(name: NameNode(value: 'stackTrace')),
+              type: NamedTypeNode(
+                  name: NameNode(value: 'String'), isNonNull: true),
+              defaultValue: DefaultValueNode(value: null),
+              directives: [])
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'saveError'),
+              alias: null,
+              arguments: [
+                ArgumentNode(
+                    name: NameNode(value: 'stackTrace'),
+                    value: VariableNode(name: NameNode(value: 'stackTrace')))
+              ],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FieldNode(
+                    name: NameNode(value: '__typename'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: null)
+              ]))
+        ]))
+  ]);
+
+  @override
+  final String operationName = 'error';
+
+  @override
+  final ErrorArguments variables;
+
+  @override
+  List<Object> get props => [document, operationName, variables];
+  @override
+  Error$Mutation parse(Map<String, dynamic> json) =>
+      Error$Mutation.fromJson(json);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -3312,71 +3403,4 @@ class UsersQuery extends GraphQLQuery<Users$Query, JsonSerializable> {
   List<Object> get props => [document, operationName];
   @override
   Users$Query parse(Map<String, dynamic> json) => Users$Query.fromJson(json);
-}
-
-@JsonSerializable(explicitToJson: true)
-class ErrorArguments extends JsonSerializable with EquatableMixin {
-  ErrorArguments({@required this.stackTrace});
-
-  @override
-  factory ErrorArguments.fromJson(Map<String, dynamic> json) =>
-      _$ErrorArgumentsFromJson(json);
-
-  final String stackTrace;
-
-  @override
-  List<Object> get props => [stackTrace];
-  @override
-  Map<String, dynamic> toJson() => _$ErrorArgumentsToJson(this);
-}
-
-class ErrorMutation extends GraphQLQuery<Error$Mutation, ErrorArguments> {
-  ErrorMutation({this.variables});
-
-  @override
-  final DocumentNode document = DocumentNode(definitions: [
-    OperationDefinitionNode(
-        type: OperationType.mutation,
-        name: NameNode(value: 'error'),
-        variableDefinitions: [
-          VariableDefinitionNode(
-              variable: VariableNode(name: NameNode(value: 'stackTrace')),
-              type: NamedTypeNode(
-                  name: NameNode(value: 'String'), isNonNull: true),
-              defaultValue: DefaultValueNode(value: null),
-              directives: [])
-        ],
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'saveError'),
-              alias: null,
-              arguments: [
-                ArgumentNode(
-                    name: NameNode(value: 'stackTrace'),
-                    value: VariableNode(name: NameNode(value: 'stackTrace')))
-              ],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FieldNode(
-                    name: NameNode(value: '__typename'),
-                    alias: null,
-                    arguments: [],
-                    directives: [],
-                    selectionSet: null)
-              ]))
-        ]))
-  ]);
-
-  @override
-  final String operationName = 'error';
-
-  @override
-  final ErrorArguments variables;
-
-  @override
-  List<Object> get props => [document, operationName, variables];
-  @override
-  Error$Mutation parse(Map<String, dynamic> json) =>
-      Error$Mutation.fromJson(json);
 }

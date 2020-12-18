@@ -32,6 +32,8 @@ class Task(BaseModel):
     fixed_credits: int = models.IntegerField(default=0)
     group: Group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user: User = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, related_name='+',
+                                   on_delete=models.CASCADE)
     period_start: datetime.date = models.DateField(
         default=datetime.datetime.utcnow)
     period_end: datetime.date = models.DateField(

@@ -73,8 +73,6 @@ class TaskScalars:
 
 
 class TaskType(graphene_django.DjangoObjectType):
-    task_changes = graphene.NonNull(
-        graphene.List(graphene.NonNull(TaskChangeType)))
     approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
 
     # implicitly declaring state here instead of inheriting from model Task
@@ -84,11 +82,6 @@ class TaskType(graphene_django.DjangoObjectType):
     # we can use the same enum for the query and the mutation.
     state = graphene.NonNull(TaskScalars.state)
     credits_calc = graphene.NonNull(TaskScalars.credits_calc)
-
-    @staticmethod
-    @graphql_jwt.decorators.login_required
-    def resolve_task_changes(parent: Task, info: graphql.ResolveInfo):
-        return get_task_changes_by_task(parent)
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -194,6 +187,9 @@ class SaveError(graphene.Mutation):
         return SaveError(error=error)
 
 
+# TODO: Problem with nullable's is if a property should be set to None, it's
+#  ignored due to _remove_none_values. But this is needed since if properties
+#  which the user didn't change are None (not passed). Seek solution.
 class SaveTask(graphene.Mutation):
     class Arguments:
         create_input = TaskInputCreate()

@@ -36,6 +36,7 @@ class _AssignmentTileState extends State<AssignmentTile> {
             subtitle: _isEdit
                 ? TaskAssigneeInput(
                     onChanged: (value) => _value = value,
+                    initialValue: widget._task.user.id,
                   )
                 : Text(widget._task.user?.publicName ?? 'Keine Zuweisung'),
             trailing: _isEdit ||
@@ -61,14 +62,22 @@ class _AssignmentTileState extends State<AssignmentTile> {
                   onPressed: widget._isLoading
                       ? null
                       : () {
+                          print(_formKey.currentState.validate());
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
 
                             // Form does not include radio, so check here
-                            if (_isEdit && _value != null) {
+                            if (_isEdit) {
                               widget._onSave(TaskInputUpdate(
-                                  id: widget._task.id, userId: _value));
+                                  // TODO change userId: _value ?? '' to just
+                                  //  userId: _value if TODO in backend's
+                                  //  SaveTask (graphql schema) is resolved
+                                  id: widget._task.id,
+                                  userId: _value ?? ''));
                             }
+                            setState(() {
+                              _isEdit = false;
+                            });
                           }
                         },
                   child: LoadingButtonContent(widget._isLoading, 'Speichern'),

@@ -105,7 +105,6 @@ def save_task(current_user: User, **kwargs) -> Task:
         TaskChange.objects.create(
             task_id=task_to_save.id,
             user=current_user,
-            created_by=current_user,
             previous_value=None,
             current_value=current_user.id,
             changed_property=ChangeableTaskProperty.CreatedById,
@@ -117,7 +116,6 @@ def save_task(current_user: User, **kwargs) -> Task:
         for user in users:
             Approval.objects.create(state=ApprovalState.NONE,
                                     task=task_to_save,
-                                    created_by=current_user,
                                     user=user)
         return task_to_save
 
@@ -129,6 +127,16 @@ def merge_values(task_to_merge_into: Task,
         if key == 'id' or getattr(task_to_merge_into, key) == value:
             # no changes
             continue
+
+        # TODO this can be removed if TODO's in GraphQL's SaveTask are resolved:
+        #  to set user_id to None, currently it's needed to pass '' (or
+        #  something which can be parsed to int) due to None values being
+        #  removed in SaveTask's mutate()
+        if key == 'user_id':
+            try:
+                value = str(int(value))
+            except ValueError:
+                value = None
         try:
             if key == 'user':
                 # it's easier to just use the ID instead of the object,
@@ -141,7 +149,6 @@ def merge_values(task_to_merge_into: Task,
                 TaskChange.objects.create(
                     task_id=task_to_merge_into.id,
                     user=current_user,
-                    created_by=current_user,
                     previous_value=getattr(task_to_merge_into, key),
                     current_value=value,
                     changed_property=changed_property,
@@ -229,7 +236,7 @@ def get_task_changes_by_task_id(task_id: int) -> List[TaskChange]:
 def get_task_changes_by_task(task: Task) -> List[TaskChange]:
     if task is None:
         raise ValidationError('task may not be None')
-    return list(task.task_changes.all().order_by('created_at'))
+    return list(task.task_changes.all().order_by('timestamp'))
 
 
 def get_task_approvals_by_task(task: Task) -> List[TaskChange]:

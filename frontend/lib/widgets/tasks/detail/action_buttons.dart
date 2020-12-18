@@ -75,7 +75,6 @@ class _ActionButtonsState extends State<ActionButtons> {
       var myApproval = widget._task.approvals
           .firstWhere((a) => a.user.id == auth.currentUser.id);
       switch (widget._task.state) {
-        case TaskState.declined:
         case TaskState.toApprove:
           if (myApproval != null) {
             switch (myApproval.state) {
@@ -115,7 +114,7 @@ class _ActionButtonsState extends State<ActionButtons> {
                 ));
                 buttons.add(RaisedButton(
                   onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.approved)),
+                      id: myApproval.id, state: ApprovalState.none)),
                   child: Text('Zurücksetzen'),
                 ));
                 break;
@@ -136,14 +135,6 @@ class _ActionButtonsState extends State<ActionButtons> {
               child: Text('Ablehnen'),
             ));
           }
-          break;
-        case TaskState.approved:
-          buttons.add(RaisedButton(
-            color: Colors.redAccent,
-            onPressed: () => saveApprovalChanges(ApprovalInput(
-                id: myApproval.id, state: ApprovalState.declined)),
-            child: Text('Ablehnen'),
-          ));
           break;
         default:
           break;
@@ -179,6 +170,13 @@ class _ActionButtonsState extends State<ActionButtons> {
                             .firstWhere((element) =>
                                 element.user.id == auth.currentUser.id)
                             .state = newApprovalState;
+                  if (!updatedTask.approvals.any((element) => element.state == ApprovalState.none)) {
+                    if (updatedTask.approvals.any((element) => element.state == ApprovalState.declined)) {
+                      updatedTask.state = TaskState.declined;
+                    } else  {
+                      updatedTask.state = TaskState.approved;
+                    }
+                  }
 
                   TaskDetail$Query query = TaskDetail$Query()
                     ..task = updatedTask;

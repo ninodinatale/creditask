@@ -21,8 +21,7 @@ def save_grocery(current_user: User, **kwargs):
         raise ValidationError('current_user may not be None')
 
     if 'id' not in kwargs:
-        return Grocery.objects.create(created_by=current_user,
-                                      group_id=current_user.group_id,
+        return Grocery.objects.create(group_id=current_user.group_id,
                                       **kwargs)
     else:
         grocery = Grocery.objects.get(id=kwargs.get('id'))

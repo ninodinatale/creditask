@@ -96,7 +96,7 @@ class _TaskChangesState extends State<TaskChanges> {
         TaskChangesQuery(variables: TaskChangesArguments(id: taskId));
     return Query(
         options: QueryOptions(
-            documentNode: query.document, variables: query.getVariablesMap()),
+            document: query.document, variables: query.getVariablesMap()),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
           if (result.hasException) {

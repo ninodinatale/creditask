@@ -74,7 +74,6 @@ def create_approval(**kwargs):
     assert not ('task' in kwargs and 'task_id' in kwargs)
 
     return Approval.objects.create(
-        created_by_id=get_created_by_id(**kwargs),
         **kwargs
     )
 
@@ -102,7 +101,6 @@ def create_grocery(**kwargs) -> Grocery:
         kwargs.update(name=f'grocery_{_get_unique_id(15)}')
 
     return Grocery.objects.create(
-        created_by_id=get_created_by_id(**kwargs),
         **kwargs)
 
 

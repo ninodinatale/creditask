@@ -79,6 +79,9 @@ class _FactorTileState extends State<FactorTile> {
                             widget._onSave(TaskInputUpdate(
                                 id: widget._task.id,
                                 factor: double.parse(_value)));
+                            setState(() {
+                              _isEdit = false;
+                            });
                           }
                         },
                   child: LoadingButtonContent(widget._isLoading, 'Speichern'),

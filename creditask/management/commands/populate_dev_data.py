@@ -130,89 +130,77 @@ class Command(BaseCommand):
         for task in all_tasks:
             for user in all_user:
                 Approval.objects.create(
-                    created_by=user,
                     task=task,
                     user=user
                 )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                created_by=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[1],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.Factor,
                 previous_value=1,
-                created_by=all_user[0],
                 current_value=2
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.NeededTimeSeconds,
                 previous_value=120,
-                created_by=all_user[0],
                 current_value=560
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.UserId,
                 previous_value=(
                     task.user.public_name if task.user is not None else None),
-                created_by=all_user[0],
                 current_value=all_user[2].public_name
             )
 
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Milch',
             in_cart=False,
             info='1 Liter',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Poulet',
             in_cart=True,
             info='500g',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Kornflakes',
             in_cart=False,
             info='1 Pkg',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Tomatensauce',
             in_cart=False,
             info='2x Bolognese, 2x Napoletana',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Früchte',
             in_cart=True,
             info='Äpfel, Birnen, Bananen',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Spaghetti',
             in_cart=False,
             info='2 Packungen',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Käse',
             in_cart=True,
             info='',
@@ -220,5 +208,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if getattr(settings, 'DEBUG') is True:
+        print(f"lololol: {bool(getattr(settings, 'DEBUG'))}")
+        if bool(getattr(settings, 'DEBUG')) is True:
             self.setup_dev_data()

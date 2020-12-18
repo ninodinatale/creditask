@@ -659,7 +659,8 @@ TaskChanges$Query$Task$TaskChanges _$TaskChanges$Query$Task$TaskChangesFromJson(
     ..timestamp = json['timestamp'] as String
     ..user = json['user'] == null
         ? null
-        : TaskChangesMixin$User.fromJson(json['user'] as Map<String, dynamic>);
+        : TaskChangesMixin$User.fromJson(json['user'] as Map<String, dynamic>)
+    ..$$typename = json['__typename'] as String;
 }
 
 Map<String, dynamic> _$TaskChanges$Query$Task$TaskChangesToJson(
@@ -671,6 +672,7 @@ Map<String, dynamic> _$TaskChanges$Query$Task$TaskChangesToJson(
       'previousValue': instance.previousValue,
       'timestamp': instance.timestamp,
       'user': instance.user?.toJson(),
+      '__typename': instance.$$typename,
     };
 
 const _$TaskChangeChangedPropertyEnumMap = {
@@ -691,6 +693,7 @@ const _$TaskChangeChangedPropertyEnumMap = {
 TaskChanges$Query$Task _$TaskChanges$Query$TaskFromJson(
     Map<String, dynamic> json) {
   return TaskChanges$Query$Task()
+    ..$$typename = json['__typename'] as String
     ..taskChanges = (json['taskChanges'] as List)
         ?.map((e) => e == null
             ? null
@@ -702,6 +705,7 @@ TaskChanges$Query$Task _$TaskChanges$Query$TaskFromJson(
 Map<String, dynamic> _$TaskChanges$Query$TaskToJson(
         TaskChanges$Query$Task instance) =>
     <String, dynamic>{
+      '__typename': instance.$$typename,
       'taskChanges': instance.taskChanges?.map((e) => e?.toJson())?.toList(),
     };
 
@@ -797,6 +801,30 @@ Map<String, dynamic> _$GroceryUpdateInputToJson(GroceryUpdateInput instance) =>
       'name': instance.name,
       'info': instance.info,
       'inCart': instance.inCart,
+    };
+
+Error$Mutation$SaveError _$Error$Mutation$SaveErrorFromJson(
+    Map<String, dynamic> json) {
+  return Error$Mutation$SaveError()..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$Error$Mutation$SaveErrorToJson(
+        Error$Mutation$SaveError instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+    };
+
+Error$Mutation _$Error$MutationFromJson(Map<String, dynamic> json) {
+  return Error$Mutation()
+    ..saveError = json['saveError'] == null
+        ? null
+        : Error$Mutation$SaveError.fromJson(
+            json['saveError'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$Error$MutationToJson(Error$Mutation instance) =>
+    <String, dynamic>{
+      'saveError': instance.saveError?.toJson(),
     };
 
 UsersDoneToApproveTasks$Query$DoneTasksOfUser
@@ -1139,30 +1167,6 @@ Map<String, dynamic> _$Users$QueryToJson(Users$Query instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
-Error$Mutation$SaveError _$Error$Mutation$SaveErrorFromJson(
-    Map<String, dynamic> json) {
-  return Error$Mutation$SaveError()..$$typename = json['__typename'] as String;
-}
-
-Map<String, dynamic> _$Error$Mutation$SaveErrorToJson(
-        Error$Mutation$SaveError instance) =>
-    <String, dynamic>{
-      '__typename': instance.$$typename,
-    };
-
-Error$Mutation _$Error$MutationFromJson(Map<String, dynamic> json) {
-  return Error$Mutation()
-    ..saveError = json['saveError'] == null
-        ? null
-        : Error$Mutation$SaveError.fromJson(
-            json['saveError'] as Map<String, dynamic>);
-}
-
-Map<String, dynamic> _$Error$MutationToJson(Error$Mutation instance) =>
-    <String, dynamic>{
-      'saveError': instance.saveError?.toJson(),
-    };
-
 UpdateApprovalArguments _$UpdateApprovalArgumentsFromJson(
     Map<String, dynamic> json) {
   return UpdateApprovalArguments(
@@ -1290,6 +1294,17 @@ Map<String, dynamic> _$UpdateGroceryArgumentsToJson(
       'input': instance.input?.toJson(),
     };
 
+ErrorArguments _$ErrorArgumentsFromJson(Map<String, dynamic> json) {
+  return ErrorArguments(
+    stackTrace: json['stackTrace'] as String,
+  );
+}
+
+Map<String, dynamic> _$ErrorArgumentsToJson(ErrorArguments instance) =>
+    <String, dynamic>{
+      'stackTrace': instance.stackTrace,
+    };
+
 UsersDoneToApproveTasksArguments _$UsersDoneToApproveTasksArgumentsFromJson(
     Map<String, dynamic> json) {
   return UsersDoneToApproveTasksArguments(
@@ -1347,15 +1362,4 @@ Map<String, dynamic> _$SaveTaskArgumentsToJson(SaveTaskArguments instance) =>
     <String, dynamic>{
       'createInput': instance.createInput?.toJson(),
       'updateInput': instance.updateInput?.toJson(),
-    };
-
-ErrorArguments _$ErrorArgumentsFromJson(Map<String, dynamic> json) {
-  return ErrorArguments(
-    stackTrace: json['stackTrace'] as String,
-  );
-}
-
-Map<String, dynamic> _$ErrorArgumentsToJson(ErrorArguments instance) =>
-    <String, dynamic>{
-      'stackTrace': instance.stackTrace,
     };
