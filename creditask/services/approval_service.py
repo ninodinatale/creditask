@@ -32,6 +32,11 @@ def save_approval(current_user: User, approval_id: int,
     if approval.state == new_state:
         raise ValidationError('approval state has not been changed')
 
+    if approval.task.state != TaskState.TO_APPROVE:
+        raise ValidationError(
+            f'task state needs to be {TaskState.TO_APPROVE} in'
+            f'order to change an approval, but was {approval.task.state}')
+
     approval.state = new_state
     approval.save()
 
@@ -47,7 +52,7 @@ def save_approval(current_user: User, approval_id: int,
             approval.task.state = TaskState.APPROVED
             if approval.task.credits_calc == CreditsCalc.FIXED:
                 new_credits = ceil((approval.task.user.credits +
-                               approval.task.fixed_credits))
+                                    approval.task.fixed_credits))
             elif approval.task.credits_calc == CreditsCalc.BY_FACTOR:
                 new_credits = ceil(approval.task.user.credits + (
                         approval.task.factor * (

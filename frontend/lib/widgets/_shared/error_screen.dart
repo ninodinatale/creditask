@@ -25,7 +25,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                   'Es ist ein Fehler aufgetreten. Versuch es später erneut oder schliesse und öffne Creditask neu.'),
               if (_showErrorText) Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Text(widget.error),
+                child: Container(constraints: BoxConstraints(),height: 200, child: SingleChildScrollView(child: Text(widget.error))),
               )
             ],
           ),

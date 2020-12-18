@@ -79,6 +79,9 @@ class _FixedCreditsTileState extends State<FixedCreditsTile> {
                             widget._onSave(TaskInputUpdate(
                                 id: widget._task.id,
                                 fixedCredits: double.parse(_value)));
+                            setState(() {
+                              _isEdit = false;
+                            });
                           }
                         },
                   child: LoadingButtonContent(widget._isLoading, 'Speichern'),

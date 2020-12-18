@@ -15,9 +15,6 @@ enum ApprovalState {
 }
 
 type ApprovalType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   state: ApprovalState!
   task: TaskType!
@@ -51,9 +48,6 @@ scalar DateTime
 
 type ErrorType {
   id: ID!
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   user: UserType!
   stackTrace: String!
 }
@@ -66,9 +60,6 @@ input GroceryCreateInput {
 }
 
 type GroceryType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   name: String!
   inCart: Boolean!
@@ -148,9 +139,6 @@ enum TaskChangeChangedProperty {
 }
 
 type TaskChangeType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   currentValue: String
   previousValue: String
@@ -192,9 +180,6 @@ enum TaskState {
 }
 
 type TaskType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   name: String!
   neededTimeSeconds: Int!
@@ -203,6 +188,7 @@ type TaskType {
   factor: Float!
   fixedCredits: Int!
   user: UserType
+  createdBy: UserType!
   periodStart: Date!
   periodEnd: Date!
   approvals: [ApprovalType!]!

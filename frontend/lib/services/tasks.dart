@@ -23,11 +23,6 @@ bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
     case TaskState.toApprove:
       return property == EditableTaskProperties.name;
     case TaskState.declined:
-      return property == EditableTaskProperties.name ||
-          property == EditableTaskProperties.neededTimeSeconds ||
-          property == EditableTaskProperties.fixedCredits ||
-          property == EditableTaskProperties.creditsCalc ||
-          property == EditableTaskProperties.factor;
     case TaskState.approved:
       return false;
     default:

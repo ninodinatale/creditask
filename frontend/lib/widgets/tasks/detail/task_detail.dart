@@ -53,11 +53,16 @@ class _TaskDetailState extends State<TaskDetail> {
             if (result.hasException) {
               return ErrorDialog(result.exception.toString());
             } else {
-              var updatedTask =
-                  UpdateDetailTask$Mutation.fromJson(result.data).saveTask.task;
-              var updatedTaskJson = widget._task.toJson()
-                ..addAll(updatedTask.toJson());
-              cache.writeQuery(widget._request, data: updatedTaskJson);
+              var _updatedTask =
+                  UpdateDetailTask$Mutation
+                      .fromJson(result.data)
+                      .saveTask
+                      .task;
+
+              TaskDetail$Query _query = TaskDetail$Query()
+                ..task = TaskDetail$Query$Task.fromJson(widget._task.toJson()
+                  ..addAll(_updatedTask.toJson()));
+              cache.writeQuery(widget._request, data: _query.toJson());
               emitTaskDidChange();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
@@ -70,10 +75,10 @@ class _TaskDetailState extends State<TaskDetail> {
             }
           },
           onCompleted: (_) =>
-              // TODO remove this if optimistic result is implemented
-              setState(() {
-                _isLoading = false;
-              }),
+          // TODO remove this if optimistic result is implemented
+          setState(() {
+            _isLoading = false;
+          }),
           onError: (OperationException error) {
             // TODO
           }),
