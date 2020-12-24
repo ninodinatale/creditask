@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:creditask/providers/auth.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/utils/date_format.dart';
-import 'package:creditask/widgets/_shared/task_state_icon.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
 import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,8 +37,9 @@ class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
           : SizedBox.shrink(),
       ...ListTile.divideTiles(
           context: context,
-          tiles: tasks.map((task) =>
-              ListTile(
+          tiles: tasks.map((task) {
+            final _icon = taskStateData(task.state);
+            return ListTile(
                 onTap: () =>
                     Navigator.push(
                         context,
@@ -56,9 +56,10 @@ class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
                             ? theme.errorColor
                             : null)),
                 trailing: task.state == TaskState.toApprove
-                    ? TaskStateIcon(task.state)
+                    ? Icon(_icon.item1, color: _icon.item2)
                     : null,
-              )))
+              );
+          }))
     ];
   }
 

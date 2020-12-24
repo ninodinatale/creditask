@@ -1,12 +1,15 @@
 from datetime import datetime
+from math import ceil
 from typing import List
 
 from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
 
 from creditask.models import Task, User, Approval, TaskState, TaskChange, \
-    ApprovalState, ChangeableTaskProperty
+    ApprovalState, ChangeableTaskProperty, CreditsCalc
 from creditask.validators import MinLenValidator
+import creditask.services.user_service as user_service
+import creditask.services.approval_service as approval_service
 
 
 def get_task_by_id(task_id: int) -> Task:
@@ -15,14 +18,8 @@ def get_task_by_id(task_id: int) -> Task:
 
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
     return list(
-        Task.objects.filter(user__email=user_mail,
-                            state=TaskState.TO_DO).order_by('period_end'))
-
-
-def get_done_tasks_to_approve_by_user_email(user_mail: str) -> List[Task]:
-    return list(
-        Task.objects.filter(user__email=user_mail,
-                            state=TaskState.TO_APPROVE).order_by('period_end'))
+        Task.objects.filter(user__email=user_mail).exclude(
+            state=TaskState.DONE).order_by('period_end'))
 
 
 def get_to_approve_tasks_of_user(user_mail: str) -> List[Task]:
@@ -137,6 +134,28 @@ def merge_values(task_to_merge_into: Task,
                 value = str(int(value))
             except ValueError:
                 value = None
+        if key == 'state':
+            if value == TaskState.DONE:
+                if task_to_merge_into.credits_calc == CreditsCalc.FIXED:
+                    new_credits = ceil((task_to_merge_into.user.credits +
+                                        task_to_merge_into.fixed_credits))
+                elif task_to_merge_into.credits_calc == CreditsCalc.BY_FACTOR:
+                    new_credits = ceil(task_to_merge_into.user.credits + (
+                            task_to_merge_into.factor * (
+                            task_to_merge_into.needed_time_seconds / 60)))
+                else:
+                    raise ValidationError(
+                        'credits_calc of task has unknown value: cannot calculate '
+                        'credits')
+                user_service.save_user(task_to_merge_into.user, credits=new_credits)
+
+            # TODO test
+            if getattr(task_to_merge_into, key) == TaskState.DECLINED:
+                if value == TaskState.TO_DO:
+                    for approval in list(task_to_merge_into.approvals.all()):
+                        approval_service.save_approval(current_user, approval.id,
+                                      ApprovalState.NONE, for_reset=True)
+
         try:
             if key == 'user':
                 # it's easier to just use the ID instead of the object,
@@ -225,6 +244,14 @@ def validate_state_change(task_to_update: Task, **kwargs):
                     f'needs to be [{TaskState.APPROVED}] or '
                     f'[{TaskState.DECLINED}],'
                     f'but was [{new_state}]')
+        if task_to_update.state == TaskState.DECLINED:
+            if new_state != TaskState.TO_DO:
+                raise ValidationError(
+                    f'Task state after [{TaskState.DECLINED}] '
+                    f'needs to be [{TaskState.TO_DO}], but was [{new_state}]')
+        if task_to_update.state == TaskState.DONE:
+            raise ValidationError(
+                f'Task state [{TaskState.DONE}] may not be changed')
 
 
 def get_task_changes_by_task_id(task_id: int) -> List[TaskChange]:

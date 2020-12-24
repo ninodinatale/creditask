@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:creditask/providers/auth.dart';
-import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/widgets/_shared/loadnig_button_content.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
@@ -101,12 +100,12 @@ class _TaskToApproveState extends State<TaskToApprove> {
               Navigator.of(context).pop();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Änderung gespeichert'),
-                      Icon(Icons.check, color: Colors.green)
-                    ],
-                  )));
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Änderung gespeichert'),
+                  Icon(Icons.check, color: Colors.green)
+                ],
+              )));
             }
           },
           onCompleted: (_) =>
@@ -129,53 +128,62 @@ class _TaskToApproveState extends State<TaskToApprove> {
             title: Text(widget._task.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: widget._task.approvals
-                  .map((a) => Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 5, right: 5),
-                            child: Icon(
-                              approvalIconData(a.state),
-                              color: themeData.textTheme.caption.color,
-                              size: 15,
-                            ),
-                          ),
-                          Text(a.user.publicName),
-                        ],
-                      ))
-                  .toList(),
+              children: widget._task.approvals.map((a) {
+                final _apprStateData = approvalStateData(a.state, context);
+                return Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5, right: 5),
+                      child: Icon(
+                        _apprStateData.item1,
+                        color: _apprStateData.item2?.withOpacity(0.6),
+                        size: 15,
+                      ),
+                    ),
+                    Text(a.user.publicName),
+                  ],
+                );
+              }).toList(),
             ),
             trailing: PopupMenuButton(
               onSelected: (value) => _showConfirmDialog(value),
               icon: Icon(Icons.more_vert),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: ApprovalInput(
-                      id: myApprovalId, state: ApprovalState.approved),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Icon(approvalIconData(ApprovalState.approved)),
-                      Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Text('Bestätigen')),
-                    ],
+              itemBuilder: (context) {
+                final _apprStateDataApproved =
+                    approvalStateData(ApprovalState.approved, context);
+                final _apprStateDataDeclined =
+                    approvalStateData(ApprovalState.declined, context);
+                return [
+                  PopupMenuItem(
+                    value: ApprovalInput(
+                        id: myApprovalId, state: ApprovalState.approved),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(_apprStateDataApproved.item1,
+                            color: _apprStateDataApproved.item2),
+                        Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Bestätigen')),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: ApprovalInput(
-                      id: myApprovalId, state: ApprovalState.declined),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Icon(approvalIconData(ApprovalState.declined)),
-                      Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Text('Ablehnen')),
-                    ],
+                  PopupMenuItem(
+                    value: ApprovalInput(
+                        id: myApprovalId, state: ApprovalState.declined),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(_apprStateDataDeclined.item1,
+                            color: _apprStateDataDeclined.item2),
+                        Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Ablehnen')),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ];
+              },
             ));
       },
     );

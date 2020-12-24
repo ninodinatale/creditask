@@ -3,6 +3,7 @@ mutation updateApproval($approval: ApprovalInput!) {
         approval {
             id
             state
+            message
         }
     }
 }

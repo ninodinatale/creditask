@@ -6,6 +6,7 @@ schema {
 input ApprovalInput {
   id: ID!
   state: ApprovalState!
+  message: String
 }
 
 enum ApprovalState {
@@ -17,6 +18,7 @@ enum ApprovalState {
 type ApprovalType {
   id: ID!
   state: ApprovalState!
+  message: String!
   task: TaskType!
   user: UserType!
 }
@@ -97,7 +99,6 @@ type Query {
   allInCart: [GroceryType!]!
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
-  doneTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
   unassignedTasks: [TaskType!]!
   allTodoTasks: [TaskType!]!

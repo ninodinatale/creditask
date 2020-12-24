@@ -5,11 +5,11 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from creditask.models import ApprovalState, User, TaskState, \
-    ChangeableTaskProperty
+    ChangeableTaskProperty, CreditsCalc
 from creditask.services.task_service import get_task_by_id, \
     get_todo_tasks_by_user_email, save_task, \
     validate_state_change, validate_task_properties, merge_values, \
-    get_to_approve_tasks_of_user, get_done_tasks_to_approve_by_user_email, \
+    get_to_approve_tasks_of_user, \
     get_unassigned_tasks, validate_new_properties_based_on_task_state, \
     get_task_changes_by_task_id, get_task_changes_by_task, \
     get_task_approvals_by_task, get_all_todo_tasks
@@ -35,39 +35,21 @@ class TestTaskService(TestCase):
     def test_get_todo_tasks_by_user_email(self, mock_task):
         user_email = 'some_user_email'
         mock_return_value = ['some', 'return', 'value']
-        mock_task.objects.filter().order_by.return_value = mock_return_value
+        mock_task.objects.filter().exclude().order_by.return_value = mock_return_value
 
         expected_call_count = mock_task.objects.filter.call_count + 1
         return_value = get_todo_tasks_by_user_email(user_email)
 
         self.assertEquals(expected_call_count,
                           mock_task.objects.filter.call_count)
-        self.assertEquals(dict(user__email=user_email, state=TaskState.TO_DO),
+        self.assertEquals(dict(user__email=user_email),
                           mock_task.objects.filter.call_args.kwargs)
+        self.assertEquals(dict(state=TaskState.DONE),
+                          mock_task.objects.filter.return_value.exclude.call_args.kwargs)
         self.assertEquals(1,
-                          mock_task.objects.filter.return_value.order_by.call_count)
+                          mock_task.objects.filter.return_value.exclude.return_value.order_by.call_count)
         self.assertEquals(('period_end',),
-                          mock_task.objects.filter.return_value.order_by.call_args.args)
-        self.assertEquals(mock_return_value, return_value)
-
-    @mock.patch('creditask.services.task_service.Task')
-    def test_get_done_tasks_to_approve_by_user_email(self, mock_task):
-        user_email = 'some_user_email'
-        mock_return_value = ['some', 'return', 'value']
-        mock_task.objects.filter().order_by.return_value = mock_return_value
-
-        expected_call_count = mock_task.objects.filter.call_count + 1
-        return_value = get_done_tasks_to_approve_by_user_email(user_email)
-
-        self.assertEquals(expected_call_count,
-                          mock_task.objects.filter.call_count)
-        self.assertEquals(
-            dict(user__email=user_email, state=TaskState.TO_APPROVE),
-            mock_task.objects.filter.call_args.kwargs)
-        self.assertEquals(1,
-                          mock_task.objects.filter.return_value.order_by.call_count)
-        self.assertEquals(('period_end',),
-                          mock_task.objects.filter.return_value.order_by.call_args.args)
+                          mock_task.objects.filter.return_value.exclude.return_value.order_by.call_args.args)
         self.assertEquals(mock_return_value, return_value)
 
     def test_get_to_approve_tasks_of_user(self):
@@ -467,7 +449,7 @@ class TestTaskService(TestCase):
         with self.subTest('should not raise error if valid task state is '
                           'provided'):
 
-            for state_under_test in TaskState.values:
+            for state_under_test in TaskState:
                 try:
                     validate_task_properties(name='created_task',
                                              state=state_under_test)
@@ -478,7 +460,9 @@ class TestTaskService(TestCase):
     @mock.patch('creditask.services.task_service.Task')
     @mock.patch('creditask.services.task_service.TaskChange')
     @mock.patch('creditask.services.task_service.datetime')
-    def test_merge_values(self, datetime_mock, task_change_model_mock,
+    @mock.patch('creditask.services.task_service.user_service.save_user')
+    def test_merge_values(self, save_user_mock, datetime_mock,
+                          task_change_model_mock,
                           mock_task_model):
         with self.subTest('should add attributes if not existing yet and return'
                           'task'):
@@ -492,6 +476,9 @@ class TestTaskService(TestCase):
                                    id=200000,
                                    user=user_1_mock,
                                    created_by=user_2_mock)
+
+            expected_call_count = save_user_mock.call_count
+
             return_value = merge_values(task_to_merge_into_mock,
                                         current_user_mock,
                                         **values_to_merge
@@ -510,6 +497,8 @@ class TestTaskService(TestCase):
                               task_to_merge_into_mock.user_id)
             self.assertEquals(values_to_merge.get('created_by'),
                               task_to_merge_into_mock.created_by)
+            self.assertEquals(expected_call_count, save_user_mock.call_count,
+                              msg='save_user should not have been called')
 
         with self.subTest('should add task changes by merged values'):
             changing_attributes = dict(
@@ -565,7 +554,51 @@ class TestTaskService(TestCase):
                      timestamp=datetime_mock.utcnow.return_value.replace.return_value),
                 task_change_model_mock.objects.create.call_args_list[2].kwargs)
 
-        with self.subTest('should set user_id to None if passed non-number-string'):
+        with self.subTest(
+                'should save task and user and give credits to user if all approvals have state approved'):
+            changing_attributes = dict(
+                needed_time_seconds=0,
+                state=TaskState.APPROVED,
+                id=1,
+                user=None,
+                user_id=None,
+                created_by=user_1_mock
+            )
+            task_to_merge_into_mock = Mock(**changing_attributes)
+            current_user_mock = Mock()
+            user_1_mock = Mock(id=123456789)
+            user_2_mock = Mock()
+            datetime_mock.utcnow().replace.return_value = 'some timestamp'
+            values_to_merge = dict(needed_time_seconds=2,
+                                   state=TaskState.DONE,
+                                   id=200000,
+                                   user=user_1_mock,
+                                   created_by=user_2_mock)
+
+            task_change_model_mock.reset_mock()
+
+            task_to_merge_into_mock.state = TaskState.TO_APPROVE
+            assigned_user_mock = Mock(credits=200)
+            task_to_merge_into_mock.user = assigned_user_mock
+            task_to_merge_into_mock.credits_calc = CreditsCalc.FIXED
+            task_to_merge_into_mock.fixed_credits = 100
+            expected_call_count_1 = save_user_mock.call_count + 1
+
+            return_value = merge_values(task_to_merge_into_mock,
+                                        current_user_mock,
+                                        **values_to_merge
+                                        )
+
+            self.assertEquals(expected_call_count_1,
+                              save_user_mock.call_count)
+            self.assertTupleEqual((assigned_user_mock,),
+                                  save_user_mock.call_args.args)
+            self.assertDictEqual(dict(
+                credits=300
+            ), save_user_mock.call_args.kwargs)
+
+        with self.subTest(
+                'should set user_id to None if passed non-number-string'):
             changing_attributes = dict(
                 needed_time_seconds=0,
                 state=TaskState.TO_DO,
@@ -593,7 +626,6 @@ class TestTaskService(TestCase):
 
             self.assertEquals(None, task_to_merge_into_mock.user_id)
 
-
     def test_validate_state_change(self):
         with self.subTest('should not raise error if state has not changed'):
             mock_old_task = Mock()
@@ -620,6 +652,30 @@ class TestTaskService(TestCase):
                               f'but was [{TaskState.TO_DO}]',
                               e.exception.message)
 
+        with self.subTest('should raise error if old task state is DECLINED'
+                          ' and new state is not TO_DO'):
+            mock_old_task = Mock(state=TaskState.DECLINED)
+            for state in TaskState:
+                new_task_dict = dict(state=state)
+                if state in [TaskState.TO_DO]:
+                    validate_state_change(mock_old_task, **new_task_dict)
+                else:
+                    with self.assertRaises(ValidationError) as e:
+                        validate_state_change(mock_old_task, **new_task_dict)
+                    self.assertEquals(f'Task state after [{TaskState.DECLINED}] '
+                                      f'needs to be [{TaskState.TO_DO}], but was [{state}]',
+                                      e.exception.message)
+
+        with self.subTest('should raise error if old task state is DONE'):
+            mock_old_task = Mock(state=TaskState.DONE)
+            for state in TaskState:
+                new_task_dict = dict(state=state)
+                with self.assertRaises(ValidationError) as e:
+                    validate_state_change(mock_old_task, **new_task_dict)
+                self.assertEquals(f'Task state [{TaskState.DONE}] may not be '
+                                  f'changed',
+                                  e.exception.message)
+
         with self.subTest('should raise error if old task state is TO_APPROVE'
                           ' and new state is not DONE'):
             mock_old_task = Mock(state=TaskState.TO_APPROVE)
@@ -627,17 +683,7 @@ class TestTaskService(TestCase):
             with self.assertRaises(ValidationError) as e:
                 validate_state_change(mock_old_task, **new_task_dict)
 
-        for state_under_test in TaskState.values:
-            if state_under_test == TaskState.DONE:
-                try:
-                    mock_old_task = Mock(state=state_under_test)
-                    new_task_dict = dict(state=TaskState.TO_DO)
-                    validate_state_change(mock_old_task, **new_task_dict)
-                except ValidationError:
-                    self.fail(
-                        'validate_state_change should not have been failed')
-
-        for state_under_test in TaskState.values:
+        for state_under_test in TaskState:
             if not (state_under_test != TaskState.APPROVED and
                     state_under_test != TaskState.DECLINED):
                 continue
@@ -650,7 +696,7 @@ class TestTaskService(TestCase):
                 with self.assertRaises(ValidationError) as e:
                     validate_state_change(mock_old_task, **new_task_dict)
 
-        for state_under_test in TaskState.values:
+        for state_under_test in TaskState:
             if state_under_test == TaskState.TO_APPROVE:
                 continue
 
@@ -664,7 +710,7 @@ class TestTaskService(TestCase):
                     self.fail(
                         'validate_state_change should not have been failed')
 
-        for state_under_test in TaskState.values:
+        for state_under_test in TaskState:
             if (state_under_test != TaskState.APPROVED and
                     state_under_test != TaskState.DECLINED):
                 continue
