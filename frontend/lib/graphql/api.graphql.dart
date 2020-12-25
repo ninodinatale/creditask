@@ -15,6 +15,20 @@ mixin SimpleTaskMixin {
   TaskState state;
   SimpleTaskMixin$User user;
 }
+mixin SimpleTaskApprovalsMixin {
+  List<SimpleTaskApprovalsMixin$Approvals> approvals;
+}
+mixin SimpleApprovalMixin {
+  String id;
+  SimpleApprovalMixin$User user;
+  @JsonKey(unknownEnumValue: ApprovalState.artemisUnknown)
+  ApprovalState state;
+  String message;
+}
+mixin SimpleUserMixin {
+  String id;
+  String publicName;
+}
 mixin GroceryMixin {
   String id;
   String name;
@@ -28,16 +42,6 @@ mixin TaskWithApprovalsMixin {
   @JsonKey(name: '__typename')
   String $$typename;
   List<TaskWithApprovalsMixin$Approvals> approvals;
-}
-mixin SimpleApprovalMixin {
-  String id;
-  SimpleApprovalMixin$User user;
-  @JsonKey(unknownEnumValue: ApprovalState.artemisUnknown)
-  ApprovalState state;
-}
-mixin SimpleUserMixin {
-  String id;
-  String publicName;
 }
 mixin CurrentUserMixin {
   String id;
@@ -72,7 +76,6 @@ mixin TaskChangesMixin {
   String timestamp;
   TaskChangesMixin$User user;
 }
-mixin UsersDoneToApproveTaskMixin {}
 
 @JsonSerializable(explicitToJson: true)
 class UpdateApproval$Mutation$SaveApproval$Approval with EquatableMixin {
@@ -87,8 +90,10 @@ class UpdateApproval$Mutation$SaveApproval$Approval with EquatableMixin {
   @JsonKey(unknownEnumValue: ApprovalState.artemisUnknown)
   ApprovalState state;
 
+  String message;
+
   @override
-  List<Object> get props => [id, state];
+  List<Object> get props => [id, state, message];
   Map<String, dynamic> toJson() =>
       _$UpdateApproval$Mutation$SaveApproval$ApprovalToJson(this);
 }
@@ -125,7 +130,7 @@ class UpdateApproval$Mutation with EquatableMixin {
 
 @JsonSerializable(explicitToJson: true)
 class ApprovalInput with EquatableMixin {
-  ApprovalInput({@required this.id, @required this.state});
+  ApprovalInput({@required this.id, @required this.state, this.message});
 
   factory ApprovalInput.fromJson(Map<String, dynamic> json) =>
       _$ApprovalInputFromJson(json);
@@ -135,14 +140,16 @@ class ApprovalInput with EquatableMixin {
   @JsonKey(unknownEnumValue: ApprovalState.artemisUnknown)
   ApprovalState state;
 
+  String message;
+
   @override
-  List<Object> get props => [id, state];
+  List<Object> get props => [id, state, message];
   Map<String, dynamic> toJson() => _$ApprovalInputToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
 class UsersTodoTasks$Query$TodoTasksOfUser
-    with EquatableMixin, SimpleTaskMixin {
+    with EquatableMixin, SimpleTaskMixin, SimpleTaskApprovalsMixin {
   UsersTodoTasks$Query$TodoTasksOfUser();
 
   factory UsersTodoTasks$Query$TodoTasksOfUser.fromJson(
@@ -150,7 +157,7 @@ class UsersTodoTasks$Query$TodoTasksOfUser
       _$UsersTodoTasks$Query$TodoTasksOfUserFromJson(json);
 
   @override
-  List<Object> get props => [id, name, periodEnd, state, user];
+  List<Object> get props => [id, name, periodEnd, state, user, approvals];
   Map<String, dynamic> toJson() =>
       _$UsersTodoTasks$Query$TodoTasksOfUserToJson(this);
 }
@@ -181,6 +188,33 @@ class SimpleTaskMixin$User with EquatableMixin {
   @override
   List<Object> get props => [publicName];
   Map<String, dynamic> toJson() => _$SimpleTaskMixin$UserToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SimpleTaskApprovalsMixin$Approvals
+    with EquatableMixin, SimpleApprovalMixin {
+  SimpleTaskApprovalsMixin$Approvals();
+
+  factory SimpleTaskApprovalsMixin$Approvals.fromJson(
+          Map<String, dynamic> json) =>
+      _$SimpleTaskApprovalsMixin$ApprovalsFromJson(json);
+
+  @override
+  List<Object> get props => [id, user, state, message];
+  Map<String, dynamic> toJson() =>
+      _$SimpleTaskApprovalsMixin$ApprovalsToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SimpleApprovalMixin$User with EquatableMixin, SimpleUserMixin {
+  SimpleApprovalMixin$User();
+
+  factory SimpleApprovalMixin$User.fromJson(Map<String, dynamic> json) =>
+      _$SimpleApprovalMixin$UserFromJson(json);
+
+  @override
+  List<Object> get props => [id, publicName];
+  Map<String, dynamic> toJson() => _$SimpleApprovalMixin$UserToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -255,21 +289,9 @@ class TaskWithApprovalsMixin$Approvals
       _$TaskWithApprovalsMixin$ApprovalsFromJson(json);
 
   @override
-  List<Object> get props => [id, user, state];
+  List<Object> get props => [id, user, state, message];
   Map<String, dynamic> toJson() =>
       _$TaskWithApprovalsMixin$ApprovalsToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class SimpleApprovalMixin$User with EquatableMixin, SimpleUserMixin {
-  SimpleApprovalMixin$User();
-
-  factory SimpleApprovalMixin$User.fromJson(Map<String, dynamic> json) =>
-      _$SimpleApprovalMixin$UserFromJson(json);
-
-  @override
-  List<Object> get props => [id, publicName];
-  Map<String, dynamic> toJson() => _$SimpleApprovalMixin$UserToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -455,7 +477,7 @@ class DetailTaskMixin$Approvals with EquatableMixin, SimpleApprovalMixin {
       _$DetailTaskMixin$ApprovalsFromJson(json);
 
   @override
-  List<Object> get props => [id, user, state];
+  List<Object> get props => [id, user, state, message];
   Map<String, dynamic> toJson() => _$DetailTaskMixin$ApprovalsToJson(this);
 }
 
@@ -777,40 +799,6 @@ class Error$Mutation with EquatableMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
-class UsersDoneToApproveTasks$Query$DoneTasksOfUser
-    with
-        EquatableMixin,
-        UsersDoneToApproveTaskMixin,
-        TaskWithApprovalsMixin,
-        SimpleTaskMixin {
-  UsersDoneToApproveTasks$Query$DoneTasksOfUser();
-
-  factory UsersDoneToApproveTasks$Query$DoneTasksOfUser.fromJson(
-          Map<String, dynamic> json) =>
-      _$UsersDoneToApproveTasks$Query$DoneTasksOfUserFromJson(json);
-
-  @override
-  List<Object> get props =>
-      [$$typename, approvals, id, name, periodEnd, state, user];
-  Map<String, dynamic> toJson() =>
-      _$UsersDoneToApproveTasks$Query$DoneTasksOfUserToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class UsersDoneToApproveTasks$Query with EquatableMixin {
-  UsersDoneToApproveTasks$Query();
-
-  factory UsersDoneToApproveTasks$Query.fromJson(Map<String, dynamic> json) =>
-      _$UsersDoneToApproveTasks$QueryFromJson(json);
-
-  List<UsersDoneToApproveTasks$Query$DoneTasksOfUser> doneTasksOfUser;
-
-  @override
-  List<Object> get props => [doneTasksOfUser];
-  Map<String, dynamic> toJson() => _$UsersDoneToApproveTasks$QueryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
 class UpdateGroceries$Mutation$UpdateGroceries$Groceries
     with EquatableMixin, GroceryMixin {
   UpdateGroceries$Mutation$UpdateGroceries$Groceries();
@@ -1049,6 +1037,56 @@ class Users$Query with EquatableMixin {
   Map<String, dynamic> toJson() => _$Users$QueryToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
+class TaskSetDoneTask$Mutation$SaveTask$Task with EquatableMixin {
+  TaskSetDoneTask$Mutation$SaveTask$Task();
+
+  factory TaskSetDoneTask$Mutation$SaveTask$Task.fromJson(
+          Map<String, dynamic> json) =>
+      _$TaskSetDoneTask$Mutation$SaveTask$TaskFromJson(json);
+
+  @JsonKey(name: '__typename')
+  String $$typename;
+
+  @override
+  List<Object> get props => [$$typename];
+  Map<String, dynamic> toJson() =>
+      _$TaskSetDoneTask$Mutation$SaveTask$TaskToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class TaskSetDoneTask$Mutation$SaveTask with EquatableMixin {
+  TaskSetDoneTask$Mutation$SaveTask();
+
+  factory TaskSetDoneTask$Mutation$SaveTask.fromJson(
+          Map<String, dynamic> json) =>
+      _$TaskSetDoneTask$Mutation$SaveTaskFromJson(json);
+
+  @JsonKey(name: '__typename')
+  String $$typename;
+
+  TaskSetDoneTask$Mutation$SaveTask$Task task;
+
+  @override
+  List<Object> get props => [$$typename, task];
+  Map<String, dynamic> toJson() =>
+      _$TaskSetDoneTask$Mutation$SaveTaskToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class TaskSetDoneTask$Mutation with EquatableMixin {
+  TaskSetDoneTask$Mutation();
+
+  factory TaskSetDoneTask$Mutation.fromJson(Map<String, dynamic> json) =>
+      _$TaskSetDoneTask$MutationFromJson(json);
+
+  TaskSetDoneTask$Mutation$SaveTask saveTask;
+
+  @override
+  List<Object> get props => [saveTask];
+  Map<String, dynamic> toJson() => _$TaskSetDoneTask$MutationToJson(this);
+}
+
 enum ApprovalState {
   @JsonValue('NONE')
   none,
@@ -1170,6 +1208,12 @@ class UpdateApprovalMutation
                           alias: null,
                           arguments: [],
                           directives: [],
+                          selectionSet: null),
+                      FieldNode(
+                          name: NameNode(value: 'message'),
+                          alias: null,
+                          arguments: [],
+                          directives: [],
                           selectionSet: null)
                     ]))
               ]))
@@ -1235,7 +1279,10 @@ class UsersTodoTasksQuery
               directives: [],
               selectionSet: SelectionSetNode(selections: [
                 FragmentSpreadNode(
-                    name: NameNode(value: 'simpleTask'), directives: [])
+                    name: NameNode(value: 'simpleTask'), directives: []),
+                FragmentSpreadNode(
+                    name: NameNode(value: 'simpleTaskApprovals'),
+                    directives: [])
               ]))
         ])),
     FragmentDefinitionNode(
@@ -1282,6 +1329,78 @@ class UsersTodoTasksQuery
                     directives: [],
                     selectionSet: null)
               ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'simpleTaskApprovals'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'TaskType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'approvals'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FragmentSpreadNode(
+                    name: NameNode(value: 'simpleApproval'), directives: [])
+              ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'simpleApproval'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'ApprovalType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'user'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FragmentSpreadNode(
+                    name: NameNode(value: 'simpleUser'), directives: [])
+              ])),
+          FieldNode(
+              name: NameNode(value: 'state'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'message'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null)
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'simpleUser'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'UserType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'publicName'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null)
         ]))
   ]);
 
@@ -1480,6 +1599,12 @@ class ToApproveTasksOfUserQuery extends GraphQLQuery<ToApproveTasksOfUser$Query,
               ])),
           FieldNode(
               name: NameNode(value: 'state'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'message'),
               alias: null,
               arguments: [],
               directives: [],
@@ -1988,6 +2113,12 @@ class UpdateDetailTaskMutation
               alias: null,
               arguments: [],
               directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'message'),
+              alias: null,
+              arguments: [],
+              directives: [],
               selectionSet: null)
         ]))
   ]);
@@ -2183,6 +2314,12 @@ class TaskDetailQuery
               ])),
           FieldNode(
               name: NameNode(value: 'state'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'message'),
               alias: null,
               arguments: [],
               directives: [],
@@ -2589,203 +2726,6 @@ class ErrorMutation extends GraphQLQuery<Error$Mutation, ErrorArguments> {
   @override
   Error$Mutation parse(Map<String, dynamic> json) =>
       Error$Mutation.fromJson(json);
-}
-
-@JsonSerializable(explicitToJson: true)
-class UsersDoneToApproveTasksArguments extends JsonSerializable
-    with EquatableMixin {
-  UsersDoneToApproveTasksArguments({@required this.email});
-
-  @override
-  factory UsersDoneToApproveTasksArguments.fromJson(
-          Map<String, dynamic> json) =>
-      _$UsersDoneToApproveTasksArgumentsFromJson(json);
-
-  final String email;
-
-  @override
-  List<Object> get props => [email];
-  @override
-  Map<String, dynamic> toJson() =>
-      _$UsersDoneToApproveTasksArgumentsToJson(this);
-}
-
-class UsersDoneToApproveTasksQuery extends GraphQLQuery<
-    UsersDoneToApproveTasks$Query, UsersDoneToApproveTasksArguments> {
-  UsersDoneToApproveTasksQuery({this.variables});
-
-  @override
-  final DocumentNode document = DocumentNode(definitions: [
-    OperationDefinitionNode(
-        type: OperationType.query,
-        name: NameNode(value: 'usersDoneToApproveTasks'),
-        variableDefinitions: [
-          VariableDefinitionNode(
-              variable: VariableNode(name: NameNode(value: 'email')),
-              type: NamedTypeNode(
-                  name: NameNode(value: 'String'), isNonNull: true),
-              defaultValue: DefaultValueNode(value: null),
-              directives: [])
-        ],
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'doneTasksOfUser'),
-              alias: null,
-              arguments: [
-                ArgumentNode(
-                    name: NameNode(value: 'userEmail'),
-                    value: VariableNode(name: NameNode(value: 'email')))
-              ],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FragmentSpreadNode(
-                    name: NameNode(value: 'usersDoneToApproveTask'),
-                    directives: [])
-              ]))
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'usersDoneToApproveTask'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'TaskType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FragmentSpreadNode(
-              name: NameNode(value: 'taskWithApprovals'), directives: [])
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'taskWithApprovals'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'TaskType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: '__typename'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FragmentSpreadNode(
-              name: NameNode(value: 'simpleTask'), directives: []),
-          FieldNode(
-              name: NameNode(value: 'approvals'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FragmentSpreadNode(
-                    name: NameNode(value: 'simpleApproval'), directives: [])
-              ]))
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'simpleApproval'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'ApprovalType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'id'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'user'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FragmentSpreadNode(
-                    name: NameNode(value: 'simpleUser'), directives: [])
-              ])),
-          FieldNode(
-              name: NameNode(value: 'state'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null)
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'simpleUser'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'UserType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'id'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'publicName'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null)
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'simpleTask'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'TaskType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'id'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'name'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'periodEnd'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'state'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'user'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FieldNode(
-                    name: NameNode(value: 'publicName'),
-                    alias: null,
-                    arguments: [],
-                    directives: [],
-                    selectionSet: null)
-              ]))
-        ]))
-  ]);
-
-  @override
-  final String operationName = 'usersDoneToApproveTasks';
-
-  @override
-  final UsersDoneToApproveTasksArguments variables;
-
-  @override
-  List<Object> get props => [document, operationName, variables];
-  @override
-  UsersDoneToApproveTasks$Query parse(Map<String, dynamic> json) =>
-      UsersDoneToApproveTasks$Query.fromJson(json);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -3403,4 +3343,85 @@ class UsersQuery extends GraphQLQuery<Users$Query, JsonSerializable> {
   List<Object> get props => [document, operationName];
   @override
   Users$Query parse(Map<String, dynamic> json) => Users$Query.fromJson(json);
+}
+
+@JsonSerializable(explicitToJson: true)
+class TaskSetDoneTaskArguments extends JsonSerializable with EquatableMixin {
+  TaskSetDoneTaskArguments({this.updateInput});
+
+  @override
+  factory TaskSetDoneTaskArguments.fromJson(Map<String, dynamic> json) =>
+      _$TaskSetDoneTaskArgumentsFromJson(json);
+
+  final TaskInputUpdate updateInput;
+
+  @override
+  List<Object> get props => [updateInput];
+  @override
+  Map<String, dynamic> toJson() => _$TaskSetDoneTaskArgumentsToJson(this);
+}
+
+class TaskSetDoneTaskMutation
+    extends GraphQLQuery<TaskSetDoneTask$Mutation, TaskSetDoneTaskArguments> {
+  TaskSetDoneTaskMutation({this.variables});
+
+  @override
+  final DocumentNode document = DocumentNode(definitions: [
+    OperationDefinitionNode(
+        type: OperationType.mutation,
+        name: NameNode(value: 'taskSetDoneTask'),
+        variableDefinitions: [
+          VariableDefinitionNode(
+              variable: VariableNode(name: NameNode(value: 'updateInput')),
+              type: NamedTypeNode(
+                  name: NameNode(value: 'TaskInputUpdate'), isNonNull: false),
+              defaultValue: DefaultValueNode(value: null),
+              directives: [])
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'saveTask'),
+              alias: null,
+              arguments: [
+                ArgumentNode(
+                    name: NameNode(value: 'updateInput'),
+                    value: VariableNode(name: NameNode(value: 'updateInput')))
+              ],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FieldNode(
+                    name: NameNode(value: '__typename'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: null),
+                FieldNode(
+                    name: NameNode(value: 'task'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: SelectionSetNode(selections: [
+                      FieldNode(
+                          name: NameNode(value: '__typename'),
+                          alias: null,
+                          arguments: [],
+                          directives: [],
+                          selectionSet: null)
+                    ]))
+              ]))
+        ]))
+  ]);
+
+  @override
+  final String operationName = 'taskSetDoneTask';
+
+  @override
+  final TaskSetDoneTaskArguments variables;
+
+  @override
+  List<Object> get props => [document, operationName, variables];
+  @override
+  TaskSetDoneTask$Mutation parse(Map<String, dynamic> json) =>
+      TaskSetDoneTask$Mutation.fromJson(json);
 }
