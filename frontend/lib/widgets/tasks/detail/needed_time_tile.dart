@@ -42,10 +42,12 @@ class _NeededTimeTileState extends State<NeededTimeTile> {
                               duration: _duration)
                           .show(context)
                           .then((value) {
-                        widget._onSave(TaskInputUpdate(
-                          id: widget._task.id,
-                          neededTimeSeconds: value.inSeconds,
-                        ));
+                        if (value != null) {
+                          widget._onSave(TaskInputUpdate(
+                            id: widget._task.id,
+                            neededTimeSeconds: value.inSeconds,
+                          ));
+                        }
                       }))),
     ]);
   }

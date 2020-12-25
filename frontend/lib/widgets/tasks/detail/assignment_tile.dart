@@ -36,7 +36,7 @@ class _AssignmentTileState extends State<AssignmentTile> {
             subtitle: _isEdit
                 ? TaskAssigneeInput(
                     onChanged: (value) => _value = value,
-                    initialValue: widget._task.user.id,
+                    initialValue: widget._task.user?.id,
                   )
                 : Text(widget._task.user?.publicName ?? 'Keine Zuweisung'),
             trailing: _isEdit ||

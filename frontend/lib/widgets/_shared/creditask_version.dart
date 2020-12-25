@@ -14,8 +14,7 @@ class CreditaskVersion extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             String version = snapshot.data.version;
-            String buildNumber = snapshot.data.buildNumber;
-            return Text('v$version+$buildNumber', style: this.style);
+            return Text('v$version', style: this.style);
           } else {
             return Text('', style: this.style);
           }

@@ -7,8 +7,7 @@ class DurationPicker {
   final Widget title;
   final Duration duration;
 
-  DurationPicker(
-      {@required this.title, @required this.duration});
+  DurationPicker({@required this.title, @required this.duration});
 
   Future<Duration> show(BuildContext context) {
     final hours = duration.inHours;
@@ -26,14 +25,18 @@ class DurationPicker {
         builder: (context) => AlertDialog(
             title: title,
             actions: [
+              TextButton(
+                child: Text('ABBRECHEN'),
+                onPressed: () => Navigator.pop(context),
+              ),
               RaisedButton(
-                child: Text('Speichern'),
+                child: Text('SPEICHERN'),
                 onPressed: () => Navigator.pop(
                     context,
                     Duration(
                         hours: int.parse(hoursController.text),
                         minutes: int.parse(minutesController.text))),
-              )
+              ),
             ],
             content: Row(
               mainAxisSize: MainAxisSize.min,

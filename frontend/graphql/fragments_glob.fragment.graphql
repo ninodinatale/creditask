@@ -20,6 +20,7 @@ fragment simpleApproval on ApprovalType {
         ...simpleUser
     }
     state
+    message
 }
 
 fragment usersDoneToApproveTask on TaskType {
@@ -62,6 +63,12 @@ fragment simpleTask on TaskType {
     state
     user {
         publicName
+    }
+}
+
+fragment simpleTaskApprovals on TaskType {
+    approvals {
+        ...simpleApproval
     }
 }
 

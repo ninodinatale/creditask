@@ -144,7 +144,8 @@ class SaveApprovalTest(CreditaskTestBase):
                                 variables={
                                     'approvalInput': dict(id=approval_0.id,
                                                           state=str(
-                                                              ApprovalState.DECLINED))})
+                                                              ApprovalState.DECLINED),
+                                                          message='Something wrong')})
 
             self.assertResponseNoErrors(response)
 
@@ -160,96 +161,3 @@ class SaveApprovalTest(CreditaskTestBase):
 
             user_0.refresh_from_db()
             self.assertEqual(user_0.credits, 200)
-
-        with self.subTest('should update approval and set task state to '
-                          'APPROVED and update user\'s credits by '
-                          'fixed_credits'):
-            group = create_group()
-            user_0 = create_user(group=group)
-            user_1 = create_user(group=group, credits=200)
-            user_2 = create_user(group=group)
-            user_3 = create_user(group=group)
-            task = create_task(group=group,
-                               credits_calc=CreditsCalc.FIXED,
-                               fixed_credits=500,
-                               state=TaskState.TO_APPROVE, user=user_1)
-            approval_0 = create_approval(user=user_0,
-                                         state=ApprovalState.NONE, task=task)
-            approval_1 = create_approval(user=user_1,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-            approval_2 = create_approval(user=user_2,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-            approval_3 = create_approval(user=user_3,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name,
-                                variables={
-                                    'approvalInput': dict(id=approval_0.id,
-                                                          state=str(
-                                                              ApprovalState.APPROVED))})
-
-            self.assertResponseNoErrors(response)
-
-            approval: dict = json.loads(response.content).get(
-                'data').get(self.op_name).get('approval')
-
-            self.assertIsNotNone(approval)
-            self.assertEqual(approval.get('state'), str(
-                ApprovalState.APPROVED))
-
-            task.refresh_from_db()
-            self.assertEqual(task.state, TaskState.APPROVED)
-
-            user_1.refresh_from_db()
-            self.assertEqual(user_1.credits, 700)
-
-        with self.subTest('should update approval and set task state to '
-                          'APPROVED and update user\'s credits by '
-                          'factor'):
-            group = create_group()
-            user_0 = create_user(group=group)
-            user_1 = create_user(group=group, credits=200)
-            user_2 = create_user(group=group)
-            user_3 = create_user(group=group)
-            task = create_task(group=group,
-                               credits_calc=CreditsCalc.BY_FACTOR,
-                               factor=2.5,
-                               needed_time_seconds=2000,
-                               state=TaskState.TO_APPROVE, user=user_1)
-            approval_0 = create_approval(user=user_0,
-                                         state=ApprovalState.NONE, task=task)
-            approval_1 = create_approval(user=user_1,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-            approval_2 = create_approval(user=user_2,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-            approval_3 = create_approval(user=user_3,
-                                         state=ApprovalState.APPROVED,
-                                         task=task)
-
-            response = self.gql(self.query_under_test,
-                                op_name=self.op_name,
-                                variables={
-                                    'approvalInput': dict(id=approval_0.id,
-                                                          state=str(
-                                                              ApprovalState.APPROVED))})
-
-            self.assertResponseNoErrors(response)
-
-            approval: dict = json.loads(response.content).get(
-                'data').get(self.op_name).get('approval')
-
-            self.assertIsNotNone(approval)
-            self.assertEqual(approval.get('state'), str(
-                ApprovalState.APPROVED))
-
-            task.refresh_from_db()
-            self.assertEqual(task.state, TaskState.APPROVED)
-
-            user_1.refresh_from_db()
-            self.assertEqual(user_1.credits, 284)

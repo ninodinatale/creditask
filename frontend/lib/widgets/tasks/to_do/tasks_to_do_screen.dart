@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:creditask/providers/auth.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/utils/date_format.dart';
-import 'package:creditask/widgets/_shared/task_state_icon.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
 import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
+import 'package:creditask/widgets/tasks/set_task_done_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -21,6 +21,7 @@ class TasksToDoScreen extends StatefulWidget {
 
 class _TasksToDoScreenState extends State<TasksToDoScreen> {
   StreamSubscription<void> _subscription;
+  Request _request;
 
   @override
   void dispose() {
@@ -28,7 +29,7 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
     _subscription.cancel();
   }
 
-  List<Widget> getListTilesFor(List<SimpleTaskMixin> tasks,
+  List<Widget> getListTilesFor(List<UsersTodoTasks$Query$TodoTasksOfUser> tasks,
       String title, bool overdue, ThemeData theme) {
     return [
       tasks.length > 0
@@ -38,23 +39,82 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
           : SizedBox.shrink(),
       ...ListTile.divideTiles(
           context: context,
-          tiles: tasks.map((task) => ListTile(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TaskDetailScreen(task.id))),
-                leading: UserAvatar(task.user.publicName),
-                title: Text(task.name),
-                subtitle: Text(
-                    'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
-                    style: TextStyle(
-                        color: task.state == TaskState.toDo && overdue
-                            ? theme.errorColor
-                            : null)),
-                trailing: task.state == TaskState.toApprove
-                    ? TaskStateIcon(task.state)
-                    : null,
-              )))
+          tiles: tasks.map((task) {
+            final _icon = taskStateData(task.state);
+            return ListTile(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TaskDetailScreen(task.id))),
+              leading: UserAvatar(task.user.publicName),
+              title: Text(task.name),
+              subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (task.state == TaskState.toDo)
+                      Text(
+                          'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
+                          style: TextStyle(
+                              color: task.state == TaskState.toDo && overdue
+                                  ? theme.errorColor
+                                  : null)),
+                    if (task.state != TaskState.toDo) ...[
+                      ...task.approvals.map((a) {
+                        final _apprStateData =
+                            approvalStateData(a.state, context);
+                        return Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5, right: 5),
+                              child: Icon(
+                                _apprStateData.item1,
+                                color: _apprStateData.item2?.withOpacity(0.6),
+                                size: 15,
+                              ),
+                            ),
+                            Text(a.user.publicName),
+                          ],
+                        );
+                      }).toList(),
+                      if (task.state == TaskState.approved) ...[
+                        Text(''), // spacer
+                        SetTaskDoneButton(
+                            taskId: task.id,
+                            onUpdate:
+                                (GraphQLDataProxy cache, QueryResult result) {
+                              if (result.hasException) {
+                                // TODO
+                              } else {
+                                final _query = UsersTodoTasks$Query.fromJson(
+                                    cache.readQuery(_request));
+
+                                _query.todoTasksOfUser.removeWhere(
+                                    (element) => element.id == task.id);
+
+                                cache.writeQuery(_request,
+                                    data: _query.toJson());
+
+                                emitTaskDidChange();
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Änderung gespeichert'),
+                                    Icon(Icons.check, color: Colors.green)
+                                  ],
+                                )));
+                              }
+                            }),
+                        Text(''), // spa
+                      ] // cer
+                    ]
+                  ]),
+              trailing: task.state != TaskState.toDo
+                  ? Icon(_icon.item1, color: _icon.item2)
+                  : null,
+            );
+          }))
     ];
   }
 
@@ -63,11 +123,13 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
     AuthProvider auth = Provider.of<AuthProvider>(context);
     UsersTodoTasksQuery query = UsersTodoTasksQuery(
         variables: UsersTodoTasksArguments(email: auth.currentUser.email));
+    final _queryOptions = QueryOptions(
+        documentNode: query.document,
+        // this is the query string you just created
+        variables: query.getVariablesMap());
+    _request = _queryOptions.asRequest;
     return Query(
-      options: QueryOptions(
-          documentNode: query.document,
-          // this is the query string you just created
-          variables: query.getVariablesMap()),
+      options: _queryOptions,
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
         if (_subscription == null) {
