@@ -20,8 +20,22 @@ samples, guidance on mobile development, and a full API reference.
 2. Run `flutter pub run flutter_launcher_icons:main`
 3. Done.
 
-## Android Release
+## Release
+
+### Android
 From the command line:
 
-Run `flutter build appbundle` (Running flutter build defaults to a release build.)
+1. Run `flutter build appbundle` (Running flutter build defaults to a release build.)
 The release bundle for your app is created at `./build/app/outputs/bundle/release/app.aab`.
+2. go to `https://play.google.com/console` => `Creditask` and create a new release for a track  (Testing/Production)
+
+### iOS
+
+1. Run `flutter build ios`
+2. In Xcode, open `Runner.xcworkspace` in your app’s ios folder.
+3. Select `Product` > `Scheme` > `Runner`.
+4. Select `Product` > `Destination` > `Any iOS Device`.
+5. Select `Runner` in the Xcode project navigator, then select the `Runner` target in the settings view sidebar.
+6. In the Identity section, update the Version to the user-facing version number you wish to publish.
+7. In the Identity section, update the Build identifier to a unique build number used to track this build on App Store Connect. Each upload requires a unique build number.
+8. Select `Product` > `Archive` to produce a build archive.
