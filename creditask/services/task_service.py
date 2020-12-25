@@ -8,8 +8,8 @@ from django.utils.timezone import utc
 from creditask.models import Task, User, Approval, TaskState, TaskChange, \
     ApprovalState, ChangeableTaskProperty, CreditsCalc
 from creditask.validators import MinLenValidator
-import creditask.services.user_service as user_service
-import creditask.services.approval_service as approval_service
+import creditask.services.user_service as userservice
+import creditask.services.approval_service as approvalservice
 
 
 def get_task_by_id(task_id: int) -> Task:
@@ -147,13 +147,13 @@ def merge_values(task_to_merge_into: Task,
                     raise ValidationError(
                         'credits_calc of task has unknown value: cannot calculate '
                         'credits')
-                user_service.save_user(task_to_merge_into.user, credits=new_credits)
+                userservice.save_user(task_to_merge_into.user, credits=new_credits)
 
             # TODO test
             if getattr(task_to_merge_into, key) == TaskState.DECLINED:
                 if value == TaskState.TO_DO:
                     for approval in list(task_to_merge_into.approvals.all()):
-                        approval_service.save_approval(current_user, approval.id,
+                        approvalservice.save_approval(current_user, approval.id,
                                       ApprovalState.NONE, for_reset=True)
 
         try:
