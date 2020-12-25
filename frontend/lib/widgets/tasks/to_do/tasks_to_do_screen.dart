@@ -5,6 +5,7 @@ import 'package:creditask/services/tasks.dart';
 import 'package:creditask/utils/date_format.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
 import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
+import 'package:creditask/widgets/tasks/set_task_done_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -77,59 +78,34 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
                       }).toList(),
                       if (task.state == TaskState.approved) ...[
                         Text(''), // spacer
-                        Mutation(
-                          options: MutationOptions(
-                              document: TaskSetDoneTaskMutation().document,
-                              update:
-                                  (GraphQLDataProxy cache, QueryResult result) {
-                                if (result.hasException) {
-                                  // TODO
-                                } else {
-                                  final _query = UsersTodoTasks$Query.fromJson(
-                                      cache.readQuery(_request));
-
-                                  _query.todoTasksOfUser.removeWhere(
-                                      (element) => element.id == task.id);
-
-                                  cache.writeQuery(_request,
-                                      data: _query.toJson());
-
-                                  emitTaskDidChange();
-                                  Scaffold.of(context).showSnackBar(SnackBar(
-                                      content: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('Änderung gespeichert'),
-                                      Icon(Icons.check, color: Colors.green)
-                                    ],
-                                  )));
-                                }
-                              },
-                              onError: (OperationException error) {
+                        SetTaskDoneButton(
+                            taskId: task.id,
+                            onUpdate:
+                                (GraphQLDataProxy cache, QueryResult result) {
+                              if (result.hasException) {
                                 // TODO
-                              }),
-                          builder:
-                              (RunMutation runMutation, QueryResult result) =>
-                                  RaisedButton(
-                            onPressed: () {
-                              runMutation(
-                                  TaskSetDoneTaskArguments(
-                                          updateInput: TaskInputUpdate(
-                                              id: task.id,
-                                              state: TaskState.done))
-                                      .toJson(),
-                                  optimisticResult:
-                                      TaskSetDoneTask$Mutation().toJson());
-                            },
-                            color: Colors.green,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [Icon(Icons.check), Text(' OK')],
-                            ),
-                          ),
-                        ),
+                              } else {
+                                final _query = UsersTodoTasks$Query.fromJson(
+                                    cache.readQuery(_request));
 
+                                _query.todoTasksOfUser.removeWhere(
+                                    (element) => element.id == task.id);
+
+                                cache.writeQuery(_request,
+                                    data: _query.toJson());
+
+                                emitTaskDidChange();
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Änderung gespeichert'),
+                                    Icon(Icons.check, color: Colors.green)
+                                  ],
+                                )));
+                              }
+                            }),
                         Text(''), // spa
                       ] // cer
                     ]

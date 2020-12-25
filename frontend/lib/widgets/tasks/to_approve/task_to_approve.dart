@@ -144,46 +144,6 @@ class _TaskToApproveState extends State<TaskToApprove> {
                   ],
                 );
               }).toList(),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) => _showConfirmDialog(value),
-              icon: Icon(Icons.more_vert),
-              itemBuilder: (context) {
-                final _apprStateDataApproved =
-                    approvalStateData(ApprovalState.approved, context);
-                final _apprStateDataDeclined =
-                    approvalStateData(ApprovalState.declined, context);
-                return [
-                  PopupMenuItem(
-                    value: ApprovalInput(
-                        id: myApprovalId, state: ApprovalState.approved),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(_apprStateDataApproved.item1,
-                            color: _apprStateDataApproved.item2),
-                        Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text('Bestätigen')),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: ApprovalInput(
-                        id: myApprovalId, state: ApprovalState.declined),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(_apprStateDataDeclined.item1,
-                            color: _apprStateDataDeclined.item2),
-                        Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text('Ablehnen')),
-                      ],
-                    ),
-                  ),
-                ];
-              },
             ));
       },
     );

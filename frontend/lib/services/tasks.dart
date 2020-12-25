@@ -31,8 +31,6 @@ bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
   }
 }
 
-
-
 Tuple2<IconData, Color> taskStateData(TaskState taskState) {
   IconData iconData;
   MaterialColor color;
@@ -42,7 +40,7 @@ Tuple2<IconData, Color> taskStateData(TaskState taskState) {
       break;
     case TaskState.toApprove:
       iconData = Icons.access_time;
-      color = Colors.green;
+      color = Colors.amber;
       break;
     case TaskState.approved:
       iconData = Icons.check_circle_outline;

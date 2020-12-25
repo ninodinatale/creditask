@@ -79,17 +79,23 @@ class _TaskDetailState extends State<TaskDetail> {
           }),
       builder: (RunMutation runMutation, QueryResult result) {
         this._runMutation = runMutation;
-        return ListView(
-          shrinkWrap: true,
+        return Column(
           children: [
-            StatusCard(widget._task),
-            AssignmentTile(widget._task, _isLoading, saveChanges),
-            widget._task.creditsCalc == CreditsCalc.fixed
-                ? FixedCreditsTile(widget._task, _isLoading, saveChanges)
-                : FactorTile(widget._task, _isLoading, saveChanges),
-            NeededTimeTile(widget._task, saveChanges),
-            PeriodStartTile(widget._task, saveChanges),
-            PeriodEndTile(widget._task, saveChanges),
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  StatusCard(widget._task),
+                  AssignmentTile(widget._task, _isLoading, saveChanges),
+                  widget._task.creditsCalc == CreditsCalc.fixed
+                      ? FixedCreditsTile(widget._task, _isLoading, saveChanges)
+                      : FactorTile(widget._task, _isLoading, saveChanges),
+                  NeededTimeTile(widget._task, saveChanges),
+                  PeriodStartTile(widget._task, saveChanges),
+                  PeriodEndTile(widget._task, saveChanges),
+                ],
+              ),
+            ),
             ActionButtons(widget._task, widget._request),
           ],
         );
