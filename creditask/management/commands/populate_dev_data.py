@@ -34,7 +34,27 @@ class Command(BaseCommand):
                                 public_name='Anna',
                                 password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
                                          'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
-                                         'O10=')
+                                         'O10='),
+            # User.objects.create(group=group_1, email='beni',
+            #                     public_name='Beni',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='tinu',
+            #                     public_name='Tinu',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='meli',
+            #                     public_name='Meli',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='seppu',
+            #                     public_name='Seppu',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
         ]
 
         rounded_now = datetime.datetime(
@@ -131,7 +151,12 @@ class Command(BaseCommand):
             for user in all_user:
                 Approval.objects.create(
                     task=task,
-                    user=user
+                    user=user,
+                    message='Ein langer Text mit max_length=240, na wie siehts '
+                            'wohl aus? Ein langer Text mit max_length=240, '
+                            'na wie siehts wohl aus? Ein langer Text mit max_'
+                            'length=240, na wie siehts wohl aus? Ein langer '
+                            'Text mit max_length=240, na wie siehts wohl aus?'
                 )
             TaskChange.objects.create(
                 task=task,
@@ -208,6 +233,5 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        print(f"lololol: {bool(getattr(settings, 'DEBUG'))}")
         if bool(getattr(settings, 'DEBUG')) is True:
             self.setup_dev_data()

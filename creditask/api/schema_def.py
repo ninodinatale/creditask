@@ -5,11 +5,11 @@ import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
     Task, TaskChange, CreditsCalc, Grocery, Error
-from creditask.services import get_task_changes_by_task, save_approval, \
+from creditask.services import save_approval, \
     get_todo_tasks_by_user_email, get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, \
-    get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
+    get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
     get_all_in_cart, save_error
 from .scalars import custom_string, custom_float
@@ -108,9 +108,6 @@ class TaskQuery:
     todo_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
-    done_tasks_of_user = graphene.NonNull(
-        graphene.List(graphene.NonNull(TaskType)),
-        user_email=graphene.NonNull(graphene.String))
     to_approve_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
@@ -128,11 +125,6 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_todo_tasks_of_user(self, info, **kwargs):
         return get_todo_tasks_by_user_email(kwargs.get('user_email'))
-
-    @staticmethod
-    @graphql_jwt.decorators.login_required
-    def resolve_done_tasks_of_user(self, info, **kwargs):
-        return get_done_tasks_to_approve_by_user_email(kwargs.get('user_email'))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -337,6 +329,7 @@ class GroceryMutation:
 class ApprovalInput(graphene.InputObjectType):
     id = graphene.NonNull(graphene.ID)
     state = graphene.NonNull(ApprovalScalars.state)
+    message = graphene.String()
 
 
 class SaveApproval(graphene.Mutation):
@@ -351,7 +344,8 @@ class SaveApproval(graphene.Mutation):
         approval = save_approval(
             info.context.user,
             approval_input.id,
-            approval_input.state)
+            approval_input.state,
+            approval_input.message)
         return SaveApproval(approval=approval)
 
 

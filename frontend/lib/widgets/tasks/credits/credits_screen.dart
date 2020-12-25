@@ -1,6 +1,3 @@
-import 'package:creditask/utils/date_format.dart';
-import 'package:creditask/widgets/_shared/task_state_icon.dart';
-import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -14,7 +11,6 @@ class CreditsScreen extends StatefulWidget {
 }
 
 class _CreditsScreenState extends State<CreditsScreen> {
-
   @override
   Widget build(BuildContext context) {
     CreditsQuery query = CreditsQuery();

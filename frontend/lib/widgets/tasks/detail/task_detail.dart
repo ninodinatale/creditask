@@ -1,13 +1,11 @@
-import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/services/tasks.dart';
-import 'package:creditask/utils/transformers.dart';
 import 'package:creditask/widgets/_shared/error_screen.dart';
-import 'package:creditask/widgets/_shared/task_state_icon.dart';
 import 'package:creditask/widgets/tasks/detail/assignment_tile.dart';
 import 'package:creditask/widgets/tasks/detail/fixed_credits_tile.dart';
 import 'package:creditask/widgets/tasks/detail/needed_time_tile.dart';
 import 'package:creditask/widgets/tasks/detail/period_end_tile.dart';
 import 'package:creditask/widgets/tasks/detail/period_start_tile.dart';
+import 'package:creditask/widgets/tasks/detail/status_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -54,52 +52,50 @@ class _TaskDetailState extends State<TaskDetail> {
               return ErrorDialog(result.exception.toString());
             } else {
               var _updatedTask =
-                  UpdateDetailTask$Mutation
-                      .fromJson(result.data)
-                      .saveTask
-                      .task;
+                  UpdateDetailTask$Mutation.fromJson(result.data).saveTask.task;
 
               TaskDetail$Query _query = TaskDetail$Query()
-                ..task = TaskDetail$Query$Task.fromJson(widget._task.toJson()
-                  ..addAll(_updatedTask.toJson()));
+                ..task = TaskDetail$Query$Task.fromJson(
+                    widget._task.toJson()..addAll(_updatedTask.toJson()));
               cache.writeQuery(widget._request, data: _query.toJson());
               emitTaskDidChange();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Änderung gespeichert'),
-                      Icon(Icons.check, color: Colors.green)
-                    ],
-                  )));
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Änderung gespeichert'),
+                  Icon(Icons.check, color: Colors.green)
+                ],
+              )));
             }
           },
           onCompleted: (_) =>
-          // TODO remove this if optimistic result is implemented
-          setState(() {
-            _isLoading = false;
-          }),
+              // TODO remove this if optimistic result is implemented
+              setState(() {
+                _isLoading = false;
+              }),
           onError: (OperationException error) {
             // TODO
           }),
       builder: (RunMutation runMutation, QueryResult result) {
         this._runMutation = runMutation;
-        return ListView(
-          shrinkWrap: true,
+        return Column(
           children: [
-            Card(
-              child: ListTile(
-                leading: TaskStateIcon(widget._task.state), // TODO get icon
-                title: Text(transformTaskState(widget._task.state)),
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  StatusCard(widget._task),
+                  AssignmentTile(widget._task, _isLoading, saveChanges),
+                  widget._task.creditsCalc == CreditsCalc.fixed
+                      ? FixedCreditsTile(widget._task, _isLoading, saveChanges)
+                      : FactorTile(widget._task, _isLoading, saveChanges),
+                  NeededTimeTile(widget._task, saveChanges),
+                  PeriodStartTile(widget._task, saveChanges),
+                  PeriodEndTile(widget._task, saveChanges),
+                ],
               ),
             ),
-            AssignmentTile(widget._task, _isLoading, saveChanges),
-            widget._task.creditsCalc == CreditsCalc.fixed
-                ? FixedCreditsTile(widget._task, _isLoading, saveChanges)
-                : FactorTile(widget._task, _isLoading, saveChanges),
-            NeededTimeTile(widget._task, saveChanges),
-            PeriodStartTile(widget._task, saveChanges),
-            PeriodEndTile(widget._task, saveChanges),
             ActionButtons(widget._task, widget._request),
           ],
         );
