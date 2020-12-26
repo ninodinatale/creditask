@@ -17,7 +17,7 @@ def get_task_by_id(task_id: int) -> Task:
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
     return list(
         Task.objects.filter(user__email=user_mail).exclude(
-            state=TaskState.DONE).order_byk('period_end'))
+            state=TaskState.DONE).order_by('period_end'))
 
 
 def get_to_approve_tasks_of_user(user_mail: str) -> List[Task]:

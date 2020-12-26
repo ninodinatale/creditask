@@ -163,7 +163,7 @@ class TestApprovalService(TestCase):
             self.assertEquals(expected_call_count,
                               approval_model_mock.objects.get.call_count)
             self.assertEquals(dict(id=approval_id),
-                              approval_model_mock.objects.get.call_args.kwargs)
+                              approval_model_mock.objects.get.call_args[1])
             fetched_approval_mock.task.state = TaskState.TO_APPROVE
 
         with self.subTest('should set state to new state and save entity'):
@@ -206,7 +206,7 @@ class TestApprovalService(TestCase):
             self.assertEquals(expected_call_count,
                               fetched_approval_mock.task.approvals.exclude.call_count)
             self.assertEquals(dict(user=fetched_approval_mock.task.user),
-                              fetched_approval_mock.task.approvals.exclude.call_args.kwargs)
+                              fetched_approval_mock.task.approvals.exclude.call_args[1])
             fetched_approval_mock.task.state = TaskState.TO_APPROVE
 
         with self.subTest(
@@ -238,11 +238,11 @@ class TestApprovalService(TestCase):
             self.assertEquals(expected_call_count_2,
                               save_task_mock.call_count)
             self.assertTupleEqual((current_user_mock,),
-                                  save_task_mock.call_args.args)
+                                  save_task_mock.call_args[0])
             self.assertDictEqual(dict(
                 id=fetched_approval_mock.task.id,
                 state=TaskState.DECLINED
-            ), save_task_mock.call_args.kwargs)
+            ), save_task_mock.call_args[1])
 
         with self.subTest(
                 'should not save task if for_reset is True'):
