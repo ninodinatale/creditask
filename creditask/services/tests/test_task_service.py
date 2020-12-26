@@ -27,8 +27,8 @@ class TestTaskService(TestCase):
         return_value = get_task_by_id(task_id)
 
         self.assertEquals(1, mock_task.objects.get.call_count)
-        self.assertEquals(dict(id=task_id),
-                          mock_task.objects.get.call_args.kwargs)
+        self.assertDictEqual(dict(id=task_id),
+                          mock_task.objects.get.call_args[1])
         self.assertEquals(mock_return_value, return_value)
 
     @mock.patch('creditask.services.task_service.Task')
@@ -43,13 +43,13 @@ class TestTaskService(TestCase):
         self.assertEquals(expected_call_count,
                           mock_task.objects.filter.call_count)
         self.assertEquals(dict(user__email=user_email),
-                          mock_task.objects.filter.call_args.kwargs)
+                          mock_task.objects.filter.call_args[1])
         self.assertEquals(dict(state=TaskState.DONE),
-                          mock_task.objects.filter.return_value.exclude.call_args.kwargs)
+                          mock_task.objects.filter.return_value.exclude.call_args[1])
         self.assertEquals(1,
                           mock_task.objects.filter.return_value.exclude.return_value.order_by.call_count)
         self.assertEquals(('period_end',),
-                          mock_task.objects.filter.return_value.exclude.return_value.order_by.call_args.args)
+                          mock_task.objects.filter.return_value.exclude.return_value.order_by.call_args[0])
         self.assertEquals(mock_return_value, return_value)
 
     def test_get_to_approve_tasks_of_user(self):
@@ -188,11 +188,11 @@ class TestTaskService(TestCase):
         self.assertEquals(expected_call_count,
                           mock_task.objects.filter.call_count)
         self.assertEquals(dict(group_id=group_id, user=None),
-                          mock_task.objects.filter.call_args.kwargs)
+                          mock_task.objects.filter.call_args[1])
         self.assertEquals(1,
                           mock_task.objects.filter.return_value.order_by.call_count)
         self.assertEquals(('period_end',),
-                          mock_task.objects.filter.return_value.order_by.call_args.args)
+                          mock_task.objects.filter.return_value.order_by.call_args[0])
         self.assertEquals(mock_return_value, return_value)
 
     @mock.patch('creditask.services.task_service.Task')
@@ -206,12 +206,12 @@ class TestTaskService(TestCase):
 
         self.assertEquals(expected_call_count,
                           mock_task.objects.filter.call_count)
-        self.assertEquals(dict(group_id=group_id, state=TaskState.TO_DO),
-                          mock_task.objects.filter.call_args.kwargs)
+        self.assertDictEqual(dict(group_id=group_id, state=TaskState.TO_DO),
+                          mock_task.objects.filter.call_args[1])
         self.assertEquals(1,
                           mock_task.objects.filter.return_value.order_by.call_count)
         self.assertEquals(('period_end',),
-                          mock_task.objects.filter.return_value.order_by.call_args.args)
+                          mock_task.objects.filter.return_value.order_by.call_args[0])
         self.assertEquals(mock_return_value, return_value)
 
     @mock.patch('creditask.services.task_service.merge_values')
@@ -269,32 +269,32 @@ class TestTaskService(TestCase):
 
             self.assertEquals(1, mock_task_model.objects.get.call_count)
             self.assertEquals(calling_kwargs,
-                              mock_task_model.objects.get.call_args.kwargs)
+                              mock_task_model.objects.get.call_args[1])
 
             self.assertEquals((mock_return_value,),
-                              mock_validate_state_change.call_args.args,
+                              mock_validate_state_change.call_args[0],
                               'first argument of validate_state_change '
                               'needs to be to task to update')
             self.assertEquals(calling_kwargs,
-                              mock_validate_state_change.call_args.kwargs,
+                              mock_validate_state_change.call_args[1],
                               'second argument of validate_state_change '
                               'needs to be to kwargs')
             self.assertEquals((mock_return_value,),
-                              mock_validate_new_properties_based_on_task_state.call_args.args,
+                              mock_validate_new_properties_based_on_task_state.call_args[0],
                               'first argument of '
                               'mock_validate_new_properties_based_on_task_state'
                               ' needs to be to task to update')
             self.assertEquals(calling_kwargs,
-                              mock_validate_new_properties_based_on_task_state.call_args.kwargs,
+                              mock_validate_new_properties_based_on_task_state.call_args[1],
                               'second argument of '
                               'mock_validate_new_properties_based_on_task_state'
                               ' needs to be to kwargs')
             self.assertEquals((mock_return_value, mock_current_user),
-                              mock_merge_values.call_args.args,
+                              mock_merge_values.call_args[0],
                               'first argument of merge_values '
                               'needs to be to task to update')
             self.assertEquals(calling_kwargs,
-                              mock_merge_values.call_args.kwargs,
+                              mock_merge_values.call_args[1],
                               'third argument of merge_values '
                               'needs to be to kwargs')
             self.assertEquals(mock_return_value, return_value,
@@ -370,7 +370,7 @@ class TestTaskService(TestCase):
                         changed_property=ChangeableTaskProperty.CreatedById,
                         timestamp=datetime_mock.utcnow.return_value.replace.return_value
                     ),
-                        mock_task_change_model.objects.create.call_args.kwargs)
+                        mock_task_change_model.objects.create.call_args[1])
 
             with self.subTest('should create approvals for users in group'):
                 mock_users = [Mock(), Mock(), Mock()]
@@ -380,7 +380,7 @@ class TestTaskService(TestCase):
 
                 self.assertEquals(
                     dict(group_id=mock_task_model.return_value.group_id, ),
-                    mock_user_model.objects.filter.call_args.kwargs)
+                    mock_user_model.objects.filter.call_args[1])
 
                 self.assertEquals(3,
                                   mock_approval_model.objects.create.call_count)
@@ -389,7 +389,7 @@ class TestTaskService(TestCase):
                                            task=mock_task_model.return_value,
                                            user=mock_users[i]),
                                       mock_approval_model.objects.create.call_args_list[
-                                          i].kwargs)
+                                          i][1])
 
     @mock.patch('creditask.services.task_service.validate_task_properties')
     def test_validate_new_properties_based_on_task_state(self,
@@ -460,7 +460,7 @@ class TestTaskService(TestCase):
     @mock.patch('creditask.services.task_service.Task')
     @mock.patch('creditask.services.task_service.TaskChange')
     @mock.patch('creditask.services.task_service.datetime')
-    @mock.patch('creditask.services.task_service.user_service.save_user')
+    @mock.patch('creditask.services.user_service.save_user')
     def test_merge_values(self, save_user_mock, datetime_mock,
                           task_change_model_mock,
                           mock_task_model):
@@ -536,7 +536,7 @@ class TestTaskService(TestCase):
                      current_value=values_to_merge.get('needed_time_seconds'),
                      changed_property=ChangeableTaskProperty.NeededTimeSeconds,
                      timestamp=datetime_mock.utcnow.return_value.replace.return_value),
-                task_change_model_mock.objects.create.call_args_list[0].kwargs)
+                task_change_model_mock.objects.create.call_args_list[0][1])
             self.assertDictEqual(
                 dict(task_id=task_to_merge_into_mock.id,
                      user=current_user_mock,
@@ -544,7 +544,7 @@ class TestTaskService(TestCase):
                      current_value=values_to_merge.get('state'),
                      changed_property=ChangeableTaskProperty.State,
                      timestamp=datetime_mock.utcnow.return_value.replace.return_value),
-                task_change_model_mock.objects.create.call_args_list[1].kwargs)
+                task_change_model_mock.objects.create.call_args_list[1][1])
             self.assertDictEqual(
                 dict(task_id=task_to_merge_into_mock.id,
                      user=current_user_mock,
@@ -552,7 +552,7 @@ class TestTaskService(TestCase):
                      current_value=values_to_merge.get('user').id,
                      changed_property=ChangeableTaskProperty.UserId,
                      timestamp=datetime_mock.utcnow.return_value.replace.return_value),
-                task_change_model_mock.objects.create.call_args_list[2].kwargs)
+                task_change_model_mock.objects.create.call_args_list[2][1])
 
         with self.subTest(
                 'should save task and user and give credits to user if all approvals have state approved'):
@@ -592,10 +592,10 @@ class TestTaskService(TestCase):
             self.assertEquals(expected_call_count_1,
                               save_user_mock.call_count)
             self.assertTupleEqual((assigned_user_mock,),
-                                  save_user_mock.call_args.args)
+                                  save_user_mock.call_args[0])
             self.assertDictEqual(dict(
                 credits=300
-            ), save_user_mock.call_args.kwargs)
+            ), save_user_mock.call_args[1])
 
         with self.subTest(
                 'should set user_id to None if passed non-number-string'):
@@ -737,9 +737,9 @@ class TestTaskService(TestCase):
         mock_task = Mock()
         mock_task_get.return_value = mock_task
         get_task_changes_by_task_id(task_id)
-        self.assertEquals(dict(id=task_id), mock_task_get.call_args.kwargs)
+        self.assertEquals(dict(id=task_id), mock_task_get.call_args[1])
         self.assertEquals((mock_task,),
-                          mock_get_task_changes_by_task.call_args.args)
+                          mock_get_task_changes_by_task.call_args[0])
 
     def test_get_task_changes_by_task(self):
         mock_task = Mock()
@@ -755,8 +755,8 @@ class TestTaskService(TestCase):
                           mock_task.task_changes.all.call_count)
         self.assertEquals(1,
                           mock_task.task_changes.all.return_value.order_by.call_count)
-        self.assertEquals(('timestamp',),
-                          mock_task.task_changes.all.return_value.order_by.call_args.args)
+        self.assertTupleEqual(('timestamp',),
+                          mock_task.task_changes.all.return_value.order_by.call_args[0])
         self.assertEquals(mock_return_value, return_value)
 
     def test_task_approvals_by_task(self):
@@ -773,5 +773,5 @@ class TestTaskService(TestCase):
         self.assertEquals(1,
                           mock_task.approvals.exclude.call_count)
         self.assertEquals(dict(user=mock_user),
-                          mock_task.approvals.exclude.call_args.kwargs)
+                          mock_task.approvals.exclude.call_args[1])
         self.assertEquals(mock_return_value, return_value)
