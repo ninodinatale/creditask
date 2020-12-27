@@ -16,18 +16,18 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       artemisClient
           .execute(ErrorMutation(
-          variables: ErrorArguments(stackTrace: details.stack.toString())))
+              variables: ErrorArguments(stackTrace: details.stack.toString())))
           .then((value) => null);
       // Send report
     };
     runZonedGuarded<Future<void>>(
-          () async {
+      () async {
         runApp(MyApp());
       },
-          (Object error, StackTrace stackTrace) {
+      (Object error, StackTrace stackTrace) {
         artemisClient
             .execute(ErrorMutation(
-            variables: ErrorArguments(stackTrace: stackTrace.toString())))
+                variables: ErrorArguments(stackTrace: stackTrace.toString())))
             .then((value) => null);
       },
     );
@@ -35,7 +35,6 @@ void main() {
     // Will be tree-shaked on release builds.
     runApp(MyApp());
   }
-
 }
 
 class MyApp extends StatelessWidget {
@@ -80,8 +79,9 @@ class AuthContainer extends StatelessWidget {
             return snapshot.hasData
                 ? LoginScreen()
                 : Center(
-                    child: FlutterLogo(
-                      size: 100,
+                    child: Image(
+                      image: AssetImage('assets/logo_rounded_512.png'),
+                      width: 150,
                     ),
                   );
           } else if (snapshot.hasError) {
@@ -89,8 +89,9 @@ class AuthContainer extends StatelessWidget {
           } else {
             // TODO cover use cases
             return Center(
-              child: FlutterLogo(
-                size: 100,
+              child: Image(
+                image: AssetImage('assets/logo_rounded_512.png'),
+                width: 150,
               ),
             );
           }
