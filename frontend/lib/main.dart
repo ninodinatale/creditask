@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         create: (context) => AuthProvider(),
         child: GraphqlProvider(
             child: MaterialApp(
-                title: 'Flutter Demo',
+                title: 'Creditask',
                 theme: base.copyWith(
                   buttonTheme: base.buttonTheme.copyWith(
                     buttonColor: base.primaryColor,
@@ -76,9 +76,7 @@ class AuthContainer extends StatelessWidget {
               snapshot.hasData) {
             return snapshot.data ? AppContainer() : LoginScreen();
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return snapshot.hasData
-                ? LoginScreen()
-                : Center(
+            return Center(
                     child: Image(
                       image: AssetImage('assets/logo_rounded_512.png'),
                       width: 150,
@@ -98,3 +96,37 @@ class AuthContainer extends StatelessWidget {
         });
   }
 }
+
+// class AuthContainer extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     AuthProvider auth = Provider.of<AuthProvider>(context);
+//     return FutureBuilder<bool>(
+//         future: auth.isLoggedIn(),
+//         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+//           if (snapshot.connectionState == ConnectionState.done &&
+//               snapshot.hasData) {
+//             return snapshot.data ? AppContainer() : LoginScreen();
+//           } else if (snapshot.connectionState == ConnectionState.waiting) {
+//             return Center(
+//                     child: Image(
+//                       image: AssetImage('assets/logo_rounded_512.png'),
+//                       width: 150,
+//                     ),
+//                   );
+//           } else if (snapshot.hasError) {
+//             auth.logout();
+//             return LoginScreen();
+//             return ErrorDialog(snapshot.error.toString());
+//           } else {
+//             // TODO cover use cases
+//             return Center(
+//               child: Image(
+//                 image: AssetImage('assets/logo_rounded_512.png'),
+//                 width: 150,
+//               ),
+//             );
+//           }
+//         });
+//   }
+// }
