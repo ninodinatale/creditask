@@ -561,7 +561,7 @@ class ResolveUnassignedTest(CreditaskTestBase):
 
 
 @tag('integration')
-class ResolveAllTasksTest(CreditaskTestBase):
+class ResolveAllTodoTasksTest(CreditaskTestBase):
     GRAPHQL_SCHEMA = schema
 
     def setUp(self):
@@ -683,6 +683,160 @@ class ResolveAllTasksTest(CreditaskTestBase):
         create_task(
             group=group_3,
             user=None,
+            period_end=now + datetime.timedelta(days=1)
+        )
+
+        response = self.gql(self.query_under_test,
+                            op_name=self.op_name)
+
+        self.assertResponseNoErrors(response)
+
+        tasks: List[dict] = json.loads(response.content).get(
+            'data').get(self.op_name)
+
+        self.assertEquals(6, len(tasks))
+
+        # checking sort order
+        self.assertEquals(task_6.id, int(tasks[0].get('id')))
+        self.assertEquals(task_4.id, int(tasks[1].get('id')))
+        self.assertEquals(task_2.id, int(tasks[2].get('id')))
+        self.assertEquals(task_8.id, int(tasks[3].get('id')))
+        self.assertEquals(task_7.id, int(tasks[4].get('id')))
+        self.assertEquals(task_1.id, int(tasks[5].get('id')))
+
+
+@tag('integration')
+class ResolveDoneTasksTest(CreditaskTestBase):
+    GRAPHQL_SCHEMA = schema
+
+    def setUp(self):
+        self.query_under_test = \
+            '''
+                query doneTasks {
+                  done {
+                    id
+                    name
+                  }
+                }
+            '''
+        self.op_name = 'done'
+
+        self.current_user_credentials = {
+            'email': 'current_user@email.com',
+            'password': 'pwuser1'
+        }
+        self.current_user = create_user(group=create_group(),
+                                        **self.current_user_credentials)
+
+        self.login(self.current_user_credentials.get('email'),
+                   self.current_user_credentials.get('password'))
+
+    def test_should_require_login(self):
+        self.should_require_login(self.query_under_test, op_name=self.op_name,
+                                  variables={'userEmail': 'user@mail.com'})
+
+    def test_should_return_expected_results(self):
+        group_1 = create_group()
+        group_2 = create_group()
+        group_3 = create_group()
+        user_2 = create_user(group=self.current_user.group)
+        user_3 = create_user(group=self.current_user.group)
+
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
+
+        # ok
+        task_1 = create_task(
+            group=self.current_user.group,
+            user=user_2,
+            state=TaskState.DONE,
+            period_end=now + datetime.timedelta(days=3)
+        )
+
+        # ok
+        task_2 = create_task(
+            group=self.current_user.group,
+            user=None,
+            period_end=now,
+            state=TaskState.DONE,
+        )
+
+        # wrong group
+        create_task(
+            group=group_2,
+            user=None,
+            state=TaskState.DONE,
+            period_end=now
+        )
+
+        # ok
+        task_4 = create_task(
+            group=self.current_user.group,
+            user=None,
+            period_end=now + datetime.timedelta(days=-1),
+            state=TaskState.DONE,
+        )
+
+        # wrong state
+        create_task(
+            group=self.current_user.group,
+            user=None,
+            state=TaskState.TO_APPROVE,
+            period_end=now + datetime.timedelta(days=-1)
+        )
+
+        # wrong group
+        create_task(
+            group=group_2,
+            user=user_3,
+            state=TaskState.DONE,
+            period_end=now
+        )
+
+        # ok
+        task_6 = create_task(
+            group=self.current_user.group,
+            user=user_2,
+            state=TaskState.DONE,
+            period_end=now + datetime.timedelta(days=-2)
+        )
+
+        # ok
+        task_7 = create_task(
+            group=self.current_user.group,
+            user=self.current_user,
+            state=TaskState.DONE,
+            period_end=now + datetime.timedelta(days=2)
+        )
+
+        # wrong state
+        create_task(
+            group=self.current_user.group,
+            state=TaskState.APPROVED,
+            user=self.current_user,
+            period_end=now + datetime.timedelta(days=2)
+        )
+
+        # ok
+        task_8 = create_task(
+            group=self.current_user.group,
+            user=user_3,
+            state=TaskState.DONE,
+            period_end=now + datetime.timedelta(days=1)
+        )
+
+        # wrong state
+        create_task(
+            group=self.current_user.group,
+            state=TaskState.DECLINED,
+            user=user_3,
+            period_end=now + datetime.timedelta(days=1)
+        )
+
+        # wrong group
+        create_task(
+            group=group_3,
+            user=None,
+            state=TaskState.DONE,
             period_end=now + datetime.timedelta(days=1)
         )
 
@@ -1504,4 +1658,3 @@ class SaveTaskTest(CreditaskTestBase):
 
             user_1.refresh_from_db()
             self.assertEqual(user_1.credits, 284)
-

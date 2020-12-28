@@ -45,6 +45,12 @@ def get_all_todo_tasks(group_id: int) -> List[Task]:
             'period_end'))
 
 
+def get_done_tasks(group_id: int) -> List[Task]:
+    return list(
+        Task.objects.filter(group_id=group_id, state=TaskState.DONE).order_by(
+            'period_end'))
+
+
 def save_task(current_user: User, **kwargs) -> Task:
     if current_user is None:
         raise ValidationError('current_user may not be None')

@@ -18,6 +18,8 @@ String transformApprovalState(String approvalStateString) {
 
 String transformTaskState(TaskState taskState) {
   switch (taskState) {
+    case TaskState.done:
+      return 'Gemacht';
     case TaskState.toDo:
       return 'Noch zu machen';
     case TaskState.toApprove:

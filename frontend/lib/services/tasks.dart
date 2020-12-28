@@ -50,6 +50,10 @@ Tuple2<IconData, Color> taskStateData(TaskState taskState) {
       iconData = Icons.close_outlined;
       color = Colors.red;
       break;
+    case TaskState.done:
+      iconData = Icons.check_circle_outline;
+      color = Colors.green;
+      break;
     default:
       iconData = Icons.help;
   }

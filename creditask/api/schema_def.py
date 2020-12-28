@@ -11,7 +11,7 @@ from creditask.services import save_approval, \
     get_other_users, get_task_changes_by_task_id, \
     get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
-    get_all_in_cart, save_error
+    get_all_in_cart, save_error, get_done_tasks
 from .scalars import custom_string, custom_float
 
 
@@ -115,6 +115,8 @@ class TaskQuery:
         graphene.List(graphene.NonNull(TaskType)))
     all_todo_tasks = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)))
+    done = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskType)))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -140,6 +142,11 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_all_todo_tasks(self, info, **kwargs):
         return get_all_todo_tasks(info.context.user.group_id)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_done(self, info, **kwargs):
+        return get_done_tasks(info.context.user.group_id)
 
 
 class TaskInputCreate(graphene.InputObjectType):

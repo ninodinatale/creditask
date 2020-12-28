@@ -1,0 +1,5 @@
+query doneTasks {
+    done {
+        ...simpleTask
+    }
+}

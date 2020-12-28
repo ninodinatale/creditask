@@ -1,22 +1,22 @@
 import 'dart:async';
 
+import 'package:creditask/graphql/api.graphql.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/utils/date_format.dart';
+import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
 import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import '../../../graphql/api.dart';
-import '../../_shared/error_screen.dart';
 
-class AllTasksScreen extends StatefulWidget {
+class AllToDo extends StatefulWidget {
   @override
-  _AllTasksScreenState createState() => _AllTasksScreenState();
+  _AllToDoState createState() => _AllToDoState();
 }
 
-class _AllTasksScreenState extends State<AllTasksScreen> {
+class _AllToDoState extends State<AllToDo> {
   StreamSubscription<void> _subscription;
 
   @override
@@ -89,6 +89,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
         } else {
           return ListView(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            shrinkWrap: true,
             children: [
               ...getListTilesFor(
                   dueDaysMap['overdue'], 'Überfällig', true, themeData),

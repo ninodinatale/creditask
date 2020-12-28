@@ -102,6 +102,7 @@ type Query {
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
   unassignedTasks: [TaskType!]!
   allTodoTasks: [TaskType!]!
+  done: [TaskType!]!
   user(id: ID!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
