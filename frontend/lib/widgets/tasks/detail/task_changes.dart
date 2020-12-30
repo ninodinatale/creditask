@@ -28,59 +28,59 @@ class _TaskChangesState extends State<TaskChanges> {
       case TaskChangeChangedProperty.name:
         return changedProp
             .replaceAll('{0}', 'den Namen')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.neededTimeSeconds:
         return changedProp
             .replaceAll('{0}', 'die benötigte Zeit')
             .replaceAll('{1}',
-                secondsToElapsedTimeString(int.parse(taskChange.previousValue)))
+            "\"${secondsToElapsedTimeString(int.parse(taskChange.previousValue))}\"")
             .replaceAll('{2}',
-                secondsToElapsedTimeString(int.parse(taskChange.currentValue)));
+            "\"${secondsToElapsedTimeString(int.parse(taskChange.currentValue))}\"");
       case TaskChangeChangedProperty.state:
         return changedProp
             .replaceAll('{0}', 'den Status')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${transformTaskStateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}', "\"${transformTaskStateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.factor:
         return changedProp
             .replaceAll('{0}', 'den Faktor')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.userId:
         return changedProp
             .replaceAll('{0}', 'die Zuweisung')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue ?? 'keine Zuweisung'}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue ?? 'keine Zuweisung'}\"");
       case TaskChangeChangedProperty.periodStart:
         return changedProp
             .replaceAll('{0}', 'das Startdatum')
             .replaceAll(
-                '{1}', localDateStringOfIsoDateString(taskChange.previousValue))
+                '{1}', "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
             .replaceAll(
-                '{2}', localDateStringOfIsoDateString(taskChange.currentValue));
+                '{2}', "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.periodEnd:
         return changedProp
             .replaceAll('{0}', 'das Enddatum')
             .replaceAll(
-                '{1}', localDateStringOfIsoDateString(taskChange.previousValue))
+                '{1}', "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
             .replaceAll(
-                '{2}', localDateStringOfIsoDateString(taskChange.currentValue));
+                '{2}', "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.approval:
         return changedProp
             .replaceAll('{0}', 'den Bestätigungsstatus')
-            .replaceAll('{1}', transformApprovalState(taskChange.previousValue))
-            .replaceAll('{2}', transformApprovalState(taskChange.currentValue));
+            .replaceAll('{1}', "\"${transformApprovalState(taskChange.previousValue)}\"")
+            .replaceAll('{2}', "\"${transformApprovalState(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.creditsCalc:
         return changedProp
             .replaceAll('{0}', 'die Creditsberechnung')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.fixedCredits:
         return changedProp
             .replaceAll('{0}', 'die Credits')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.createdById:
         return 'Aufgabe erstellt';
         break;
