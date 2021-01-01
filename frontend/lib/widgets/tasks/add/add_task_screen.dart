@@ -59,7 +59,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   builder: (context) => ErrorDialog(result.errors.toString())));
         } else {
           Navigator.pop(context);
-          emitTaskDidChange();
         }
       });
     }

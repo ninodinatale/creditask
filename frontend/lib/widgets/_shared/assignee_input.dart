@@ -29,7 +29,10 @@ class _TaskAssigneeInputState extends State<TaskAssigneeInput> {
     ThemeData themeData = Theme.of(context);
     return Query(
         options: QueryOptions(
-            documentNode: query.document, variables: query.getVariablesMap()),
+          documentNode: query.document,
+          variables: query.getVariablesMap(),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
           if (result.hasException) {
@@ -43,25 +46,26 @@ class _TaskAssigneeInputState extends State<TaskAssigneeInput> {
           Users$Query queryData = query.parse(result.data);
 
           return DropdownButtonFormField(
-            decoration: InputDecoration(
-                labelText: 'Zuweisung'
-            ),
+            decoration: InputDecoration(labelText: 'Zuweisung'),
             value: _selectedValue,
-              onChanged: (value) {
-                setState(() {
-                  _selectedValue = value;
-                });
-                onChanged(int.parse(value) < 0 ? null : value);
-              },
-              items: [
+            onChanged: (value) {
+              setState(() {
+                _selectedValue = value;
+              });
+              onChanged(int.parse(value) < 0 ? null : value);
+            },
+            items: [
               DropdownMenuItem(
                 child: Text('Keine Zuweisung'),
                 // we cannot set value to null since the input thinks there
                 // is no input in the field, fucking up the decorations
                 value: '-1',
               ),
-              ...queryData.users.map((e) =>
-                  DropdownMenuItem(child: Text(e.publicName), value: e.id,))
+              ...queryData.users
+                  .map((e) => DropdownMenuItem(
+                        child: Text(e.publicName),
+                        value: e.id,
+                      ))
                   .toList()
             ],
           );

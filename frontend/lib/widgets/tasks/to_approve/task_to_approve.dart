@@ -77,6 +77,7 @@ class _TaskToApproveState extends State<TaskToApprove> {
     UpdateApprovalMutation mutation = UpdateApprovalMutation();
     return Mutation(
       options: MutationOptions(
+          fetchPolicy: FetchPolicy.networkOnly,
           document: mutation.document,
           update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {
@@ -96,7 +97,6 @@ class _TaskToApproveState extends State<TaskToApprove> {
                   .state = updatedApproval.state;
               final updatedTaskJson = clonedTask.toJson();
               cache.writeQuery(widget._request, data: updatedTaskJson);
-              emitTaskDidChange();
               Navigator.of(context).pop();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(

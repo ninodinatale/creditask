@@ -18,15 +18,6 @@ class UnassignedTasksScreen extends StatefulWidget {
 }
 
 class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
-  StreamSubscription<void> _subscription;
-
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
-
   List<Widget> getListTilesFor(List<SimpleTaskMixin> tasks,
       String title, bool overdue, ThemeData theme) {
     return [
@@ -69,12 +60,10 @@ class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
     UnassignedTasksQuery query = UnassignedTasksQuery();
     return Query(
       options: QueryOptions(
+          fetchPolicy: FetchPolicy.networkOnly,
           documentNode: query.document),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
-        if (_subscription == null) {
-          _subscription = subscribeToTaskDidChange(refetch);
-        }
         if (result.hasException) {
           return ErrorDialog(result.exception.toString());
         }

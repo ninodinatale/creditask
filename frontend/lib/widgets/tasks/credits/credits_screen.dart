@@ -15,7 +15,10 @@ class _CreditsScreenState extends State<CreditsScreen> {
   Widget build(BuildContext context) {
     CreditsQuery query = CreditsQuery();
     return Query(
-      options: QueryOptions(documentNode: query.document),
+      options: QueryOptions(
+        documentNode: query.document,
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
         if (result.hasException) {

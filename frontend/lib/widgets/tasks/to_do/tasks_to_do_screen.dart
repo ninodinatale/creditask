@@ -20,14 +20,7 @@ class TasksToDoScreen extends StatefulWidget {
 }
 
 class _TasksToDoScreenState extends State<TasksToDoScreen> {
-  StreamSubscription<void> _subscription;
   Request _request;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
 
   List<Widget> getListTilesFor(List<UsersTodoTasks$Query$TodoTasksOfUser> tasks,
       String title, bool overdue, ThemeData theme) {
@@ -94,7 +87,6 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
                                 cache.writeQuery(_request,
                                     data: _query.toJson());
 
-                                emitTaskDidChange();
                                 Scaffold.of(context).showSnackBar(SnackBar(
                                     content: Row(
                                   mainAxisAlignment:
@@ -124,6 +116,7 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
     UsersTodoTasksQuery query = UsersTodoTasksQuery(
         variables: UsersTodoTasksArguments(email: auth.currentUser.email));
     final _queryOptions = QueryOptions(
+        fetchPolicy: FetchPolicy.networkOnly,
         documentNode: query.document,
         // this is the query string you just created
         variables: query.getVariablesMap());
@@ -132,9 +125,6 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
       options: _queryOptions,
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
-        if (_subscription == null) {
-          _subscription = subscribeToTaskDidChange(refetch);
-        }
         if (result.hasException) {
           return ErrorDialog(result.exception.toString());
         }

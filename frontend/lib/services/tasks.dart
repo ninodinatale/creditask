@@ -6,17 +6,6 @@ import 'package:creditask/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
-StreamController<void> _controller =
-    StreamController<void>.broadcast(sync: true);
-
-StreamSubscription<void> subscribeToTaskDidChange(void Function() callback) {
-  return _controller.stream.listen((_) => callback());
-}
-
-void emitTaskDidChange() {
-  _controller.add(null);
-}
-
 bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
   switch (taskState) {
     case TaskState.toDo:

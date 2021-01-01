@@ -35,7 +35,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   Widget build(BuildContext context) {
     var _queryOptions = QueryOptions(
-        document: query.document, variables: query.getVariablesMap());
+        fetchPolicy: FetchPolicy.networkOnly,
+        document: query.document,
+        variables: query.getVariablesMap());
     return Query(
       options: _queryOptions,
       builder: (QueryResult result,

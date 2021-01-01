@@ -46,7 +46,7 @@ class _TaskDetailState extends State<TaskDetail> {
     return Mutation(
       options: MutationOptions(
           document: mutation.document,
-          // will be called for both optimistic and final results
+          fetchPolicy: FetchPolicy.networkOnly,
           update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {
               return ErrorDialog(result.exception.toString());
@@ -58,7 +58,6 @@ class _TaskDetailState extends State<TaskDetail> {
                 ..task = TaskDetail$Query$Task.fromJson(
                     widget._task.toJson()..addAll(_updatedTask.toJson()));
               cache.writeQuery(widget._request, data: _query.toJson());
-              emitTaskDidChange();
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

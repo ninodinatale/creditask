@@ -67,6 +67,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
               final _createMutation = CreateGroceryMutation();
               final _updateMutation = UpdateGroceryMutation();
               final mutationOptions = MutationOptions(
+                  fetchPolicy: FetchPolicy.networkOnly,
                   documentNode: _isNewGrocery()
                       ? _createMutation.document
                       : _updateMutation.document,

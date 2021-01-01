@@ -34,14 +34,16 @@ class _TaskChangesState extends State<TaskChanges> {
         return changedProp
             .replaceAll('{0}', 'die benötigte Zeit')
             .replaceAll('{1}',
-            "\"${secondsToElapsedTimeString(int.parse(taskChange.previousValue))}\"")
+                "\"${secondsToElapsedTimeString(int.parse(taskChange.previousValue))}\"")
             .replaceAll('{2}',
-            "\"${secondsToElapsedTimeString(int.parse(taskChange.currentValue))}\"");
+                "\"${secondsToElapsedTimeString(int.parse(taskChange.currentValue))}\"");
       case TaskChangeChangedProperty.state:
         return changedProp
             .replaceAll('{0}', 'den Status')
-            .replaceAll('{1}', "\"${transformTaskStateString(taskChange.previousValue)}\"")
-            .replaceAll('{2}', "\"${transformTaskStateString(taskChange.currentValue)}\"");
+            .replaceAll('{1}',
+                "\"${transformTaskStateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${transformTaskStateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.factor:
         return changedProp
             .replaceAll('{0}', 'den Faktor')
@@ -50,27 +52,31 @@ class _TaskChangesState extends State<TaskChanges> {
       case TaskChangeChangedProperty.userId:
         return changedProp
             .replaceAll('{0}', 'die Zuweisung')
-            .replaceAll('{1}', "\"${taskChange.previousValue ?? 'keine Zuweisung'}\"")
-            .replaceAll('{2}', "\"${taskChange.currentValue ?? 'keine Zuweisung'}\"");
+            .replaceAll(
+                '{1}', "\"${taskChange.previousValue ?? 'keine Zuweisung'}\"")
+            .replaceAll(
+                '{2}', "\"${taskChange.currentValue ?? 'keine Zuweisung'}\"");
       case TaskChangeChangedProperty.periodStart:
         return changedProp
             .replaceAll('{0}', 'das Startdatum')
-            .replaceAll(
-                '{1}', "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
-            .replaceAll(
-                '{2}', "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
+            .replaceAll('{1}',
+                "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.periodEnd:
         return changedProp
             .replaceAll('{0}', 'das Enddatum')
-            .replaceAll(
-                '{1}', "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
-            .replaceAll(
-                '{2}', "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
+            .replaceAll('{1}',
+                "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.approval:
         return changedProp
             .replaceAll('{0}', 'den Bestätigungsstatus')
-            .replaceAll('{1}', "\"${transformApprovalState(taskChange.previousValue)}\"")
-            .replaceAll('{2}', "\"${transformApprovalState(taskChange.currentValue)}\"");
+            .replaceAll('{1}',
+                "\"${transformApprovalState(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${transformApprovalState(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.creditsCalc:
         return changedProp
             .replaceAll('{0}', 'die Creditsberechnung')
@@ -96,7 +102,10 @@ class _TaskChangesState extends State<TaskChanges> {
         TaskChangesQuery(variables: TaskChangesArguments(id: taskId));
     return Query(
         options: QueryOptions(
-            document: query.document, variables: query.getVariablesMap()),
+          document: query.document,
+          variables: query.getVariablesMap(),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
           if (result.hasException) {

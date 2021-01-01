@@ -16,24 +16,16 @@ class AllDone extends StatefulWidget {
 }
 
 class _AllDoneState extends State<AllDone> {
-  StreamSubscription<void> _subscription;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
-
   @override
   Widget build(BuildContext context) {
     DoneTasksQuery query = DoneTasksQuery();
     return Query(
-      options: QueryOptions(documentNode: query.document),
+      options: QueryOptions(
+        documentNode: query.document,
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
-        if (_subscription == null) {
-          _subscription = subscribeToTaskDidChange(refetch);
-        }
         if (result.hasException) {
           return ErrorDialog(result.exception.toString());
         }

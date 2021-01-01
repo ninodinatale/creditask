@@ -10,21 +10,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-
 class AllToDo extends StatefulWidget {
   @override
   _AllToDoState createState() => _AllToDoState();
 }
 
 class _AllToDoState extends State<AllToDo> {
-  StreamSubscription<void> _subscription;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
-
   List<Widget> getListTilesFor(List<SimpleTaskMixin> tasks, String title,
       bool overdue, ThemeData theme) {
     return [
@@ -38,22 +29,22 @@ class _AllToDoState extends State<AllToDo> {
           tiles: tasks.map((task) {
             final _icon = taskStateData(task.state);
             return ListTile(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TaskDetailScreen(task.id))),
-                leading: UserAvatar(task.user?.publicName),
-                title: Text(task.name),
-                subtitle: Text(
-                    'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
-                    style: TextStyle(
-                        color: task.state == TaskState.toDo && overdue
-                            ? theme.errorColor
-                            : null)),
-                trailing: task.state == TaskState.toApprove
-                    ? Icon(_icon.item1, color: _icon.item2)
-                    : null,
-              );
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TaskDetailScreen(task.id))),
+              leading: UserAvatar(task.user?.publicName),
+              title: Text(task.name),
+              subtitle: Text(
+                  'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
+                  style: TextStyle(
+                      color: task.state == TaskState.toDo && overdue
+                          ? theme.errorColor
+                          : null)),
+              trailing: task.state == TaskState.toApprove
+                  ? Icon(_icon.item1, color: _icon.item2)
+                  : null,
+            );
           }))
     ];
   }
@@ -62,12 +53,12 @@ class _AllToDoState extends State<AllToDo> {
   Widget build(BuildContext context) {
     AllTodoTasksQuery query = AllTodoTasksQuery();
     return Query(
-      options: QueryOptions(documentNode: query.document),
+      options: QueryOptions(
+        documentNode: query.document,
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
-        if (_subscription == null) {
-          _subscription = subscribeToTaskDidChange(refetch);
-        }
         if (result.hasException) {
           return ErrorDialog(result.exception.toString());
         }
