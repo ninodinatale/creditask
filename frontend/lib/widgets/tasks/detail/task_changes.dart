@@ -21,7 +21,7 @@ class _TaskChangesState extends State<TaskChanges> {
 
   _TaskChangesState(this.taskId);
 
-  String getChangeSubtitle(TaskChanges$Query$Task$TaskChanges taskChange) {
+  String getChangeSubtitle(TaskChanges$Query$TaskChanges taskChange) {
     var changedProp = 'Änderte {0} von {1} zu {2}';
 
     switch (taskChange.changedProperty) {
@@ -99,12 +99,12 @@ class _TaskChangesState extends State<TaskChanges> {
   @override
   Widget build(BuildContext context) {
     TaskChangesQuery query =
-        TaskChangesQuery(variables: TaskChangesArguments(id: taskId));
+        TaskChangesQuery(variables: TaskChangesArguments(taskId: taskId));
     return Query(
         options: QueryOptions(
           document: query.document,
           variables: query.getVariablesMap(),
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
         ),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
@@ -116,14 +116,14 @@ class _TaskChangesState extends State<TaskChanges> {
             return Center(child: CircularProgressIndicator());
           }
 
-          List<TaskChanges$Query$Task$TaskChanges> taskChanges =
-              query.parse(result.data).task.taskChanges;
+          final _query =
+              query.parse(result.data);
 
-          if (taskChanges.length > 0) {
+          if (_query.taskChanges.length > 0) {
             return ListView(children: [
               ...ListTile.divideTiles(
                   context: context,
-                  tiles: taskChanges.map((taskChange) => ListTile(
+                  tiles: _query.taskChanges.map((taskChange) => ListTile(
                         title: Text(taskChange.user.publicName),
                         subtitle: Text(getChangeSubtitle(taskChange)),
                         trailing: Text(localDateTimeStringOfIsoDateTimeString(

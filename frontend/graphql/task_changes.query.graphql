@@ -1,9 +1,6 @@
-query taskChanges($id: ID!) {
-    task(id: $id) {
+query taskChanges($taskId: ID!) {
+    taskChanges(taskId: $taskId) {
         __typename
-        taskChanges {
-            __typename
-            ...taskChanges
-        }
+        ...taskChanges
     }
 }

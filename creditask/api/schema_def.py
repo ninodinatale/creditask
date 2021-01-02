@@ -8,7 +8,7 @@ from creditask.models import User, ApprovalState, TaskState, Approval, \
 from creditask.services import save_approval, \
     get_todo_tasks_by_user_email, get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
-    get_other_users, get_task_changes_by_task_id, \
+    get_other_users, get_task_changes_by_task_id, get_task_changes_by_task, \
     get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
     get_all_in_cart, save_error, get_done_tasks
@@ -74,6 +74,8 @@ class TaskScalars:
 
 class TaskType(graphene_django.DjangoObjectType):
     approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
+    task_changes = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskChangeType)))
 
     # implicitly declaring state here instead of inheriting from model Task
     # because graphql schema generation creates different enums from
@@ -88,14 +90,20 @@ class TaskType(graphene_django.DjangoObjectType):
     def resolve_approvals(parent: Task, info: graphql.ResolveInfo):
         return get_task_approvals_by_task(parent)
 
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_task_changes(parent: Task, info, **kwargs):
+        return get_task_changes_by_task(parent)
+
     class Meta:
         convert_choices_to_enum = False
         model = Task
 
 
 class TaskChangeQuery:
-    task_changes = graphene.NonNull(TaskChangeType,
-                                    task_id=graphene.NonNull(graphene.ID))
+    task_changes = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskChangeType)),
+        task_id=graphene.NonNull(graphene.ID))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -382,7 +390,8 @@ class UserQuery:
         return get_other_users(kwargs.get('user_email'))
 
 
-class Query(UserQuery, TaskQuery, GroceryQuery, graphene.ObjectType):
+class Query(UserQuery, TaskQuery, TaskChangeQuery, GroceryQuery,
+            graphene.ObjectType):
     pass
 
 

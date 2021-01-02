@@ -46,7 +46,7 @@ class _TaskDetailState extends State<TaskDetail> {
     return Mutation(
       options: MutationOptions(
           document: mutation.document,
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
           update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {
               return ErrorDialog(result.exception.toString());

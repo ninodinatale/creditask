@@ -25,7 +25,7 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
         variables:
             ToApproveTasksOfUserArguments(email: auth.currentUser.email));
     var _queryOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.cacheAndNetwork,
       document: query.document, variables: query.getVariablesMap(),
     );
     return Query(

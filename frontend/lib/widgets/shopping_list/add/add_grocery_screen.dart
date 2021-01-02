@@ -53,7 +53,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
         body: Query(
             options: QueryOptions(
                 documentNode: query.document,
-                fetchPolicy: FetchPolicy.networkOnly),
+                fetchPolicy: FetchPolicy.cacheAndNetwork),
             builder: (QueryResult result,
                 {VoidCallback refetch, FetchMore fetchMore}) {
               if (result.hasException) {
@@ -67,7 +67,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
               final _createMutation = CreateGroceryMutation();
               final _updateMutation = UpdateGroceryMutation();
               final mutationOptions = MutationOptions(
-                  fetchPolicy: FetchPolicy.networkOnly,
+                  fetchPolicy: FetchPolicy.cacheAndNetwork,
                   documentNode: _isNewGrocery()
                       ? _createMutation.document
                       : _updateMutation.document,

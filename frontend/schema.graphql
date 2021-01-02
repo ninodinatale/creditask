@@ -97,6 +97,7 @@ type ObtainJSONWebToken {
 type Query {
   allNotInCart: [GroceryType!]!
   allInCart: [GroceryType!]!
+  taskChanges(taskId: ID!): [TaskChangeType!]!
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!

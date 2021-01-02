@@ -168,16 +168,16 @@ class Command(BaseCommand):
                 user=all_user[1],
                 timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.Factor,
-                previous_value=1,
-                current_value=2
+                previous_value="1",
+                current_value="2"
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
                 timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.NeededTimeSeconds,
-                previous_value=120,
-                current_value=560
+                previous_value="120",
+                current_value="560"
             )
             TaskChange.objects.create(
                 task=task,
@@ -185,8 +185,8 @@ class Command(BaseCommand):
                 timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.UserId,
                 previous_value=(
-                    task.user.public_name if task.user is not None else None),
-                current_value=all_user[2].public_name
+                    task.user.id if task.user is not None else ''),
+                current_value=all_user[2].id
             )
 
         Grocery.objects.create(

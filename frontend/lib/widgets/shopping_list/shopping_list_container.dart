@@ -85,7 +85,7 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
           body: Mutation(
             options: MutationOptions(
                 document: mutation.document,
-                fetchPolicy: FetchPolicy.networkOnly,
+                fetchPolicy: FetchPolicy.cacheAndNetwork,
                 update: (GraphQLDataProxy cache, QueryResult result) {
                   if (result.hasException) {
                     // TODO
@@ -118,7 +118,7 @@ class _ShoppingListContainerState extends State<ShoppingListContainer> {
               _runMutation = runMutation;
               _queryOptions = QueryOptions(
                 document: query.document,
-                fetchPolicy: FetchPolicy.networkOnly,
+                fetchPolicy: FetchPolicy.cacheAndNetwork,
               );
               return Query(
                 options: _queryOptions,

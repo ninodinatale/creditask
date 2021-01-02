@@ -77,7 +77,7 @@ class _TaskToApproveState extends State<TaskToApprove> {
     UpdateApprovalMutation mutation = UpdateApprovalMutation();
     return Mutation(
       options: MutationOptions(
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
           document: mutation.document,
           update: (GraphQLDataProxy cache, QueryResult result) {
             if (result.hasException) {

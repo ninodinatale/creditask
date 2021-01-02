@@ -116,7 +116,7 @@ class _TasksToDoScreenState extends State<TasksToDoScreen> {
     UsersTodoTasksQuery query = UsersTodoTasksQuery(
         variables: UsersTodoTasksArguments(email: auth.currentUser.email));
     final _queryOptions = QueryOptions(
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: FetchPolicy.cacheAndNetwork,
         documentNode: query.document,
         // this is the query string you just created
         variables: query.getVariablesMap());

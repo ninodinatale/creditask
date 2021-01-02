@@ -17,7 +17,7 @@ class SetTaskDoneButton extends StatelessWidget {
       options: MutationOptions(
           document: TaskSetDoneTaskMutation().document,
           update: _onUpdate,
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
           onError: (OperationException error) {
             // TODO
           }),

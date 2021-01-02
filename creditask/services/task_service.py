@@ -153,16 +153,19 @@ def merge_values(task_to_merge_into: Task,
                         'credits')
                 # TODO import needs to be here due to cyclic imports, fix
                 import creditask.services.user_service as userservice
-                userservice.save_user(task_to_merge_into.user, credits=new_credits)
+                userservice.save_user(task_to_merge_into.user,
+                                      credits=new_credits)
 
             # TODO test
             if getattr(task_to_merge_into, key) == TaskState.DECLINED:
                 if value == TaskState.TO_DO:
                     # TODO import needs to be here due to cyclic imports, fix
-                    import creditask.services.approval_service as approvalservice
+                    import \
+                        creditask.services.approval_service as approvalservice
                     for approval in list(task_to_merge_into.approvals.all()):
                         approvalservice.save_approval(current_user, approval.id,
-                                      ApprovalState.NONE, for_reset=True)
+                                                      ApprovalState.NONE,
+                                                      for_reset=True)
 
         try:
             if key == 'user':
@@ -271,7 +274,17 @@ def get_task_changes_by_task_id(task_id: int) -> List[TaskChange]:
 def get_task_changes_by_task(task: Task) -> List[TaskChange]:
     if task is None:
         raise ValidationError('task may not be None')
-    return list(task.task_changes.all().order_by('timestamp'))
+    return list(map(_replace_user_id_with_public_name_of,
+                    list(task.task_changes.all().order_by('timestamp'))))
+
+
+def _replace_user_id_with_public_name_of(change: TaskChange) -> TaskChange:
+    if change.changed_property == ChangeableTaskProperty.UserId:
+        change.previous_value = User.objects.get(
+            id=change.previous_value).public_name
+        change.current_value = User.objects.get(
+            id=change.current_value).public_name
+    return change
 
 
 def get_task_approvals_by_task(task: Task) -> List[TaskChange]:

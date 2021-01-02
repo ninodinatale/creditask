@@ -31,7 +31,7 @@ class _TaskAssigneeInputState extends State<TaskAssigneeInput> {
         options: QueryOptions(
           documentNode: query.document,
           variables: query.getVariablesMap(),
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
         ),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {

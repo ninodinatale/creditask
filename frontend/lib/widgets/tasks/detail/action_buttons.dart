@@ -302,7 +302,7 @@ class _ActionButtonsState extends State<ActionButtons> {
       builder: (context, auth, child) {
         return Mutation(
           options: MutationOptions(
-              fetchPolicy: FetchPolicy.networkOnly,
+              fetchPolicy: FetchPolicy.cacheAndNetwork,
               document: approvalMutation.document,
               update: (GraphQLDataProxy cache, QueryResult result) {
                 if (result.hasException) {
@@ -361,7 +361,7 @@ class _ActionButtonsState extends State<ActionButtons> {
             this._runUpdateApprovalMutation = runUpdateApprovalMutation;
             return Mutation(
               options: MutationOptions(
-                  fetchPolicy: FetchPolicy.networkOnly,
+                  fetchPolicy: FetchPolicy.cacheAndNetwork,
                   document: taskMutation.document,
                   update: (GraphQLDataProxy cache, QueryResult result) {
                     if (result.hasException) {

@@ -730,9 +730,9 @@ Map<String, dynamic> _$Credits$QueryToJson(Credits$Query instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
-TaskChanges$Query$Task$TaskChanges _$TaskChanges$Query$Task$TaskChangesFromJson(
+TaskChanges$Query$TaskChanges _$TaskChanges$Query$TaskChangesFromJson(
     Map<String, dynamic> json) {
-  return TaskChanges$Query$Task$TaskChanges()
+  return TaskChanges$Query$TaskChanges()
     ..changedProperty = _$enumDecodeNullable(
         _$TaskChangeChangedPropertyEnumMap, json['changedProperty'],
         unknownValue: TaskChangeChangedProperty.artemisUnknown)
@@ -745,8 +745,8 @@ TaskChanges$Query$Task$TaskChanges _$TaskChanges$Query$Task$TaskChangesFromJson(
     ..$$typename = json['__typename'] as String;
 }
 
-Map<String, dynamic> _$TaskChanges$Query$Task$TaskChangesToJson(
-        TaskChanges$Query$Task$TaskChanges instance) =>
+Map<String, dynamic> _$TaskChanges$Query$TaskChangesToJson(
+        TaskChanges$Query$TaskChanges instance) =>
     <String, dynamic>{
       'changedProperty':
           _$TaskChangeChangedPropertyEnumMap[instance.changedProperty],
@@ -772,35 +772,18 @@ const _$TaskChangeChangedPropertyEnumMap = {
   TaskChangeChangedProperty.artemisUnknown: 'ARTEMIS_UNKNOWN',
 };
 
-TaskChanges$Query$Task _$TaskChanges$Query$TaskFromJson(
-    Map<String, dynamic> json) {
-  return TaskChanges$Query$Task()
-    ..$$typename = json['__typename'] as String
+TaskChanges$Query _$TaskChanges$QueryFromJson(Map<String, dynamic> json) {
+  return TaskChanges$Query()
     ..taskChanges = (json['taskChanges'] as List)
         ?.map((e) => e == null
             ? null
-            : TaskChanges$Query$Task$TaskChanges.fromJson(
-                e as Map<String, dynamic>))
+            : TaskChanges$Query$TaskChanges.fromJson(e as Map<String, dynamic>))
         ?.toList();
-}
-
-Map<String, dynamic> _$TaskChanges$Query$TaskToJson(
-        TaskChanges$Query$Task instance) =>
-    <String, dynamic>{
-      '__typename': instance.$$typename,
-      'taskChanges': instance.taskChanges?.map((e) => e?.toJson())?.toList(),
-    };
-
-TaskChanges$Query _$TaskChanges$QueryFromJson(Map<String, dynamic> json) {
-  return TaskChanges$Query()
-    ..task = json['task'] == null
-        ? null
-        : TaskChanges$Query$Task.fromJson(json['task'] as Map<String, dynamic>);
 }
 
 Map<String, dynamic> _$TaskChanges$QueryToJson(TaskChanges$Query instance) =>
     <String, dynamic>{
-      'task': instance.task?.toJson(),
+      'taskChanges': instance.taskChanges?.map((e) => e?.toJson())?.toList(),
     };
 
 TaskChangesMixin$User _$TaskChangesMixin$UserFromJson(
@@ -1351,14 +1334,14 @@ Map<String, dynamic> _$TaskDetailArgumentsToJson(
 
 TaskChangesArguments _$TaskChangesArgumentsFromJson(Map<String, dynamic> json) {
   return TaskChangesArguments(
-    id: json['id'] as String,
+    taskId: json['taskId'] as String,
   );
 }
 
 Map<String, dynamic> _$TaskChangesArgumentsToJson(
         TaskChangesArguments instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'taskId': instance.taskId,
     };
 
 UpdateGroceryArguments _$UpdateGroceryArgumentsFromJson(

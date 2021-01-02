@@ -28,10 +28,12 @@ class _OtherTasksScreenState extends State<OtherTasksScreen> {
                 return DropdownMenuItem(child: Text(e), value: e);
               }).toList()),
         ),
-        IndexedStack(index: _currentIndex, children: [
-          AllToDo(),
-          AllDone(),
-        ])
+        Expanded(
+          child: IndexedStack(index: _currentIndex, children: [
+            AllToDo(),
+            AllDone(),
+          ]),
+        )
       ],
     );
   }

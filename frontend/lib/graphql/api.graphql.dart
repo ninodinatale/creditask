@@ -688,12 +688,11 @@ class Credits$Query with EquatableMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
-class TaskChanges$Query$Task$TaskChanges with EquatableMixin, TaskChangesMixin {
-  TaskChanges$Query$Task$TaskChanges();
+class TaskChanges$Query$TaskChanges with EquatableMixin, TaskChangesMixin {
+  TaskChanges$Query$TaskChanges();
 
-  factory TaskChanges$Query$Task$TaskChanges.fromJson(
-          Map<String, dynamic> json) =>
-      _$TaskChanges$Query$Task$TaskChangesFromJson(json);
+  factory TaskChanges$Query$TaskChanges.fromJson(Map<String, dynamic> json) =>
+      _$TaskChanges$Query$TaskChangesFromJson(json);
 
   @JsonKey(name: '__typename')
   String $$typename;
@@ -707,25 +706,7 @@ class TaskChanges$Query$Task$TaskChanges with EquatableMixin, TaskChangesMixin {
         user,
         $$typename
       ];
-  Map<String, dynamic> toJson() =>
-      _$TaskChanges$Query$Task$TaskChangesToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class TaskChanges$Query$Task with EquatableMixin {
-  TaskChanges$Query$Task();
-
-  factory TaskChanges$Query$Task.fromJson(Map<String, dynamic> json) =>
-      _$TaskChanges$Query$TaskFromJson(json);
-
-  @JsonKey(name: '__typename')
-  String $$typename;
-
-  List<TaskChanges$Query$Task$TaskChanges> taskChanges;
-
-  @override
-  List<Object> get props => [$$typename, taskChanges];
-  Map<String, dynamic> toJson() => _$TaskChanges$Query$TaskToJson(this);
+  Map<String, dynamic> toJson() => _$TaskChanges$Query$TaskChangesToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -735,10 +716,10 @@ class TaskChanges$Query with EquatableMixin {
   factory TaskChanges$Query.fromJson(Map<String, dynamic> json) =>
       _$TaskChanges$QueryFromJson(json);
 
-  TaskChanges$Query$Task task;
+  List<TaskChanges$Query$TaskChanges> taskChanges;
 
   @override
-  List<Object> get props => [task];
+  List<Object> get props => [taskChanges];
   Map<String, dynamic> toJson() => _$TaskChanges$QueryToJson(this);
 }
 
@@ -2518,16 +2499,16 @@ class CreditsQuery extends GraphQLQuery<Credits$Query, JsonSerializable> {
 
 @JsonSerializable(explicitToJson: true)
 class TaskChangesArguments extends JsonSerializable with EquatableMixin {
-  TaskChangesArguments({@required this.id});
+  TaskChangesArguments({@required this.taskId});
 
   @override
   factory TaskChangesArguments.fromJson(Map<String, dynamic> json) =>
       _$TaskChangesArgumentsFromJson(json);
 
-  final String id;
+  final String taskId;
 
   @override
-  List<Object> get props => [id];
+  List<Object> get props => [taskId];
   @override
   Map<String, dynamic> toJson() => _$TaskChangesArgumentsToJson(this);
 }
@@ -2543,7 +2524,7 @@ class TaskChangesQuery
         name: NameNode(value: 'taskChanges'),
         variableDefinitions: [
           VariableDefinitionNode(
-              variable: VariableNode(name: NameNode(value: 'id')),
+              variable: VariableNode(name: NameNode(value: 'taskId')),
               type: NamedTypeNode(name: NameNode(value: 'ID'), isNonNull: true),
               defaultValue: DefaultValueNode(value: null),
               directives: [])
@@ -2551,12 +2532,12 @@ class TaskChangesQuery
         directives: [],
         selectionSet: SelectionSetNode(selections: [
           FieldNode(
-              name: NameNode(value: 'task'),
+              name: NameNode(value: 'taskChanges'),
               alias: null,
               arguments: [
                 ArgumentNode(
-                    name: NameNode(value: 'id'),
-                    value: VariableNode(name: NameNode(value: 'id')))
+                    name: NameNode(value: 'taskId'),
+                    value: VariableNode(name: NameNode(value: 'taskId')))
               ],
               directives: [],
               selectionSet: SelectionSetNode(selections: [
@@ -2566,21 +2547,8 @@ class TaskChangesQuery
                     arguments: [],
                     directives: [],
                     selectionSet: null),
-                FieldNode(
-                    name: NameNode(value: 'taskChanges'),
-                    alias: null,
-                    arguments: [],
-                    directives: [],
-                    selectionSet: SelectionSetNode(selections: [
-                      FieldNode(
-                          name: NameNode(value: '__typename'),
-                          alias: null,
-                          arguments: [],
-                          directives: [],
-                          selectionSet: null),
-                      FragmentSpreadNode(
-                          name: NameNode(value: 'taskChanges'), directives: [])
-                    ]))
+                FragmentSpreadNode(
+                    name: NameNode(value: 'taskChanges'), directives: [])
               ]))
         ])),
     FragmentDefinitionNode(

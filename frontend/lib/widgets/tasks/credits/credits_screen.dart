@@ -17,7 +17,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
     return Query(
       options: QueryOptions(
         documentNode: query.document,
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: FetchPolicy.cacheAndNetwork,
       ),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {

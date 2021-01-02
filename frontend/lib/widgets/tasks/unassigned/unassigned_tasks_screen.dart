@@ -60,7 +60,7 @@ class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
     UnassignedTasksQuery query = UnassignedTasksQuery();
     return Query(
       options: QueryOptions(
-          fetchPolicy: FetchPolicy.networkOnly,
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
           documentNode: query.document),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
