@@ -11,7 +11,7 @@ from creditask.services import save_approval, \
     get_other_users, get_task_changes_by_task_id, get_task_changes_by_task, \
     get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
-    get_all_in_cart, save_error, get_done_tasks
+    get_all_in_cart, save_error, get_done_tasks, delete_grocery
 from .scalars import custom_string, custom_float
 
 
@@ -319,6 +319,20 @@ class UpdateGrocery(graphene.Mutation):
         return UpdateGrocery(grocery=grocery)
 
 
+# TODO test
+class DeleteGrocery(graphene.Mutation):
+    class Arguments:
+        id = graphene.NonNull(graphene.ID)
+
+    grocery = graphene.Field(GroceryType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, id):
+        delete_grocery(id)
+        return DeleteGrocery(grocery=None)
+
+
 class UpdateGroceries(graphene.Mutation):
     class Arguments:
         input = graphene.NonNull(graphene.List(GroceryUpdateInput))
@@ -339,6 +353,7 @@ class GroceryMutation:
     create_grocery = CreateGrocery.Field()
     update_grocery = UpdateGrocery.Field()
     update_groceries = UpdateGroceries.Field()
+    delete_grocery = DeleteGrocery.Field()
 
 
 class ApprovalInput(graphene.InputObjectType):

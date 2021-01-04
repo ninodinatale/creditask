@@ -1217,6 +1217,57 @@ Map<String, dynamic> _$DoneTasks$QueryToJson(DoneTasks$Query instance) =>
       'done': instance.done?.map((e) => e?.toJson())?.toList(),
     };
 
+DeleteGrocery$Mutation$DeleteGrocery$Grocery
+    _$DeleteGrocery$Mutation$DeleteGrocery$GroceryFromJson(
+        Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation$DeleteGrocery$Grocery()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$DeleteGrocery$Mutation$DeleteGrocery$GroceryToJson(
+        DeleteGrocery$Mutation$DeleteGrocery$Grocery instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+      '__typename': instance.$$typename,
+    };
+
+DeleteGrocery$Mutation$DeleteGrocery
+    _$DeleteGrocery$Mutation$DeleteGroceryFromJson(Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation$DeleteGrocery()
+    ..grocery = json['grocery'] == null
+        ? null
+        : DeleteGrocery$Mutation$DeleteGrocery$Grocery.fromJson(
+            json['grocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$DeleteGrocery$Mutation$DeleteGroceryToJson(
+        DeleteGrocery$Mutation$DeleteGrocery instance) =>
+    <String, dynamic>{
+      'grocery': instance.grocery?.toJson(),
+    };
+
+DeleteGrocery$Mutation _$DeleteGrocery$MutationFromJson(
+    Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation()
+    ..deleteGrocery = json['deleteGrocery'] == null
+        ? null
+        : DeleteGrocery$Mutation$DeleteGrocery.fromJson(
+            json['deleteGrocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$DeleteGrocery$MutationToJson(
+        DeleteGrocery$Mutation instance) =>
+    <String, dynamic>{
+      'deleteGrocery': instance.deleteGrocery?.toJson(),
+    };
+
 TaskSetDoneTaskArguments _$TaskSetDoneTaskArgumentsFromJson(
     Map<String, dynamic> json) {
   return TaskSetDoneTaskArguments(
@@ -1414,4 +1465,17 @@ Map<String, dynamic> _$SaveTaskArgumentsToJson(SaveTaskArguments instance) =>
     <String, dynamic>{
       'createInput': instance.createInput?.toJson(),
       'updateInput': instance.updateInput?.toJson(),
+    };
+
+DeleteGroceryArguments _$DeleteGroceryArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return DeleteGroceryArguments(
+    id: json['id'] as String,
+  );
+}
+
+Map<String, dynamic> _$DeleteGroceryArgumentsToJson(
+        DeleteGroceryArguments instance) =>
+    <String, dynamic>{
+      'id': instance.id,
     };

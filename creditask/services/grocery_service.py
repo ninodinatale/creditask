@@ -30,6 +30,14 @@ def save_grocery(current_user: User, **kwargs):
 
 
 # TODO test
+def delete_grocery(id: int):
+    if id is None:
+        raise ValidationError('id may not be None')
+    Grocery(id=id).delete()
+
+
+
+# TODO test
 def merge_values(entity_to_merge_into: BaseModel, **kwargs) -> BaseModel:
     for key, value in kwargs.items():
         if key == 'id' or getattr(entity_to_merge_into, key) == value:

@@ -48,6 +48,10 @@ scalar Date
 
 scalar DateTime
 
+type DeleteGrocery {
+  grocery: GroceryType
+}
+
 type ErrorType {
   id: ID!
   user: UserType!
@@ -80,6 +84,7 @@ type Mutation {
   createGrocery(input: GroceryCreateInput!): CreateGrocery
   updateGrocery(input: GroceryUpdateInput!): UpdateGrocery
   updateGroceries(input: [GroceryUpdateInput]!): UpdateGroceries
+  deleteGrocery(id: ID!): DeleteGrocery
   saveApproval(approvalInput: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken

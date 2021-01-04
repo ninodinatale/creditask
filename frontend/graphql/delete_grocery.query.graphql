@@ -1,0 +1,7 @@
+mutation deleteGrocery($id: ID!) {
+    deleteGrocery(id: $id) {
+        grocery {
+            ...grocery
+        }
+    }
+}
