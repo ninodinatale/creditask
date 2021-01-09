@@ -1,7 +1,7 @@
 import 'package:creditask/providers/auth.dart';
-import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/widgets/_shared/duration_picker.dart';
+import 'package:creditask/widgets/tasks/set_task_done_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -22,6 +22,127 @@ class ActionButtons extends StatefulWidget {
 class _ActionButtonsState extends State<ActionButtons> {
   RunMutation _runUpdateApprovalMutation;
   RunMutation _runUpdateTaskMutation;
+
+  void _showApproveConfirmDialog(DetailTaskMixin$Approvals approval) {
+    final _msgCtrl = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text('Akzeptieren'),
+              actions: [
+                TextButton(
+                  child: Text('ABBRECHEN'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                RaisedButton(
+                    child: const Text('AKZEPTIEREN'),
+                    onPressed: () {
+                      saveApprovalChanges(ApprovalInput(
+                          id: approval.id,
+                          state: ApprovalState.approved,
+                          message: _msgCtrl.text));
+                      Navigator.pop(context);
+                    }),
+              ],
+              content: Form(
+                key: _formKey,
+                child: TextFormField(
+                  decoration: InputDecoration(
+                      labelText: 'Nachricht', helperText: 'Optional'),
+                  controller: _msgCtrl,
+                ),
+              ),
+            ));
+  }
+
+  void _showToDoConfirmDialog(TaskDetail$Query$Task task) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text('Auf zu machen setzen'),
+              actions: [
+                TextButton(
+                  child: Text('ABBRECHEN'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                RaisedButton(
+                    child: const Text('ZU MACHEN'),
+                    onPressed: () {
+                      saveTaskChanges(widget._task.id, TaskState.toDo,
+                          task.neededTimeSeconds);
+                      Navigator.pop(context);
+                    }),
+              ],
+              content:
+                  Text('Die Aufgabe wieder auf zu machen setzen? Schaue die '
+                      'Nachrichten der Benutzer an, welche die Aufgabe '
+                      'abgelehnt haben, um zu sehen, was du besser machen '
+                      'solltest.'),
+            ));
+  }
+
+  void _showDeclineConfirmDialog(DetailTaskMixin$Approvals approval) {
+    final _msgCtrl = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text('Ablehnen'),
+              actions: [
+                TextButton(
+                  child: Text('ABBRECHEN'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                RaisedButton(
+                    child: const Text('ABLEHNEN'),
+                    onPressed: () {
+                      if (_formKey.currentState.validate()) {
+                        saveApprovalChanges(ApprovalInput(
+                            id: approval.id,
+                            state: ApprovalState.declined,
+                            message: _msgCtrl.text));
+                        Navigator.pop(context);
+                      }
+                    }),
+              ],
+              content: Form(
+                key: _formKey,
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Grund muss angegeben werden';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Grund'),
+                  controller: _msgCtrl,
+                ),
+              ),
+            ));
+  }
+
+  void _showResetConfirmDialog(DetailTaskMixin$Approvals approval) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text('Zurücksetzen'),
+              actions: [
+                TextButton(
+                  child: Text('ABBRECHEN'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                RaisedButton(
+                    child: const Text('ZURÜCKSETZEN'),
+                    onPressed: () {
+                      saveApprovalChanges(ApprovalInput(
+                          id: approval.id, state: ApprovalState.none));
+                      Navigator.pop(context);
+                    }),
+              ],
+              content: Text('Willst du den Status zurücksetzen?'),
+            ));
+  }
 
   void saveTaskChanges(String id, TaskState state, int neededTimeSeconds) {
     UpdateDetailTask$Mutation optimisticResult = UpdateDetailTask$Mutation()
@@ -44,7 +165,8 @@ class _ActionButtonsState extends State<ActionButtons> {
       ..saveApproval = (UpdateApproval$Mutation$SaveApproval()
         ..approval =
             ((UpdateApproval$Mutation$SaveApproval$Approval()..id = approvalInput.id)
-              ..state = approvalInput.state));
+              ..state = approvalInput.state
+              ..message = approvalInput.message));
 
     this._runUpdateApprovalMutation(
         UpdateApprovalArguments(approval: approvalInput).toJson(),
@@ -64,10 +186,44 @@ class _ActionButtonsState extends State<ActionButtons> {
                     title: Text('Benötigte Zeit'),
                     duration: Duration(seconds: widget._task.neededTimeSeconds))
                 .show(context)
-                .then((value) => saveTaskChanges(
-                    widget._task.id, TaskState.toApprove, value.inSeconds)),
-            child: Text('Auf gemacht setzen'),
+                .then((value) {
+              if (value != null) {
+                saveTaskChanges(
+                    widget._task.id, TaskState.toApprove, value.inSeconds);
+              }
+            }),
+            child: Text('GEMACHT'),
           ));
+          break;
+        case TaskState.declined:
+          buttons.add(RaisedButton(
+            color: theme.primaryColor,
+            onPressed: () => _showToDoConfirmDialog(widget._task),
+            child: const Text('ZU MACHEN'),
+          ));
+          break;
+        case TaskState.approved:
+          SetTaskDoneButton(
+              taskId: widget._task.id,
+              onUpdate: (GraphQLDataProxy cache, QueryResult result) {
+                if (result.hasException) {
+                  // TODO
+                } else {
+                  final _query = (TaskDetail$Query()..task = widget._task)
+                    ..task.state = TaskState.done;
+
+                  cache.writeQuery(widget._request, data: _query.toJson());
+
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Änderung gespeichert'),
+                      Icon(Icons.check, color: Colors.green)
+                    ],
+                  )));
+                }
+              });
           break;
         default:
           break;
@@ -76,48 +232,41 @@ class _ActionButtonsState extends State<ActionButtons> {
       var myApproval = widget._task.approvals
           .firstWhere((a) => a.user.id == auth.currentUser.id);
       switch (widget._task.state) {
-        case TaskState.declined:
         case TaskState.toApprove:
           if (myApproval != null) {
             switch (myApproval.state) {
               case ApprovalState.none:
                 buttons.add(RaisedButton(
                   color: Colors.green,
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.approved)),
-                  child: Text('Akzeptieren'),
+                  onPressed: () => _showApproveConfirmDialog(myApproval),
+                  child: const Text('AKZEPTIEREN'),
                 ));
                 buttons.add(RaisedButton(
                   color: Colors.redAccent,
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.declined)),
-                  child: Text('Ablehnen'),
+                  onPressed: () => _showDeclineConfirmDialog(myApproval),
+                  child: const Text('ABLEHNEN'),
                 ));
                 break;
               case ApprovalState.approved:
                 buttons.add(RaisedButton(
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.none)),
-                  child: Text('Zurücksetzen'),
+                  onPressed: () => _showResetConfirmDialog(myApproval),
+                  child: Text('ZURÜCKSETZEN'),
                 ));
                 buttons.add(RaisedButton(
                   color: Colors.redAccent,
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.declined)),
-                  child: Text('Ablehnen'),
+                  onPressed: () => _showDeclineConfirmDialog(myApproval),
+                  child: const Text('ABLEHNEN'),
                 ));
                 break;
               case ApprovalState.declined:
                 buttons.add(RaisedButton(
                   color: Colors.green,
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.approved)),
-                  child: Text('Akzeptieren'),
+                  onPressed: () => _showApproveConfirmDialog(myApproval),
+                  child: const Text('AKZEPTIEREN'),
                 ));
                 buttons.add(RaisedButton(
-                  onPressed: () => saveApprovalChanges(ApprovalInput(
-                      id: myApproval.id, state: ApprovalState.approved)),
-                  child: Text('Zurücksetzen'),
+                  onPressed: () => _showResetConfirmDialog(myApproval),
+                  child: Text('ZURÜCKSETZEN'),
                 ));
                 break;
               default:
@@ -126,25 +275,15 @@ class _ActionButtonsState extends State<ActionButtons> {
           } else {
             buttons.add(RaisedButton(
               color: Colors.green,
-              onPressed: () => saveApprovalChanges(ApprovalInput(
-                  id: myApproval.id, state: ApprovalState.approved)),
-              child: Text('Akzeptieren'),
+              onPressed: () => _showApproveConfirmDialog(myApproval),
+              child: const Text('AKZEPTIEREN'),
             ));
             buttons.add(RaisedButton(
               color: Colors.redAccent,
-              onPressed: () => saveApprovalChanges(ApprovalInput(
-                  id: myApproval.id, state: ApprovalState.declined)),
-              child: Text('Ablehnen'),
+              onPressed: () => _showDeclineConfirmDialog(myApproval),
+              child: const Text('ABLEHNEN'),
             ));
           }
-          break;
-        case TaskState.approved:
-          buttons.add(RaisedButton(
-            color: Colors.redAccent,
-            onPressed: () => saveApprovalChanges(ApprovalInput(
-                id: myApproval.id, state: ApprovalState.declined)),
-            child: Text('Ablehnen'),
-          ));
           break;
         default:
           break;
@@ -163,6 +302,7 @@ class _ActionButtonsState extends State<ActionButtons> {
       builder: (context, auth, child) {
         return Mutation(
           options: MutationOptions(
+              fetchPolicy: FetchPolicy.cacheAndNetwork,
               document: approvalMutation.document,
               update: (GraphQLDataProxy cache, QueryResult result) {
                 if (result.hasException) {
@@ -173,25 +313,45 @@ class _ActionButtonsState extends State<ActionButtons> {
                           .saveApproval
                           .approval
                           .state;
+                  var newApprovalMsg =
+                      UpdateApproval$Mutation.fromJson(result.data)
+                          .saveApproval
+                          .approval
+                          .message;
 
                   var updatedTask =
-                      TaskDetail$Query$Task.fromJson(widget._task.toJson());
-                  updatedTask.approvals
-                      .firstWhere(
-                          (element) => element.user.id == auth.currentUser.id)
-                      .state = newApprovalState;
+                      TaskDetail$Query$Task.fromJson(widget._task.toJson())
+                        ..approvals.firstWhere((element) {
+                          if (element.user.id == auth.currentUser.id) {
+                            element.state = newApprovalState;
+                            element.message = newApprovalMsg;
+                            return true;
+                          }
+                          return false;
+                        });
 
-                  var updatedTaskJson = updatedTask.toJson();
-                  cache.writeQuery(widget._request, data: updatedTaskJson);
-                  emitTaskDidChange();
+                  if (!updatedTask.approvals
+                      .any((element) => element.state == ApprovalState.none)) {
+                    if (updatedTask.approvals.any(
+                        (element) => element.state == ApprovalState.declined)) {
+                      updatedTask.state = TaskState.declined;
+                    } else {
+                      updatedTask.state = TaskState.approved;
+                    }
+                  }
+
+                  TaskDetail$Query query = TaskDetail$Query()
+                    ..task = updatedTask;
+
+                  cache.writeQuery(widget._request, data: query.toJson());
                   Scaffold.of(context).showSnackBar(SnackBar(
                       content: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Änderung gespeichert'),
-                          Icon(Icons.check, color: Colors.green)
-                        ],
-                      )));
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Änderung gespeichert'),
+                      Icon(Icons.check, color: Colors.green)
+                    ],
+                  )));
                 }
               },
               onError: (OperationException error) {
@@ -201,28 +361,32 @@ class _ActionButtonsState extends State<ActionButtons> {
             this._runUpdateApprovalMutation = runUpdateApprovalMutation;
             return Mutation(
               options: MutationOptions(
+                  fetchPolicy: FetchPolicy.cacheAndNetwork,
                   document: taskMutation.document,
                   update: (GraphQLDataProxy cache, QueryResult result) {
                     if (result.hasException) {
                       // TODO
                     } else {
-                      var updatedTask =
+                      UpdateDetailTask$Mutation$SaveTask$Task updatedTask =
                           UpdateDetailTask$Mutation.fromJson(result.data)
                               .saveTask
                               .task;
-                      var updatedTaskJson = widget._task.toJson()
-                        ..addAll(updatedTask.toJson());
-                      cache.writeQuery(
-                          widget._request, data: updatedTaskJson);
-                      emitTaskDidChange();
+
+                      widget._task.toJson()..addAll(updatedTask.toJson());
+                      TaskDetail$Query query = TaskDetail$Query()
+                        ..task = (TaskDetail$Query$Task.fromJson(
+                            widget._task.toJson()
+                              ..addAll(updatedTask.toJson())));
+
+                      cache.writeQuery(widget._request, data: query.toJson());
                       Scaffold.of(context).showSnackBar(SnackBar(
                           content: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Änderung gespeichert'),
-                              Icon(Icons.check, color: Colors.green)
-                            ],
-                          )));
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Änderung gespeichert'),
+                          Icon(Icons.check, color: Colors.green)
+                        ],
+                      )));
                     }
                   },
                   onError: (OperationException error) {

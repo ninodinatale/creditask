@@ -6,6 +6,7 @@ schema {
 input ApprovalInput {
   id: ID!
   state: ApprovalState!
+  message: String
 }
 
 enum ApprovalState {
@@ -15,11 +16,9 @@ enum ApprovalState {
 }
 
 type ApprovalType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   state: ApprovalState!
+  message: String!
   task: TaskType!
   user: UserType!
 }
@@ -49,6 +48,16 @@ scalar Date
 
 scalar DateTime
 
+type DeleteGrocery {
+  grocery: GroceryType
+}
+
+type ErrorType {
+  id: ID!
+  user: UserType!
+  stackTrace: String!
+}
+
 scalar GenericScalar
 
 input GroceryCreateInput {
@@ -57,9 +66,6 @@ input GroceryCreateInput {
 }
 
 type GroceryType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   name: String!
   inCart: Boolean!
@@ -74,9 +80,11 @@ input GroceryUpdateInput {
 }
 
 type Mutation {
+  saveError(stackTrace: String!): SaveError
   createGrocery(input: GroceryCreateInput!): CreateGrocery
   updateGrocery(input: GroceryUpdateInput!): UpdateGrocery
   updateGroceries(input: [GroceryUpdateInput]!): UpdateGroceries
+  deleteGrocery(id: ID!): DeleteGrocery
   saveApproval(approvalInput: ApprovalInput!): SaveApproval
   saveTask(createInput: TaskInputCreate, updateInput: TaskInputUpdate): SaveTask
   tokenAuth(email: String!, password: String!): ObtainJSONWebToken
@@ -94,12 +102,13 @@ type ObtainJSONWebToken {
 type Query {
   allNotInCart: [GroceryType!]!
   allInCart: [GroceryType!]!
+  taskChanges(taskId: ID!): [TaskChangeType!]!
   task(id: ID!): TaskType!
   todoTasksOfUser(userEmail: String!): [TaskType!]!
-  doneTasksOfUser(userEmail: String!): [TaskType!]!
   toApproveTasksOfUser(userEmail: String!): [TaskType!]!
   unassignedTasks: [TaskType!]!
   allTodoTasks: [TaskType!]!
+  done: [TaskType!]!
   user(id: ID!): UserType
   users: [UserType!]
   otherUsers(userEmail: String!): [UserType!]
@@ -113,6 +122,10 @@ type Refresh {
 
 type SaveApproval {
   approval: ApprovalType!
+}
+
+type SaveError {
+  error: ErrorType!
 }
 
 type SaveTask {
@@ -135,9 +148,6 @@ enum TaskChangeChangedProperty {
 
 type TaskChangeType {
   id: ID!
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   currentValue: String
   previousValue: String
   user: UserType!
@@ -178,9 +188,6 @@ enum TaskState {
 }
 
 type TaskType {
-  createdAt: DateTime!
-  createdBy: UserType!
-  isDeleted: Boolean!
   id: ID!
   name: String!
   neededTimeSeconds: Int!
@@ -189,6 +196,7 @@ type TaskType {
   factor: Float!
   fixedCredits: Int!
   user: UserType
+  createdBy: UserType!
   periodStart: Date!
   periodEnd: Date!
   approvals: [ApprovalType!]!
@@ -216,6 +224,7 @@ type UserType {
   taskSet: [TaskType!]!
   approvalSet: [ApprovalType!]!
   taskchangeSet: [TaskChangeType!]!
+  errorSet: [ErrorType!]!
 }
 
 type Verify {

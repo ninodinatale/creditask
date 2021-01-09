@@ -1,0 +1,5 @@
+mutation error($stackTrace: String!) {
+    saveError(stackTrace: $stackTrace) {
+        __typename
+    }
+}

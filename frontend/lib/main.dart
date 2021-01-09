@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:creditask/graphql/api.dart';
 import 'package:creditask/providers/auth.dart';
 import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/widgets/_shared/error_screen.dart';
@@ -5,21 +8,46 @@ import 'package:creditask/widgets/app_container.dart';
 import 'package:creditask/widgets/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' as Foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  if (Foundation.kReleaseMode) {
+    FlutterError.onError = (FlutterErrorDetails details) {
+      artemisClient
+          .execute(ErrorMutation(
+              variables: ErrorArguments(stackTrace: details.stack.toString())))
+          .then((value) => null);
+      // Send report
+    };
+    runZonedGuarded<Future<void>>(
+      () async {
+        runApp(MyApp());
+      },
+      (Object error, StackTrace stackTrace) {
+        artemisClient
+            .execute(ErrorMutation(
+                variables: ErrorArguments(stackTrace: stackTrace.toString())))
+            .then((value) => null);
+      },
+    );
+  } else {
+    // Will be tree-shaked on release builds.
+    runApp(MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
   static Future<void> onMessageHandler(RemoteMessage message) async {
     print('onMessage: ' + message.sentTime.toString());
   }
+
   static Future<void> onMessageOpenedAppHandler(RemoteMessage message) async {
     print('onMessageOpenedApp: ' + message.sentTime.toString());
   }
+
   static Future<void> onBackgroundMessageHandler(RemoteMessage message) async {
     print('onBackgroundMessage: ' + message.sentTime.toString());
   }
@@ -28,7 +56,8 @@ class MyApp extends StatelessWidget {
     FirebaseMessaging.instance.requestPermission();
 
     FirebaseMessaging.onMessage.listen(MyApp.onMessageHandler);
-    FirebaseMessaging.onMessageOpenedApp.listen(MyApp.onMessageOpenedAppHandler);
+    FirebaseMessaging.onMessageOpenedApp
+        .listen(MyApp.onMessageOpenedAppHandler);
     FirebaseMessaging.onBackgroundMessage(MyApp.onBackgroundMessageHandler);
   }
 
@@ -48,7 +77,7 @@ class MyApp extends StatelessWidget {
                 create: (context) => AuthProvider(),
                 child: GraphqlProvider(
                     child: MaterialApp(
-                        title: 'Flutter Demo',
+                        title: 'Creditask',
                         theme: base.copyWith(
                           buttonTheme: base.buttonTheme.copyWith(
                             buttonColor: base.primaryColor,
@@ -65,11 +94,10 @@ class MyApp extends StatelessWidget {
                             ),
                             child: AuthContainer()))));
           }
-
-          // TODO logo
           return Center(
-            child: FlutterLogo(
-              size: 100,
+            child: Image(
+              image: AssetImage('assets/logo_rounded_512.png'),
+              width: 150,
             ),
           );
         });
@@ -87,20 +115,20 @@ class AuthContainer extends StatelessWidget {
               snapshot.hasData) {
             return snapshot.data ? AppContainer() : LoginScreen();
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return snapshot.hasData
-                ? LoginScreen()
-                : Center(
-                    child: FlutterLogo(
-                      size: 100,
-                    ),
-                  );
+            return Center(
+              child: Image(
+                image: AssetImage('assets/logo_rounded_512.png'),
+                width: 150,
+              ),
+            );
           } else if (snapshot.hasError) {
             return ErrorDialog(snapshot.error.toString());
           } else {
             // TODO cover use cases
             return Center(
-              child: FlutterLogo(
-                size: 100,
+              child: Image(
+                image: AssetImage('assets/logo_rounded_512.png'),
+                width: 150,
               ),
             );
           }

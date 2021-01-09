@@ -4,17 +4,7 @@ import 'package:creditask/enums/editable_task_properties.dart';
 import 'package:creditask/graphql/api.dart';
 import 'package:creditask/utils/date_format.dart';
 import 'package:flutter/material.dart';
-
-StreamController<void> _controller =
-    StreamController<void>.broadcast(sync: true);
-
-StreamSubscription<void> subscribeToTaskDidChange(void Function() callback) {
-  return _controller.stream.listen((_) => callback());
-}
-
-void emitTaskDidChange() {
-  _controller.add(null);
-}
+import 'package:tuple/tuple.dart';
 
 bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
   switch (taskState) {
@@ -23,11 +13,6 @@ bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
     case TaskState.toApprove:
       return property == EditableTaskProperties.name;
     case TaskState.declined:
-      return property == EditableTaskProperties.name ||
-          property == EditableTaskProperties.neededTimeSeconds ||
-          property == EditableTaskProperties.fixedCredits ||
-          property == EditableTaskProperties.creditsCalc ||
-          property == EditableTaskProperties.factor;
     case TaskState.approved:
       return false;
     default:
@@ -35,28 +20,66 @@ bool canEditTaskProperty(EditableTaskProperties property, TaskState taskState) {
   }
 }
 
-IconData approvalIconData(ApprovalState approvalState) {
-  switch (approvalState) {
-    case ApprovalState.none:
-      return Icons.radio_button_unchecked;
+Tuple2<IconData, Color> taskStateData(TaskState taskState) {
+  IconData iconData;
+  MaterialColor color;
+  switch (taskState) {
+    case TaskState.toDo:
+      iconData = Icons.check_box_outline_blank_rounded;
       break;
-    case ApprovalState.approved:
-      return Icons.check_circle_outline;
+    case TaskState.toApprove:
+      iconData = Icons.access_time;
+      color = Colors.amber;
       break;
-    case ApprovalState.declined:
-      return Icons.highlight_off;
+    case TaskState.approved:
+      iconData = Icons.check_circle_outline;
+      color = Colors.green;
+      break;
+    case TaskState.declined:
+      iconData = Icons.close_outlined;
+      color = Colors.red;
+      break;
+    case TaskState.done:
+      iconData = Icons.check_circle_outline;
+      color = Colors.green;
       break;
     default:
-      return Icons.help_outline;
-      break;
+      iconData = Icons.help;
   }
+
+  return Tuple2(iconData, color);
 }
 
-Map<String, List<SimpleTaskMixin>> splitByDueDays(List<SimpleTaskMixin> tasks) {
-  final overdue = <SimpleTaskMixin>[];
-  final today = <SimpleTaskMixin>[];
-  final next7Days = <SimpleTaskMixin>[];
-  final later = <SimpleTaskMixin>[];
+Tuple2<IconData, Color> approvalStateData(ApprovalState approvalState, BuildContext ctx) {
+  IconData iconData;
+  Color color;
+  final theme = Theme.of(ctx);
+  switch (approvalState) {
+    case ApprovalState.none:
+      iconData = Icons.radio_button_unchecked;
+      color = theme.colorScheme.onSurface;
+      break;
+    case ApprovalState.approved:
+      iconData = Icons.check_circle_outline;
+      color = Colors.green;
+      break;
+    case ApprovalState.declined:
+      iconData = Icons.highlight_off;
+      color = Colors.red;
+      break;
+    default:
+      iconData = Icons.help_outline;
+      break;
+  }
+
+  return Tuple2(iconData, color);
+}
+
+Map<String, List<T>> splitByDueDays<T extends SimpleTaskMixin>(List<T> tasks) {
+  final overdue = <T>[];
+  final today = <T>[];
+  final next7Days = <T>[];
+  final later = <T>[];
 
   for (final task in tasks) {
     var now = DateTime.now();

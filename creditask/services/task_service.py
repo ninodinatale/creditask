@@ -1,11 +1,12 @@
 from datetime import datetime
+from math import ceil
 from typing import List
 
 from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
 
 from creditask.models import Task, User, Approval, TaskState, TaskChange, \
-    ApprovalState, ChangeableTaskProperty
+    ApprovalState, ChangeableTaskProperty, CreditsCalc
 from creditask.validators import MinLenValidator
 
 
@@ -15,14 +16,8 @@ def get_task_by_id(task_id: int) -> Task:
 
 def get_todo_tasks_by_user_email(user_mail: str) -> List[Task]:
     return list(
-        Task.objects.filter(user__email=user_mail,
-                            state=TaskState.TO_DO).order_by('period_end'))
-
-
-def get_done_tasks_to_approve_by_user_email(user_mail: str) -> List[Task]:
-    return list(
-        Task.objects.filter(user__email=user_mail,
-                            state=TaskState.TO_APPROVE).order_by('period_end'))
+        Task.objects.filter(user__email=user_mail).exclude(
+            state=TaskState.DONE).order_by('period_end'))
 
 
 def get_to_approve_tasks_of_user(user_mail: str) -> List[Task]:
@@ -47,6 +42,12 @@ def get_unassigned_tasks(group_id: int) -> List[Task]:
 def get_all_todo_tasks(group_id: int) -> List[Task]:
     return list(
         Task.objects.filter(group_id=group_id, state=TaskState.TO_DO).order_by(
+            'period_end'))
+
+
+def get_done_tasks(group_id: int) -> List[Task]:
+    return list(
+        Task.objects.filter(group_id=group_id, state=TaskState.DONE).order_by(
             'period_end'))
 
 
@@ -105,7 +106,6 @@ def save_task(current_user: User, **kwargs) -> Task:
         TaskChange.objects.create(
             task_id=task_to_save.id,
             user=current_user,
-            created_by=current_user,
             previous_value=None,
             current_value=current_user.id,
             changed_property=ChangeableTaskProperty.CreatedById,
@@ -117,7 +117,6 @@ def save_task(current_user: User, **kwargs) -> Task:
         for user in users:
             Approval.objects.create(state=ApprovalState.NONE,
                                     task=task_to_save,
-                                    created_by=current_user,
                                     user=user)
         return task_to_save
 
@@ -129,6 +128,45 @@ def merge_values(task_to_merge_into: Task,
         if key == 'id' or getattr(task_to_merge_into, key) == value:
             # no changes
             continue
+
+        # TODO this can be removed if TODO's in GraphQL's SaveTask are resolved:
+        #  to set user_id to None, currently it's needed to pass '' (or
+        #  something which can be parsed to int) due to None values being
+        #  removed in SaveTask's mutate()
+        if key == 'user_id':
+            try:
+                value = str(int(value))
+            except ValueError:
+                value = None
+        if key == 'state':
+            if value == TaskState.DONE:
+                if task_to_merge_into.credits_calc == CreditsCalc.FIXED:
+                    new_credits = ceil((task_to_merge_into.user.credits +
+                                        task_to_merge_into.fixed_credits))
+                elif task_to_merge_into.credits_calc == CreditsCalc.BY_FACTOR:
+                    new_credits = ceil(task_to_merge_into.user.credits + (
+                            task_to_merge_into.factor * (
+                            task_to_merge_into.needed_time_seconds / 60)))
+                else:
+                    raise ValidationError(
+                        'credits_calc of task has unknown value: cannot calculate '
+                        'credits')
+                # TODO import needs to be here due to cyclic imports, fix
+                import creditask.services.user_service as userservice
+                userservice.save_user(task_to_merge_into.user,
+                                      credits=new_credits)
+
+            # TODO test
+            if getattr(task_to_merge_into, key) == TaskState.DECLINED:
+                if value == TaskState.TO_DO:
+                    # TODO import needs to be here due to cyclic imports, fix
+                    import \
+                        creditask.services.approval_service as approvalservice
+                    for approval in list(task_to_merge_into.approvals.all()):
+                        approvalservice.save_approval(current_user, approval.id,
+                                                      ApprovalState.NONE,
+                                                      for_reset=True)
+
         try:
             if key == 'user':
                 # it's easier to just use the ID instead of the object,
@@ -141,7 +179,6 @@ def merge_values(task_to_merge_into: Task,
                 TaskChange.objects.create(
                     task_id=task_to_merge_into.id,
                     user=current_user,
-                    created_by=current_user,
                     previous_value=getattr(task_to_merge_into, key),
                     current_value=value,
                     changed_property=changed_property,
@@ -218,6 +255,14 @@ def validate_state_change(task_to_update: Task, **kwargs):
                     f'needs to be [{TaskState.APPROVED}] or '
                     f'[{TaskState.DECLINED}],'
                     f'but was [{new_state}]')
+        if task_to_update.state == TaskState.DECLINED:
+            if new_state != TaskState.TO_DO:
+                raise ValidationError(
+                    f'Task state after [{TaskState.DECLINED}] '
+                    f'needs to be [{TaskState.TO_DO}], but was [{new_state}]')
+        if task_to_update.state == TaskState.DONE:
+            raise ValidationError(
+                f'Task state [{TaskState.DONE}] may not be changed')
 
 
 def get_task_changes_by_task_id(task_id: int) -> List[TaskChange]:
@@ -229,7 +274,17 @@ def get_task_changes_by_task_id(task_id: int) -> List[TaskChange]:
 def get_task_changes_by_task(task: Task) -> List[TaskChange]:
     if task is None:
         raise ValidationError('task may not be None')
-    return list(task.task_changes.all().order_by('created_at'))
+    return list(map(_replace_user_id_with_public_name_of,
+                    list(task.task_changes.all().order_by('timestamp'))))
+
+
+def _replace_user_id_with_public_name_of(change: TaskChange) -> TaskChange:
+    if change.changed_property == ChangeableTaskProperty.UserId:
+        change.previous_value = User.objects.get(
+            id=change.previous_value).public_name
+        change.current_value = User.objects.get(
+            id=change.current_value).public_name
+    return change
 
 
 def get_task_approvals_by_task(task: Task) -> List[TaskChange]:

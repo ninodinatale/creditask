@@ -15,8 +15,8 @@ class TestGroceryService(TestCase):
         return_value = get_all_not_in_cart(group_id)
 
         self.assertEquals(1, grocery_model_mock.objects.filter.call_count)
-        self.assertEquals(dict(group_id=group_id, in_cart=False),
-                          grocery_model_mock.objects.filter.call_args.kwargs)
+        self.assertDictEqual(dict(group_id=group_id, in_cart=False),
+                          grocery_model_mock.objects.filter.call_args[1])
         self.assertEquals(mock_return_value, return_value)
 
     @mock.patch('creditask.services.grocery_service.Grocery')
@@ -27,6 +27,6 @@ class TestGroceryService(TestCase):
         return_value = get_all_in_cart(group_id)
 
         self.assertEquals(1, grocery_model_mock.objects.filter.call_count)
-        self.assertEquals(dict(group_id=group_id, in_cart=True),
-                          grocery_model_mock.objects.filter.call_args.kwargs)
+        self.assertDictEqual(dict(group_id=group_id, in_cart=True),
+                          grocery_model_mock.objects.filter.call_args[1])
         self.assertEquals(mock_return_value, return_value)

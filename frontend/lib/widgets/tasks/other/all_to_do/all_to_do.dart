@@ -1,31 +1,21 @@
 import 'dart:async';
 
+import 'package:creditask/graphql/api.graphql.dart';
 import 'package:creditask/services/tasks.dart';
 import 'package:creditask/utils/date_format.dart';
-import 'package:creditask/widgets/_shared/task_state_icon.dart';
+import 'package:creditask/widgets/_shared/error_screen.dart';
 import 'package:creditask/widgets/_shared/user_avatar.dart';
 import 'package:creditask/widgets/tasks/detail/task_detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import '../../../graphql/api.dart';
-import '../../_shared/error_screen.dart';
-
-class AllTasksScreen extends StatefulWidget {
+class AllToDo extends StatefulWidget {
   @override
-  _AllTasksScreenState createState() => _AllTasksScreenState();
+  _AllToDoState createState() => _AllToDoState();
 }
 
-class _AllTasksScreenState extends State<AllTasksScreen> {
-  StreamSubscription<void> _subscription;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
-
+class _AllToDoState extends State<AllToDo> {
   List<Widget> getListTilesFor(List<SimpleTaskMixin> tasks, String title,
       bool overdue, ThemeData theme) {
     return [
@@ -36,23 +26,26 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
           : SizedBox.shrink(),
       ...ListTile.divideTiles(
           context: context,
-          tiles: tasks.map((task) => ListTile(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TaskDetailScreen(task.id))),
-                leading: UserAvatar(task.user?.publicName),
-                title: Text(task.name),
-                subtitle: Text(
-                    'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
-                    style: TextStyle(
-                        color: task.state == TaskState.toDo && overdue
-                            ? theme.errorColor
-                            : null)),
-                trailing: task.state == TaskState.toApprove
-                    ? TaskStateIcon(task.state)
-                    : null,
-              )))
+          tiles: tasks.map((task) {
+            final _icon = taskStateData(task.state);
+            return ListTile(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TaskDetailScreen(task.id))),
+              leading: UserAvatar(task.user?.publicName),
+              title: Text(task.name),
+              subtitle: Text(
+                  'Fällig am ${localDateStringOfIsoDateString(task.periodEnd)} (${relativeDateStringOf(task.periodEnd)})',
+                  style: TextStyle(
+                      color: task.state == TaskState.toDo && overdue
+                          ? theme.errorColor
+                          : null)),
+              trailing: task.state == TaskState.toApprove
+                  ? Icon(_icon.item1, color: _icon.item2)
+                  : null,
+            );
+          }))
     ];
   }
 
@@ -60,12 +53,12 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
   Widget build(BuildContext context) {
     AllTodoTasksQuery query = AllTodoTasksQuery();
     return Query(
-      options: QueryOptions(documentNode: query.document),
+      options: QueryOptions(
+        documentNode: query.document,
+        fetchPolicy: FetchPolicy.cacheAndNetwork,
+      ),
       builder: (QueryResult result,
           {VoidCallback refetch, FetchMore fetchMore}) {
-        if (_subscription == null) {
-          _subscription = subscribeToTaskDidChange(refetch);
-        }
         if (result.hasException) {
           return ErrorDialog(result.exception.toString());
         }
@@ -87,6 +80,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
         } else {
           return ListView(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            shrinkWrap: true,
             children: [
               ...getListTilesFor(
                   dueDaysMap['overdue'], 'Überfällig', true, themeData),

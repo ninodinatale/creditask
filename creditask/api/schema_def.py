@@ -4,15 +4,20 @@ import graphql
 import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
-    Task, TaskChange, CreditsCalc, Grocery
-from creditask.services import get_task_changes_by_task, save_approval, \
+    Task, TaskChange, CreditsCalc, Grocery, Error
+from creditask.services import save_approval, \
     get_todo_tasks_by_user_email, get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
-    get_other_users, get_task_changes_by_task_id, \
-    get_done_tasks_to_approve_by_user_email, get_task_approvals_by_task, \
+    get_other_users, get_task_changes_by_task_id, get_task_changes_by_task, \
+    get_task_approvals_by_task, \
     get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
-    get_all_in_cart
+    get_all_in_cart, save_error, get_done_tasks, delete_grocery
 from .scalars import custom_string, custom_float
+
+
+class ErrorType(graphene_django.DjangoObjectType):
+    class Meta:
+        model = Error
 
 
 class UserType(graphene_django.DjangoObjectType):
@@ -68,9 +73,9 @@ class TaskScalars:
 
 
 class TaskType(graphene_django.DjangoObjectType):
+    approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
     task_changes = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskChangeType)))
-    approvals = graphene.NonNull(graphene.List(graphene.NonNull(ApprovalType)))
 
     # implicitly declaring state here instead of inheriting from model Task
     # because graphql schema generation creates different enums from
@@ -82,13 +87,13 @@ class TaskType(graphene_django.DjangoObjectType):
 
     @staticmethod
     @graphql_jwt.decorators.login_required
-    def resolve_task_changes(parent: Task, info: graphql.ResolveInfo):
-        return get_task_changes_by_task(parent)
+    def resolve_approvals(parent: Task, info: graphql.ResolveInfo):
+        return get_task_approvals_by_task(parent)
 
     @staticmethod
     @graphql_jwt.decorators.login_required
-    def resolve_approvals(parent: Task, info: graphql.ResolveInfo):
-        return get_task_approvals_by_task(parent)
+    def resolve_task_changes(parent: Task, info, **kwargs):
+        return get_task_changes_by_task(parent)
 
     class Meta:
         convert_choices_to_enum = False
@@ -96,8 +101,9 @@ class TaskType(graphene_django.DjangoObjectType):
 
 
 class TaskChangeQuery:
-    task_changes = graphene.NonNull(TaskChangeType,
-                                    task_id=graphene.NonNull(graphene.ID))
+    task_changes = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskChangeType)),
+        task_id=graphene.NonNull(graphene.ID))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -110,15 +116,14 @@ class TaskQuery:
     todo_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
-    done_tasks_of_user = graphene.NonNull(
-        graphene.List(graphene.NonNull(TaskType)),
-        user_email=graphene.NonNull(graphene.String))
     to_approve_tasks_of_user = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)),
         user_email=graphene.NonNull(graphene.String))
     unassigned_tasks = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)))
     all_todo_tasks = graphene.NonNull(
+        graphene.List(graphene.NonNull(TaskType)))
+    done = graphene.NonNull(
         graphene.List(graphene.NonNull(TaskType)))
 
     @staticmethod
@@ -130,11 +135,6 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_todo_tasks_of_user(self, info, **kwargs):
         return get_todo_tasks_by_user_email(kwargs.get('user_email'))
-
-    @staticmethod
-    @graphql_jwt.decorators.login_required
-    def resolve_done_tasks_of_user(self, info, **kwargs):
-        return get_done_tasks_to_approve_by_user_email(kwargs.get('user_email'))
 
     @staticmethod
     @graphql_jwt.decorators.login_required
@@ -150,6 +150,11 @@ class TaskQuery:
     @graphql_jwt.decorators.login_required
     def resolve_all_todo_tasks(self, info, **kwargs):
         return get_all_todo_tasks(info.context.user.group_id)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def resolve_done(self, info, **kwargs):
+        return get_done_tasks(info.context.user.group_id)
 
 
 class TaskInputCreate(graphene.InputObjectType):
@@ -175,6 +180,23 @@ class TaskInputUpdate(graphene.InputObjectType):
     period_end = TaskScalars.period_end()
 
 
+# TODO test
+class SaveError(graphene.Mutation):
+    class Arguments:
+        stack_trace = graphene.NonNull(graphene.String)
+
+    error = graphene.NonNull(ErrorType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, stack_trace: str):
+        error = save_error(info.context.user.id, stack_trace)
+        return SaveError(error=error)
+
+
+# TODO: Problem with nullable's is if a property should be set to None, it's
+#  ignored due to _remove_none_values. But this is needed since if properties
+#  which the user didn't change are None (not passed). Seek solution.
 class SaveTask(graphene.Mutation):
     class Arguments:
         create_input = TaskInputCreate()
@@ -247,6 +269,11 @@ class GroceryQuery:
 #
 # Mutations
 #
+# TODO test
+class ErrorMutation:
+    save_error = SaveError.Field()
+
+
 class TaskMutation:
     save_task = SaveTask.Field()
 
@@ -292,6 +319,20 @@ class UpdateGrocery(graphene.Mutation):
         return UpdateGrocery(grocery=grocery)
 
 
+# TODO test
+class DeleteGrocery(graphene.Mutation):
+    class Arguments:
+        id = graphene.NonNull(graphene.ID)
+
+    grocery = graphene.Field(GroceryType)
+
+    @staticmethod
+    @graphql_jwt.decorators.login_required
+    def mutate(root, info, id):
+        delete_grocery(id)
+        return DeleteGrocery(grocery=None)
+
+
 class UpdateGroceries(graphene.Mutation):
     class Arguments:
         input = graphene.NonNull(graphene.List(GroceryUpdateInput))
@@ -312,11 +353,13 @@ class GroceryMutation:
     create_grocery = CreateGrocery.Field()
     update_grocery = UpdateGrocery.Field()
     update_groceries = UpdateGroceries.Field()
+    delete_grocery = DeleteGrocery.Field()
 
 
 class ApprovalInput(graphene.InputObjectType):
     id = graphene.NonNull(graphene.ID)
     state = graphene.NonNull(ApprovalScalars.state)
+    message = graphene.String()
 
 
 class SaveApproval(graphene.Mutation):
@@ -331,7 +374,8 @@ class SaveApproval(graphene.Mutation):
         approval = save_approval(
             info.context.user,
             approval_input.id,
-            approval_input.state)
+            approval_input.state,
+            approval_input.message)
         return SaveApproval(approval=approval)
 
 
@@ -361,7 +405,8 @@ class UserQuery:
         return get_other_users(kwargs.get('user_email'))
 
 
-class Query(UserQuery, TaskQuery, GroceryQuery, graphene.ObjectType):
+class Query(UserQuery, TaskQuery, TaskChangeQuery, GroceryQuery,
+            graphene.ObjectType):
     pass
 
 
@@ -399,7 +444,7 @@ class Verify(graphene.Mutation, graphene.ObjectType):
         return parent.user
 
 
-class Mutation(TaskMutation, ApprovalMutation, GroceryMutation,
+class Mutation(TaskMutation, ApprovalMutation, GroceryMutation, ErrorMutation,
                graphene.ObjectType):
     token_auth = ObtainJSONWebToken.Field()
 

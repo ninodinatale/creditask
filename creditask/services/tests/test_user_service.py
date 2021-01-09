@@ -19,7 +19,7 @@ class TestUserService(TestCase):
 
         self.assertEquals(1, mock_user_model.objects.filter.call_count)
         self.assertEquals(dict(group_id=group_id),
-                          mock_user_model.objects.filter.call_args.kwargs)
+                          mock_user_model.objects.filter.call_args[1])
         self.assertEquals(mock_return_value, return_value)
 
     @mock.patch('creditask.services.user_service.merge_values')
@@ -39,7 +39,7 @@ class TestUserService(TestCase):
             self.assertEquals(1, mock_user_model.objects.get.call_count)
             self.assertEquals(1, merge_values_mock.call_count)
             self.assertEquals((123456789,),
-                              mock_user_model.objects.get.call_args.args)
+                              mock_user_model.objects.get.call_args[0])
             self.assertEquals(user_mock_2, return_value)
             self.assertEquals(1, merge_values_mock.return_value.save.call_count)
 
@@ -92,9 +92,9 @@ class TestUserService(TestCase):
         return_value = get_other_users(email)
 
         self.assertEqual(1, user_model_mock.objects.get.call_count)
-        self.assertDictEqual(dict(email=email), user_model_mock.objects.get.call_args.kwargs)
+        self.assertDictEqual(dict(email=email), user_model_mock.objects.get.call_args[1])
         self.assertEqual(1, user_model_mock.objects.filter.call_count)
-        self.assertDictEqual(dict(group=mock_group), user_model_mock.objects.filter.call_args.kwargs)
+        self.assertDictEqual(dict(group=mock_group), user_model_mock.objects.filter.call_args[1])
         self.assertEqual(1, user_model_mock.objects.filter.return_value.exclude.call_count)
-        self.assertDictEqual(dict(email=email), user_model_mock.objects.filter.return_value.exclude.call_args.kwargs)
+        self.assertDictEqual(dict(email=email), user_model_mock.objects.filter.return_value.exclude.call_args[1])
         self.assertEquals(mock_return_value_2, return_value)

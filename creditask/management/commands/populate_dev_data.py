@@ -34,7 +34,27 @@ class Command(BaseCommand):
                                 public_name='Anna',
                                 password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
                                          'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
-                                         'O10=')
+                                         'O10='),
+            # User.objects.create(group=group_1, email='beni',
+            #                     public_name='Beni',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='tinu',
+            #                     public_name='Tinu',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='meli',
+            #                     public_name='Meli',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
+            # User.objects.create(group=group_1, email='seppu',
+            #                     public_name='Seppu',
+            #                     password='pbkdf2_sha256$216000$XDP0IK0mMdrw$zkF'
+            #                              'UIfNs5ObTgW9ryZv4uP65JODej2/XKass+U10'
+            #                              'O10='),
         ]
 
         rounded_now = datetime.datetime(
@@ -130,89 +150,82 @@ class Command(BaseCommand):
         for task in all_tasks:
             for user in all_user:
                 Approval.objects.create(
-                    created_by=user,
                     task=task,
-                    user=user
+                    user=user,
+                    message='Ein langer Text mit max_length=240, na wie siehts '
+                            'wohl aus? Ein langer Text mit max_length=240, '
+                            'na wie siehts wohl aus? Ein langer Text mit max_'
+                            'length=240, na wie siehts wohl aus? Ein langer '
+                            'Text mit max_length=240, na wie siehts wohl aus?'
                 )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                created_by=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[1],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.Factor,
-                previous_value=1,
-                created_by=all_user[0],
-                current_value=2
+                previous_value="1",
+                current_value="2"
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.NeededTimeSeconds,
-                previous_value=120,
-                created_by=all_user[0],
-                current_value=560
+                previous_value="120",
+                current_value="560"
             )
             TaskChange.objects.create(
                 task=task,
                 user=all_user[0],
-                timestamp=task.created_at,
+                timestamp=rounded_now,
                 changed_property=ChangeableTaskProperty.UserId,
                 previous_value=(
-                    task.user.public_name if task.user is not None else None),
-                created_by=all_user[0],
-                current_value=all_user[2].public_name
+                    task.user.id if task.user is not None else ''),
+                current_value=all_user[2].id
             )
 
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Milch',
             in_cart=False,
             info='1 Liter',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Poulet',
             in_cart=True,
             info='500g',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Kornflakes',
             in_cart=False,
             info='1 Pkg',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Tomatensauce',
             in_cart=False,
             info='2x Bolognese, 2x Napoletana',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Früchte',
             in_cart=True,
             info='Äpfel, Birnen, Bananen',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Spaghetti',
             in_cart=False,
             info='2 Packungen',
             group=group_1
         )
         Grocery.objects.create(
-            created_by=all_user[0],
             name='Käse',
             in_cart=True,
             info='',
@@ -220,5 +233,5 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if getattr(settings, 'DEBUG') is True:
+        if bool(getattr(settings, 'DEBUG')) is True:
             self.setup_dev_data()

@@ -1,0 +1,9 @@
+mutation taskSetDoneTask($updateInput: TaskInputUpdate) {
+    saveTask(updateInput: $updateInput) {
+        __typename
+        task {
+            __typename
+        }
+    }
+}
+

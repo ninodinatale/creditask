@@ -1,18 +1,21 @@
-from math import ceil
-
 from django.core.exceptions import ValidationError
 
-from creditask.models import Approval, ApprovalState, User, TaskState, \
-    CreditsCalc
+from creditask.models import Approval, ApprovalState, User, TaskState
 from .task_service import save_task
-from .user_service import save_user
 
 
 def save_approval(current_user: User, approval_id: int,
-                  new_state: ApprovalState) -> Approval:
+                  new_state: ApprovalState, message: str = None,
+                  for_reset: bool = False) -> Approval:
     """
     Since approvals are created on creating tasks, approvals can only be altered
     on the state column.
+    :param for_reset: defines if the approval should be reset. This is used if
+    a task is in state DECLINED and is being set back to TO_DO, therefor the
+    approval should also be set back to NONE, which is the only valid state in
+    this case. Also, calculating and setting the task state will be omitted.
+    :param message: The message to the approval. If ApprovalState is declined,
+    the message is mandatory.
     :param new_state: The new state the approval should have.
     :param current_user: The current user.
     :param approval_id: The approval id to be its state altered.
@@ -24,15 +27,23 @@ def save_approval(current_user: User, approval_id: int,
     if new_state is None:
         raise ValidationError('new_state may not be None')
 
+    if new_state == ApprovalState.DECLINED and message is None:
+        raise ValidationError('if new_state is DECLINED, '
+                              'the message may not be None')
+
     approval = Approval.objects.get(id=approval_id)
 
-    # this is not an actual problem, but since it's only possible to change
-    # the state of an approval, it's pretty sure unwanted behavior if the state
-    # keeps the same
-    if approval.state == new_state:
-        raise ValidationError('approval state has not been changed')
+    if (not (approval.task.state == TaskState.TO_APPROVE) and (not (
+            for_reset and approval.task.state == TaskState.DECLINED
+            and new_state == ApprovalState.NONE))):
+        raise ValidationError(
+            f'task state needs to be {TaskState.TO_APPROVE} or for_reset should'
+            f' be True, TashState should be {TaskState.DECLINED} and the new '
+            f'approval state needs to be {ApprovalState.NONE} in'
+            f'order to change an approval')
 
     approval.state = new_state
+    approval.message = message if message is not None else ''
     approval.save()
 
     approvals = list(approval.task.approvals.exclude(
@@ -40,25 +51,14 @@ def save_approval(current_user: User, approval_id: int,
         user=approval.task.user
     ))
 
-    if (len(approvals) > 0 and next(
-            (a for a in approvals if a.state == ApprovalState.NONE),
-            None) is None):
-        if all(a.state == ApprovalState.APPROVED for a in approvals):
-            approval.task.state = TaskState.APPROVED
-            if approval.task.credits_calc == CreditsCalc.FIXED:
-                new_credits = ceil((approval.task.user.credits +
-                               approval.task.fixed_credits))
-            elif approval.task.credits_calc == CreditsCalc.BY_FACTOR:
-                new_credits = ceil(approval.task.user.credits + (
-                        approval.task.factor * (
-                        approval.task.needed_time_seconds / 60)))
+    if not for_reset:
+        if (len(approvals) > 0 and next(
+                (a for a in approvals if a.state == ApprovalState.NONE),
+                None) is None):
+            if all(a.state == ApprovalState.APPROVED for a in approvals):
+                approval.task.state = TaskState.APPROVED
             else:
-                raise ValidationError(
-                    'credits_calc of task has unknown value: cannot calculate '
-                    'credits')
-            save_user(approval.task.user, credits=new_credits)
-        else:
-            approval.task.state = TaskState.DECLINED
-        save_task(current_user, id=approval.task.id, state=approval.task.state)
+                approval.task.state = TaskState.DECLINED
+            save_task(current_user, id=approval.task.id, state=approval.task.state)
 
     return approval

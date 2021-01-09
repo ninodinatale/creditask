@@ -53,7 +53,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
         body: Query(
             options: QueryOptions(
                 documentNode: query.document,
-                fetchPolicy: FetchPolicy.networkOnly),
+                fetchPolicy: FetchPolicy.cacheAndNetwork),
             builder: (QueryResult result,
                 {VoidCallback refetch, FetchMore fetchMore}) {
               if (result.hasException) {
@@ -67,6 +67,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
               final _createMutation = CreateGroceryMutation();
               final _updateMutation = UpdateGroceryMutation();
               final mutationOptions = MutationOptions(
+                  fetchPolicy: FetchPolicy.cacheAndNetwork,
                   documentNode: _isNewGrocery()
                       ? _createMutation.document
                       : _updateMutation.document,
@@ -84,20 +85,30 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                           ],
                         )),
                       );
+
                       AllGroceriesInCart$Query _queryToUpdate =
                           AllGroceriesInCart$Query.fromJson(
                               cache.readQuery(widget._request));
 
-                      _queryToUpdate.allInCart.add(
-                          AllGroceriesInCart$Query$AllInCart.fromJson(
-                              UpdateGrocery$Mutation.fromJson(result.data)
-                                  .updateGrocery
-                                  .grocery
-                                  .toJson()));
-                      cache.writeQuery(widget._request, data: _queryToUpdate.toJson());
+                      if (_isNewGrocery()) {
+                        _queryToUpdate.allInCart.add(
+                            AllGroceriesInCart$Query$AllInCart.fromJson(
+                                CreateGrocery$Mutation.fromJson(result.data)
+                                    .createGrocery
+                                    .grocery
+                                    .toJson()));
+                      } else {
+                        _queryToUpdate.allInCart.add(
+                            AllGroceriesInCart$Query$AllInCart.fromJson(
+                                UpdateGrocery$Mutation.fromJson(result.data)
+                                    .updateGrocery
+                                    .grocery
+                                    .toJson()));
+                      }
+                      cache.writeQuery(widget._request,
+                          data: _queryToUpdate.toJson());
 
                       Navigator.of(context).pop();
-                      // emitGroceryDidChange();
                     }
                   },
                   onError: (OperationException error) {
@@ -114,7 +125,8 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Flexible(
-                            child: TypeAheadField<Grocery$Query$AllNotInCart>(
+                            child: TypeAheadFormField<Grocery$Query$AllNotInCart>(
+                              validator: (value) => value.isEmpty ? 'Name darf nicht leer sein' : null,
                               textFieldConfiguration: TextFieldConfiguration(
                                 decoration:
                                     const InputDecoration(labelText: 'Name'),
@@ -158,6 +170,7 @@ class _AddGroceryScreenState extends State<AddGroceryScreen> {
                               focusNode: _infoFocusNode,
                               decoration: InputDecoration(
                                 labelText: 'Info',
+                                helperText: 'Optional'
                               ),
                               controller: _infoCtrl,
                             ),

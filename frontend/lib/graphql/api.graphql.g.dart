@@ -6,20 +6,80 @@ part of 'api.graphql.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UpdateApproval$Mutation$SaveApproval$Approval
-    _$UpdateApproval$Mutation$SaveApproval$ApprovalFromJson(
+TaskSetDoneTask$Mutation$SaveTask$Task
+    _$TaskSetDoneTask$Mutation$SaveTask$TaskFromJson(
         Map<String, dynamic> json) {
-  return UpdateApproval$Mutation$SaveApproval$Approval()
-    ..id = json['id'] as String
-    ..state = _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
-        unknownValue: ApprovalState.artemisUnknown);
+  return TaskSetDoneTask$Mutation$SaveTask$Task()
+    ..$$typename = json['__typename'] as String;
 }
 
-Map<String, dynamic> _$UpdateApproval$Mutation$SaveApproval$ApprovalToJson(
-        UpdateApproval$Mutation$SaveApproval$Approval instance) =>
+Map<String, dynamic> _$TaskSetDoneTask$Mutation$SaveTask$TaskToJson(
+        TaskSetDoneTask$Mutation$SaveTask$Task instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+    };
+
+TaskSetDoneTask$Mutation$SaveTask _$TaskSetDoneTask$Mutation$SaveTaskFromJson(
+    Map<String, dynamic> json) {
+  return TaskSetDoneTask$Mutation$SaveTask()
+    ..$$typename = json['__typename'] as String
+    ..task = json['task'] == null
+        ? null
+        : TaskSetDoneTask$Mutation$SaveTask$Task.fromJson(
+            json['task'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$TaskSetDoneTask$Mutation$SaveTaskToJson(
+        TaskSetDoneTask$Mutation$SaveTask instance) =>
+    <String, dynamic>{
+      '__typename': instance.$$typename,
+      'task': instance.task?.toJson(),
+    };
+
+TaskSetDoneTask$Mutation _$TaskSetDoneTask$MutationFromJson(
+    Map<String, dynamic> json) {
+  return TaskSetDoneTask$Mutation()
+    ..saveTask = json['saveTask'] == null
+        ? null
+        : TaskSetDoneTask$Mutation$SaveTask.fromJson(
+            json['saveTask'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$TaskSetDoneTask$MutationToJson(
+        TaskSetDoneTask$Mutation instance) =>
+    <String, dynamic>{
+      'saveTask': instance.saveTask?.toJson(),
+    };
+
+TaskInputUpdate _$TaskInputUpdateFromJson(Map<String, dynamic> json) {
+  return TaskInputUpdate(
+    id: json['id'] as String,
+    state: _$enumDecodeNullable(_$TaskStateEnumMap, json['state'],
+        unknownValue: TaskState.artemisUnknown),
+    name: json['name'] as String,
+    creditsCalc: _$enumDecodeNullable(_$CreditsCalcEnumMap, json['creditsCalc'],
+        unknownValue: CreditsCalc.artemisUnknown),
+    fixedCredits: (json['fixedCredits'] as num)?.toDouble(),
+    factor: (json['factor'] as num)?.toDouble(),
+    userId: json['userId'] as String,
+    neededTimeSeconds: json['neededTimeSeconds'] as int,
+    periodStart: json['periodStart'] as String,
+    periodEnd: json['periodEnd'] as String,
+  );
+}
+
+Map<String, dynamic> _$TaskInputUpdateToJson(TaskInputUpdate instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'state': _$ApprovalStateEnumMap[instance.state],
+      'state': _$TaskStateEnumMap[instance.state],
+      'name': instance.name,
+      'creditsCalc': _$CreditsCalcEnumMap[instance.creditsCalc],
+      'fixedCredits': instance.fixedCredits,
+      'factor': instance.factor,
+      'userId': instance.userId,
+      'neededTimeSeconds': instance.neededTimeSeconds,
+      'periodStart': instance.periodStart,
+      'periodEnd': instance.periodEnd,
     };
 
 T _$enumDecode<T>(
@@ -53,6 +113,39 @@ T _$enumDecodeNullable<T>(
   }
   return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
 }
+
+const _$TaskStateEnumMap = {
+  TaskState.toDo: 'TO_DO',
+  TaskState.toApprove: 'TO_APPROVE',
+  TaskState.declined: 'DECLINED',
+  TaskState.approved: 'APPROVED',
+  TaskState.done: 'DONE',
+  TaskState.artemisUnknown: 'ARTEMIS_UNKNOWN',
+};
+
+const _$CreditsCalcEnumMap = {
+  CreditsCalc.byFactor: 'BY_FACTOR',
+  CreditsCalc.fixed: 'FIXED',
+  CreditsCalc.artemisUnknown: 'ARTEMIS_UNKNOWN',
+};
+
+UpdateApproval$Mutation$SaveApproval$Approval
+    _$UpdateApproval$Mutation$SaveApproval$ApprovalFromJson(
+        Map<String, dynamic> json) {
+  return UpdateApproval$Mutation$SaveApproval$Approval()
+    ..id = json['id'] as String
+    ..state = _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
+        unknownValue: ApprovalState.artemisUnknown)
+    ..message = json['message'] as String;
+}
+
+Map<String, dynamic> _$UpdateApproval$Mutation$SaveApproval$ApprovalToJson(
+        UpdateApproval$Mutation$SaveApproval$Approval instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'state': _$ApprovalStateEnumMap[instance.state],
+      'message': instance.message,
+    };
 
 const _$ApprovalStateEnumMap = {
   ApprovalState.none: 'NONE',
@@ -96,6 +189,7 @@ ApprovalInput _$ApprovalInputFromJson(Map<String, dynamic> json) {
     id: json['id'] as String,
     state: _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
         unknownValue: ApprovalState.artemisUnknown),
+    message: json['message'] as String,
   );
 }
 
@@ -103,6 +197,7 @@ Map<String, dynamic> _$ApprovalInputToJson(ApprovalInput instance) =>
     <String, dynamic>{
       'id': instance.id,
       'state': _$ApprovalStateEnumMap[instance.state],
+      'message': instance.message,
     };
 
 UsersTodoTasks$Query$TodoTasksOfUser
@@ -115,7 +210,13 @@ UsersTodoTasks$Query$TodoTasksOfUser
         unknownValue: TaskState.artemisUnknown)
     ..user = json['user'] == null
         ? null
-        : SimpleTaskMixin$User.fromJson(json['user'] as Map<String, dynamic>);
+        : SimpleTaskMixin$User.fromJson(json['user'] as Map<String, dynamic>)
+    ..approvals = (json['approvals'] as List)
+        ?.map((e) => e == null
+            ? null
+            : SimpleTaskApprovalsMixin$Approvals.fromJson(
+                e as Map<String, dynamic>))
+        ?.toList();
 }
 
 Map<String, dynamic> _$UsersTodoTasks$Query$TodoTasksOfUserToJson(
@@ -126,16 +227,8 @@ Map<String, dynamic> _$UsersTodoTasks$Query$TodoTasksOfUserToJson(
       'periodEnd': instance.periodEnd,
       'state': _$TaskStateEnumMap[instance.state],
       'user': instance.user?.toJson(),
+      'approvals': instance.approvals?.map((e) => e?.toJson())?.toList(),
     };
-
-const _$TaskStateEnumMap = {
-  TaskState.toDo: 'TO_DO',
-  TaskState.toApprove: 'TO_APPROVE',
-  TaskState.declined: 'DECLINED',
-  TaskState.approved: 'APPROVED',
-  TaskState.done: 'DONE',
-  TaskState.artemisUnknown: 'ARTEMIS_UNKNOWN',
-};
 
 UsersTodoTasks$Query _$UsersTodoTasks$QueryFromJson(Map<String, dynamic> json) {
   return UsersTodoTasks$Query()
@@ -161,6 +254,42 @@ SimpleTaskMixin$User _$SimpleTaskMixin$UserFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$SimpleTaskMixin$UserToJson(
         SimpleTaskMixin$User instance) =>
     <String, dynamic>{
+      'publicName': instance.publicName,
+    };
+
+SimpleTaskApprovalsMixin$Approvals _$SimpleTaskApprovalsMixin$ApprovalsFromJson(
+    Map<String, dynamic> json) {
+  return SimpleTaskApprovalsMixin$Approvals()
+    ..id = json['id'] as String
+    ..user = json['user'] == null
+        ? null
+        : SimpleApprovalMixin$User.fromJson(
+            json['user'] as Map<String, dynamic>)
+    ..state = _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
+        unknownValue: ApprovalState.artemisUnknown)
+    ..message = json['message'] as String;
+}
+
+Map<String, dynamic> _$SimpleTaskApprovalsMixin$ApprovalsToJson(
+        SimpleTaskApprovalsMixin$Approvals instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user': instance.user?.toJson(),
+      'state': _$ApprovalStateEnumMap[instance.state],
+      'message': instance.message,
+    };
+
+SimpleApprovalMixin$User _$SimpleApprovalMixin$UserFromJson(
+    Map<String, dynamic> json) {
+  return SimpleApprovalMixin$User()
+    ..id = json['id'] as String
+    ..publicName = json['publicName'] as String;
+}
+
+Map<String, dynamic> _$SimpleApprovalMixin$UserToJson(
+        SimpleApprovalMixin$User instance) =>
+    <String, dynamic>{
+      'id': instance.id,
       'publicName': instance.publicName,
     };
 
@@ -261,7 +390,8 @@ TaskWithApprovalsMixin$Approvals _$TaskWithApprovalsMixin$ApprovalsFromJson(
         : SimpleApprovalMixin$User.fromJson(
             json['user'] as Map<String, dynamic>)
     ..state = _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
-        unknownValue: ApprovalState.artemisUnknown);
+        unknownValue: ApprovalState.artemisUnknown)
+    ..message = json['message'] as String;
 }
 
 Map<String, dynamic> _$TaskWithApprovalsMixin$ApprovalsToJson(
@@ -270,20 +400,7 @@ Map<String, dynamic> _$TaskWithApprovalsMixin$ApprovalsToJson(
       'id': instance.id,
       'user': instance.user?.toJson(),
       'state': _$ApprovalStateEnumMap[instance.state],
-    };
-
-SimpleApprovalMixin$User _$SimpleApprovalMixin$UserFromJson(
-    Map<String, dynamic> json) {
-  return SimpleApprovalMixin$User()
-    ..id = json['id'] as String
-    ..publicName = json['publicName'] as String;
-}
-
-Map<String, dynamic> _$SimpleApprovalMixin$UserToJson(
-        SimpleApprovalMixin$User instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'publicName': instance.publicName,
+      'message': instance.message,
     };
 
 TokenAuth$Mutation$TokenAuth$User _$TokenAuth$Mutation$TokenAuth$UserFromJson(
@@ -440,12 +557,6 @@ Map<String, dynamic> _$UpdateDetailTask$Mutation$SaveTask$TaskToJson(
       'approvals': instance.approvals?.map((e) => e?.toJson())?.toList(),
     };
 
-const _$CreditsCalcEnumMap = {
-  CreditsCalc.byFactor: 'BY_FACTOR',
-  CreditsCalc.fixed: 'FIXED',
-  CreditsCalc.artemisUnknown: 'ARTEMIS_UNKNOWN',
-};
-
 UpdateDetailTask$Mutation$SaveTask _$UpdateDetailTask$Mutation$SaveTaskFromJson(
     Map<String, dynamic> json) {
   return UpdateDetailTask$Mutation$SaveTask()
@@ -498,7 +609,8 @@ DetailTaskMixin$Approvals _$DetailTaskMixin$ApprovalsFromJson(
         : SimpleApprovalMixin$User.fromJson(
             json['user'] as Map<String, dynamic>)
     ..state = _$enumDecodeNullable(_$ApprovalStateEnumMap, json['state'],
-        unknownValue: ApprovalState.artemisUnknown);
+        unknownValue: ApprovalState.artemisUnknown)
+    ..message = json['message'] as String;
 }
 
 Map<String, dynamic> _$DetailTaskMixin$ApprovalsToJson(
@@ -507,6 +619,7 @@ Map<String, dynamic> _$DetailTaskMixin$ApprovalsToJson(
       'id': instance.id,
       'user': instance.user?.toJson(),
       'state': _$ApprovalStateEnumMap[instance.state],
+      'message': instance.message,
     };
 
 TaskInputCreate _$TaskInputCreateFromJson(Map<String, dynamic> json) {
@@ -529,37 +642,6 @@ Map<String, dynamic> _$TaskInputCreateToJson(TaskInputCreate instance) =>
       'fixedCredits': instance.fixedCredits,
       'factor': instance.factor,
       'userId': instance.userId,
-      'periodStart': instance.periodStart,
-      'periodEnd': instance.periodEnd,
-    };
-
-TaskInputUpdate _$TaskInputUpdateFromJson(Map<String, dynamic> json) {
-  return TaskInputUpdate(
-    id: json['id'] as String,
-    state: _$enumDecodeNullable(_$TaskStateEnumMap, json['state'],
-        unknownValue: TaskState.artemisUnknown),
-    name: json['name'] as String,
-    creditsCalc: _$enumDecodeNullable(_$CreditsCalcEnumMap, json['creditsCalc'],
-        unknownValue: CreditsCalc.artemisUnknown),
-    fixedCredits: (json['fixedCredits'] as num)?.toDouble(),
-    factor: (json['factor'] as num)?.toDouble(),
-    userId: json['userId'] as String,
-    neededTimeSeconds: json['neededTimeSeconds'] as int,
-    periodStart: json['periodStart'] as String,
-    periodEnd: json['periodEnd'] as String,
-  );
-}
-
-Map<String, dynamic> _$TaskInputUpdateToJson(TaskInputUpdate instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'state': _$TaskStateEnumMap[instance.state],
-      'name': instance.name,
-      'creditsCalc': _$CreditsCalcEnumMap[instance.creditsCalc],
-      'fixedCredits': instance.fixedCredits,
-      'factor': instance.factor,
-      'userId': instance.userId,
-      'neededTimeSeconds': instance.neededTimeSeconds,
       'periodStart': instance.periodStart,
       'periodEnd': instance.periodEnd,
     };
@@ -648,9 +730,9 @@ Map<String, dynamic> _$Credits$QueryToJson(Credits$Query instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
-TaskChanges$Query$Task$TaskChanges _$TaskChanges$Query$Task$TaskChangesFromJson(
+TaskChanges$Query$TaskChanges _$TaskChanges$Query$TaskChangesFromJson(
     Map<String, dynamic> json) {
-  return TaskChanges$Query$Task$TaskChanges()
+  return TaskChanges$Query$TaskChanges()
     ..changedProperty = _$enumDecodeNullable(
         _$TaskChangeChangedPropertyEnumMap, json['changedProperty'],
         unknownValue: TaskChangeChangedProperty.artemisUnknown)
@@ -659,11 +741,12 @@ TaskChanges$Query$Task$TaskChanges _$TaskChanges$Query$Task$TaskChangesFromJson(
     ..timestamp = json['timestamp'] as String
     ..user = json['user'] == null
         ? null
-        : TaskChangesMixin$User.fromJson(json['user'] as Map<String, dynamic>);
+        : TaskChangesMixin$User.fromJson(json['user'] as Map<String, dynamic>)
+    ..$$typename = json['__typename'] as String;
 }
 
-Map<String, dynamic> _$TaskChanges$Query$Task$TaskChangesToJson(
-        TaskChanges$Query$Task$TaskChanges instance) =>
+Map<String, dynamic> _$TaskChanges$Query$TaskChangesToJson(
+        TaskChanges$Query$TaskChanges instance) =>
     <String, dynamic>{
       'changedProperty':
           _$TaskChangeChangedPropertyEnumMap[instance.changedProperty],
@@ -671,6 +754,7 @@ Map<String, dynamic> _$TaskChanges$Query$Task$TaskChangesToJson(
       'previousValue': instance.previousValue,
       'timestamp': instance.timestamp,
       'user': instance.user?.toJson(),
+      '__typename': instance.$$typename,
     };
 
 const _$TaskChangeChangedPropertyEnumMap = {
@@ -688,33 +772,18 @@ const _$TaskChangeChangedPropertyEnumMap = {
   TaskChangeChangedProperty.artemisUnknown: 'ARTEMIS_UNKNOWN',
 };
 
-TaskChanges$Query$Task _$TaskChanges$Query$TaskFromJson(
-    Map<String, dynamic> json) {
-  return TaskChanges$Query$Task()
+TaskChanges$Query _$TaskChanges$QueryFromJson(Map<String, dynamic> json) {
+  return TaskChanges$Query()
     ..taskChanges = (json['taskChanges'] as List)
         ?.map((e) => e == null
             ? null
-            : TaskChanges$Query$Task$TaskChanges.fromJson(
-                e as Map<String, dynamic>))
+            : TaskChanges$Query$TaskChanges.fromJson(e as Map<String, dynamic>))
         ?.toList();
-}
-
-Map<String, dynamic> _$TaskChanges$Query$TaskToJson(
-        TaskChanges$Query$Task instance) =>
-    <String, dynamic>{
-      'taskChanges': instance.taskChanges?.map((e) => e?.toJson())?.toList(),
-    };
-
-TaskChanges$Query _$TaskChanges$QueryFromJson(Map<String, dynamic> json) {
-  return TaskChanges$Query()
-    ..task = json['task'] == null
-        ? null
-        : TaskChanges$Query$Task.fromJson(json['task'] as Map<String, dynamic>);
 }
 
 Map<String, dynamic> _$TaskChanges$QueryToJson(TaskChanges$Query instance) =>
     <String, dynamic>{
-      'task': instance.task?.toJson(),
+      'taskChanges': instance.taskChanges?.map((e) => e?.toJson())?.toList(),
     };
 
 TaskChangesMixin$User _$TaskChangesMixin$UserFromJson(
@@ -799,55 +868,28 @@ Map<String, dynamic> _$GroceryUpdateInputToJson(GroceryUpdateInput instance) =>
       'inCart': instance.inCart,
     };
 
-UsersDoneToApproveTasks$Query$DoneTasksOfUser
-    _$UsersDoneToApproveTasks$Query$DoneTasksOfUserFromJson(
-        Map<String, dynamic> json) {
-  return UsersDoneToApproveTasks$Query$DoneTasksOfUser()
-    ..id = json['id'] as String
-    ..name = json['name'] as String
-    ..periodEnd = json['periodEnd'] as String
-    ..state = _$enumDecodeNullable(_$TaskStateEnumMap, json['state'],
-        unknownValue: TaskState.artemisUnknown)
-    ..user = json['user'] == null
-        ? null
-        : SimpleTaskMixin$User.fromJson(json['user'] as Map<String, dynamic>)
-    ..$$typename = json['__typename'] as String
-    ..approvals = (json['approvals'] as List)
-        ?.map((e) => e == null
-            ? null
-            : TaskWithApprovalsMixin$Approvals.fromJson(
-                e as Map<String, dynamic>))
-        ?.toList();
+Error$Mutation$SaveError _$Error$Mutation$SaveErrorFromJson(
+    Map<String, dynamic> json) {
+  return Error$Mutation$SaveError()..$$typename = json['__typename'] as String;
 }
 
-Map<String, dynamic> _$UsersDoneToApproveTasks$Query$DoneTasksOfUserToJson(
-        UsersDoneToApproveTasks$Query$DoneTasksOfUser instance) =>
+Map<String, dynamic> _$Error$Mutation$SaveErrorToJson(
+        Error$Mutation$SaveError instance) =>
     <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'periodEnd': instance.periodEnd,
-      'state': _$TaskStateEnumMap[instance.state],
-      'user': instance.user?.toJson(),
       '__typename': instance.$$typename,
-      'approvals': instance.approvals?.map((e) => e?.toJson())?.toList(),
     };
 
-UsersDoneToApproveTasks$Query _$UsersDoneToApproveTasks$QueryFromJson(
-    Map<String, dynamic> json) {
-  return UsersDoneToApproveTasks$Query()
-    ..doneTasksOfUser = (json['doneTasksOfUser'] as List)
-        ?.map((e) => e == null
-            ? null
-            : UsersDoneToApproveTasks$Query$DoneTasksOfUser.fromJson(
-                e as Map<String, dynamic>))
-        ?.toList();
+Error$Mutation _$Error$MutationFromJson(Map<String, dynamic> json) {
+  return Error$Mutation()
+    ..saveError = json['saveError'] == null
+        ? null
+        : Error$Mutation$SaveError.fromJson(
+            json['saveError'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$UsersDoneToApproveTasks$QueryToJson(
-        UsersDoneToApproveTasks$Query instance) =>
+Map<String, dynamic> _$Error$MutationToJson(Error$Mutation instance) =>
     <String, dynamic>{
-      'doneTasksOfUser':
-          instance.doneTasksOfUser?.map((e) => e?.toJson())?.toList(),
+      'saveError': instance.saveError?.toJson(),
     };
 
 UpdateGroceries$Mutation$UpdateGroceries$Groceries
@@ -1139,6 +1181,108 @@ Map<String, dynamic> _$Users$QueryToJson(Users$Query instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
+DoneTasks$Query$Done _$DoneTasks$Query$DoneFromJson(Map<String, dynamic> json) {
+  return DoneTasks$Query$Done()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..periodEnd = json['periodEnd'] as String
+    ..state = _$enumDecodeNullable(_$TaskStateEnumMap, json['state'],
+        unknownValue: TaskState.artemisUnknown)
+    ..user = json['user'] == null
+        ? null
+        : SimpleTaskMixin$User.fromJson(json['user'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$DoneTasks$Query$DoneToJson(
+        DoneTasks$Query$Done instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'periodEnd': instance.periodEnd,
+      'state': _$TaskStateEnumMap[instance.state],
+      'user': instance.user?.toJson(),
+    };
+
+DoneTasks$Query _$DoneTasks$QueryFromJson(Map<String, dynamic> json) {
+  return DoneTasks$Query()
+    ..done = (json['done'] as List)
+        ?.map((e) => e == null
+            ? null
+            : DoneTasks$Query$Done.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$DoneTasks$QueryToJson(DoneTasks$Query instance) =>
+    <String, dynamic>{
+      'done': instance.done?.map((e) => e?.toJson())?.toList(),
+    };
+
+DeleteGrocery$Mutation$DeleteGrocery$Grocery
+    _$DeleteGrocery$Mutation$DeleteGrocery$GroceryFromJson(
+        Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation$DeleteGrocery$Grocery()
+    ..id = json['id'] as String
+    ..name = json['name'] as String
+    ..info = json['info'] as String
+    ..inCart = json['inCart'] as bool
+    ..$$typename = json['__typename'] as String;
+}
+
+Map<String, dynamic> _$DeleteGrocery$Mutation$DeleteGrocery$GroceryToJson(
+        DeleteGrocery$Mutation$DeleteGrocery$Grocery instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'info': instance.info,
+      'inCart': instance.inCart,
+      '__typename': instance.$$typename,
+    };
+
+DeleteGrocery$Mutation$DeleteGrocery
+    _$DeleteGrocery$Mutation$DeleteGroceryFromJson(Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation$DeleteGrocery()
+    ..grocery = json['grocery'] == null
+        ? null
+        : DeleteGrocery$Mutation$DeleteGrocery$Grocery.fromJson(
+            json['grocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$DeleteGrocery$Mutation$DeleteGroceryToJson(
+        DeleteGrocery$Mutation$DeleteGrocery instance) =>
+    <String, dynamic>{
+      'grocery': instance.grocery?.toJson(),
+    };
+
+DeleteGrocery$Mutation _$DeleteGrocery$MutationFromJson(
+    Map<String, dynamic> json) {
+  return DeleteGrocery$Mutation()
+    ..deleteGrocery = json['deleteGrocery'] == null
+        ? null
+        : DeleteGrocery$Mutation$DeleteGrocery.fromJson(
+            json['deleteGrocery'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$DeleteGrocery$MutationToJson(
+        DeleteGrocery$Mutation instance) =>
+    <String, dynamic>{
+      'deleteGrocery': instance.deleteGrocery?.toJson(),
+    };
+
+TaskSetDoneTaskArguments _$TaskSetDoneTaskArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return TaskSetDoneTaskArguments(
+    updateInput: json['updateInput'] == null
+        ? null
+        : TaskInputUpdate.fromJson(json['updateInput'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$TaskSetDoneTaskArgumentsToJson(
+        TaskSetDoneTaskArguments instance) =>
+    <String, dynamic>{
+      'updateInput': instance.updateInput?.toJson(),
+    };
+
 UpdateApprovalArguments _$UpdateApprovalArgumentsFromJson(
     Map<String, dynamic> json) {
   return UpdateApprovalArguments(
@@ -1241,14 +1385,14 @@ Map<String, dynamic> _$TaskDetailArgumentsToJson(
 
 TaskChangesArguments _$TaskChangesArgumentsFromJson(Map<String, dynamic> json) {
   return TaskChangesArguments(
-    id: json['id'] as String,
+    taskId: json['taskId'] as String,
   );
 }
 
 Map<String, dynamic> _$TaskChangesArgumentsToJson(
         TaskChangesArguments instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'taskId': instance.taskId,
     };
 
 UpdateGroceryArguments _$UpdateGroceryArgumentsFromJson(
@@ -1266,17 +1410,15 @@ Map<String, dynamic> _$UpdateGroceryArgumentsToJson(
       'input': instance.input?.toJson(),
     };
 
-UsersDoneToApproveTasksArguments _$UsersDoneToApproveTasksArgumentsFromJson(
-    Map<String, dynamic> json) {
-  return UsersDoneToApproveTasksArguments(
-    email: json['email'] as String,
+ErrorArguments _$ErrorArgumentsFromJson(Map<String, dynamic> json) {
+  return ErrorArguments(
+    stackTrace: json['stackTrace'] as String,
   );
 }
 
-Map<String, dynamic> _$UsersDoneToApproveTasksArgumentsToJson(
-        UsersDoneToApproveTasksArguments instance) =>
+Map<String, dynamic> _$ErrorArgumentsToJson(ErrorArguments instance) =>
     <String, dynamic>{
-      'email': instance.email,
+      'stackTrace': instance.stackTrace,
     };
 
 UpdateGroceriesArguments _$UpdateGroceriesArgumentsFromJson(
@@ -1323,4 +1465,17 @@ Map<String, dynamic> _$SaveTaskArgumentsToJson(SaveTaskArguments instance) =>
     <String, dynamic>{
       'createInput': instance.createInput?.toJson(),
       'updateInput': instance.updateInput?.toJson(),
+    };
+
+DeleteGroceryArguments _$DeleteGroceryArgumentsFromJson(
+    Map<String, dynamic> json) {
+  return DeleteGroceryArguments(
+    id: json['id'] as String,
+  );
+}
+
+Map<String, dynamic> _$DeleteGroceryArgumentsToJson(
+        DeleteGroceryArguments instance) =>
+    <String, dynamic>{
+      'id': instance.id,
     };

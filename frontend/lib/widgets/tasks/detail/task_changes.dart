@@ -21,66 +21,72 @@ class _TaskChangesState extends State<TaskChanges> {
 
   _TaskChangesState(this.taskId);
 
-  String getChangeSubtitle(TaskChanges$Query$Task$TaskChanges taskChange) {
+  String getChangeSubtitle(TaskChanges$Query$TaskChanges taskChange) {
     var changedProp = 'Änderte {0} von {1} zu {2}';
 
     switch (taskChange.changedProperty) {
       case TaskChangeChangedProperty.name:
         return changedProp
             .replaceAll('{0}', 'den Namen')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.neededTimeSeconds:
         return changedProp
             .replaceAll('{0}', 'die benötigte Zeit')
             .replaceAll('{1}',
-                secondsToElapsedTimeString(int.parse(taskChange.previousValue)))
+                "\"${secondsToElapsedTimeString(int.parse(taskChange.previousValue))}\"")
             .replaceAll('{2}',
-                secondsToElapsedTimeString(int.parse(taskChange.currentValue)));
+                "\"${secondsToElapsedTimeString(int.parse(taskChange.currentValue))}\"");
       case TaskChangeChangedProperty.state:
         return changedProp
             .replaceAll('{0}', 'den Status')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}',
+                "\"${transformTaskStateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${transformTaskStateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.factor:
         return changedProp
             .replaceAll('{0}', 'den Faktor')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.userId:
         return changedProp
             .replaceAll('{0}', 'die Zuweisung')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll(
+                '{1}', "\"${taskChange.previousValue ?? 'keine Zuweisung'}\"")
+            .replaceAll(
+                '{2}', "\"${taskChange.currentValue ?? 'keine Zuweisung'}\"");
       case TaskChangeChangedProperty.periodStart:
         return changedProp
             .replaceAll('{0}', 'das Startdatum')
-            .replaceAll(
-                '{1}', localDateStringOfIsoDateString(taskChange.previousValue))
-            .replaceAll(
-                '{2}', localDateStringOfIsoDateString(taskChange.currentValue));
+            .replaceAll('{1}',
+                "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.periodEnd:
         return changedProp
             .replaceAll('{0}', 'das Enddatum')
-            .replaceAll(
-                '{1}', localDateStringOfIsoDateString(taskChange.previousValue))
-            .replaceAll(
-                '{2}', localDateStringOfIsoDateString(taskChange.currentValue));
+            .replaceAll('{1}',
+                "\"${localDateStringOfIsoDateString(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${localDateStringOfIsoDateString(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.approval:
         return changedProp
             .replaceAll('{0}', 'den Bestätigungsstatus')
-            .replaceAll('{1}', transformApprovalState(taskChange.previousValue))
-            .replaceAll('{2}', transformApprovalState(taskChange.currentValue));
+            .replaceAll('{1}',
+                "\"${transformApprovalState(taskChange.previousValue)}\"")
+            .replaceAll('{2}',
+                "\"${transformApprovalState(taskChange.currentValue)}\"");
       case TaskChangeChangedProperty.creditsCalc:
         return changedProp
             .replaceAll('{0}', 'die Creditsberechnung')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.fixedCredits:
         return changedProp
             .replaceAll('{0}', 'die Credits')
-            .replaceAll('{1}', taskChange.previousValue)
-            .replaceAll('{2}', taskChange.currentValue);
+            .replaceAll('{1}', "\"${taskChange.previousValue}\"")
+            .replaceAll('{2}', "\"${taskChange.currentValue}\"");
       case TaskChangeChangedProperty.createdById:
         return 'Aufgabe erstellt';
         break;
@@ -93,10 +99,13 @@ class _TaskChangesState extends State<TaskChanges> {
   @override
   Widget build(BuildContext context) {
     TaskChangesQuery query =
-        TaskChangesQuery(variables: TaskChangesArguments(id: taskId));
+        TaskChangesQuery(variables: TaskChangesArguments(taskId: taskId));
     return Query(
         options: QueryOptions(
-            documentNode: query.document, variables: query.getVariablesMap()),
+          document: query.document,
+          variables: query.getVariablesMap(),
+          fetchPolicy: FetchPolicy.cacheAndNetwork,
+        ),
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
           if (result.hasException) {
@@ -107,14 +116,14 @@ class _TaskChangesState extends State<TaskChanges> {
             return Center(child: CircularProgressIndicator());
           }
 
-          List<TaskChanges$Query$Task$TaskChanges> taskChanges =
-              query.parse(result.data).task.taskChanges;
+          final _query =
+              query.parse(result.data);
 
-          if (taskChanges.length > 0) {
+          if (_query.taskChanges.length > 0) {
             return ListView(children: [
               ...ListTile.divideTiles(
                   context: context,
-                  tiles: taskChanges.map((taskChange) => ListTile(
+                  tiles: _query.taskChanges.map((taskChange) => ListTile(
                         title: Text(taskChange.user.publicName),
                         subtitle: Text(getChangeSubtitle(taskChange)),
                         trailing: Text(localDateTimeStringOfIsoDateTimeString(

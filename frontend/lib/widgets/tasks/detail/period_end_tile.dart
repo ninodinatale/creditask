@@ -73,11 +73,13 @@ class _PeriodEndTileState extends State<PeriodEndTile> {
                             firstDate: DateTime.now(),
                             lastDate: DateTime.now().add(Duration(days: 365)))
                         .then((value) {
-                      widget._onSave(TaskInputUpdate(
-                        id: widget._task.id,
-                        periodStart: dateTimeToIsoDateString(value.start),
-                        periodEnd: dateTimeToIsoDateString(value.end),
-                      ));
+                      if (value != null) {
+                        widget._onSave(TaskInputUpdate(
+                          id: widget._task.id,
+                          periodStart: dateTimeToIsoDateString(value.start),
+                          periodEnd: dateTimeToIsoDateString(value.end),
+                        ));
+                      }
                     })),
       ),
     ]);

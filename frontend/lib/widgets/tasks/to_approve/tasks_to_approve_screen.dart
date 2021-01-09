@@ -17,13 +17,6 @@ class TasksToApproveScreen extends StatefulWidget {
 }
 
 class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
-  StreamSubscription<void> _subscription;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +25,13 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
         variables:
             ToApproveTasksOfUserArguments(email: auth.currentUser.email));
     var _queryOptions = QueryOptions(
-        document: query.document, variables: query.getVariablesMap());
+      fetchPolicy: FetchPolicy.cacheAndNetwork,
+      document: query.document, variables: query.getVariablesMap(),
+    );
     return Query(
         options: _queryOptions,
         builder: (QueryResult result,
             {VoidCallback refetch, FetchMore fetchMore}) {
-          if (_subscription == null) {
-            _subscription = subscribeToTaskDidChange(refetch);
-          }
           if (result.hasException) {
             return ErrorDialog(result.exception.toString());
           }

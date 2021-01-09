@@ -1,5 +1,6 @@
 import 'package:creditask/graphql/api.dart';
 import 'package:flutter/foundation.dart';
+import 'package:recase/recase.dart';
 
 String transformApprovalState(String approvalStateString) {
   ApprovalState approvalState = ApprovalState.values
@@ -16,8 +17,16 @@ String transformApprovalState(String approvalStateString) {
   }
 }
 
+String transformTaskStateString(String taskStateStr) {
+  return transformTaskState(TaskState.values.firstWhere((element) =>
+      element.toString() ==
+      '${(TaskState).toString()}.${taskStateStr.camelCase}'));
+}
+
 String transformTaskState(TaskState taskState) {
   switch (taskState) {
+    case TaskState.done:
+      return 'Gemacht';
     case TaskState.toDo:
       return 'Noch zu machen';
     case TaskState.toApprove:
