@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:creditask/providers/auth.dart';
-import 'package:creditask/services/tasks.dart';
 import 'package:creditask/widgets/tasks/to_approve/task_to_approve.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,11 +9,26 @@ import '../../../graphql/api.dart';
 import '../../_shared/error_screen.dart';
 
 class TasksToApproveScreen extends StatefulWidget {
+  final Function(State owner) onTaskChangesSeen;
+
+  const TasksToApproveScreen({Key key, @required this.onTaskChangesSeen})
+      : super(key: key);
+
   @override
-  _TasksToApproveScreenState createState() => _TasksToApproveScreenState();
+  _TasksToApproveScreenState createState() =>
+      _TasksToApproveScreenState(onTaskChangesSeen);
 }
 
 class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
+  final Function(State owner) onTaskChangesSeen;
+
+  _TasksToApproveScreenState(this.onTaskChangesSeen);
+
+  @override
+  void dispose() {
+    onTaskChangesSeen(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +38,8 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
             ToApproveTasksOfUserArguments(email: auth.currentUser.email));
     var _queryOptions = QueryOptions(
       fetchPolicy: FetchPolicy.cacheAndNetwork,
-      document: query.document, variables: query.getVariablesMap(),
+      document: query.document,
+      variables: query.getVariablesMap(),
     );
     return Query(
         options: _queryOptions,
@@ -52,7 +65,8 @@ class _TasksToApproveScreenState extends State<TasksToApproveScreen> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               children: ListTile.divideTiles(
                   context: context,
-                  tiles: tasks.map((task) => TaskToApprove(task, _queryOptions.asRequest))).toList(),
+                  tiles: tasks.map((task) =>
+                      TaskToApprove(task, _queryOptions.asRequest))).toList(),
             );
           }
         });

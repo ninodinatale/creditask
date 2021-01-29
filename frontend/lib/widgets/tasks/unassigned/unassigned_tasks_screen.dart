@@ -13,11 +13,25 @@ import '../../../graphql/api.dart';
 import '../../_shared/error_screen.dart';
 
 class UnassignedTasksScreen extends StatefulWidget {
+  final Function(State owner) onTaskChangesSeen;
+
+  const UnassignedTasksScreen({Key key, @required this.onTaskChangesSeen}) : super(key: key);
   @override
-  _UnassignedTasksScreenState createState() => _UnassignedTasksScreenState();
+  _UnassignedTasksScreenState createState() => _UnassignedTasksScreenState(onTaskChangesSeen);
 }
 
 class _UnassignedTasksScreenState extends State<UnassignedTasksScreen> {
+
+  final Function(State owner) onTaskChangesSeen;
+
+  _UnassignedTasksScreenState(this.onTaskChangesSeen);
+
+  @override
+  void dispose() {
+    onTaskChangesSeen(this);
+    super.dispose();
+  }
+
   List<Widget> getListTilesFor(List<SimpleTaskMixin> tasks,
       String title, bool overdue, ThemeData theme) {
     return [

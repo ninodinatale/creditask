@@ -47,6 +47,7 @@ mixin CurrentUserMixin {
   String id;
   String publicName;
   String email;
+  String groupId;
 }
 mixin DetailTaskMixin {
   @JsonKey(name: '__typename')
@@ -408,7 +409,7 @@ class TokenAuth$Mutation$TokenAuth$User with EquatableMixin, CurrentUserMixin {
       _$TokenAuth$Mutation$TokenAuth$UserFromJson(json);
 
   @override
-  List<Object> get props => [id, publicName, email];
+  List<Object> get props => [id, publicName, email, groupId];
   Map<String, dynamic> toJson() =>
       _$TokenAuth$Mutation$TokenAuth$UserToJson(this);
 }
@@ -830,6 +831,32 @@ class Error$Mutation with EquatableMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
+class DoneTasks$Query$Done with EquatableMixin, SimpleTaskMixin {
+  DoneTasks$Query$Done();
+
+  factory DoneTasks$Query$Done.fromJson(Map<String, dynamic> json) =>
+      _$DoneTasks$Query$DoneFromJson(json);
+
+  @override
+  List<Object> get props => [id, name, periodEnd, state, user];
+  Map<String, dynamic> toJson() => _$DoneTasks$Query$DoneToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class DoneTasks$Query with EquatableMixin {
+  DoneTasks$Query();
+
+  factory DoneTasks$Query.fromJson(Map<String, dynamic> json) =>
+      _$DoneTasks$QueryFromJson(json);
+
+  List<DoneTasks$Query$Done> done;
+
+  @override
+  List<Object> get props => [done];
+  Map<String, dynamic> toJson() => _$DoneTasks$QueryToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class UpdateGroceries$Mutation$UpdateGroceries$Groceries
     with EquatableMixin, GroceryMixin {
   UpdateGroceries$Mutation$UpdateGroceries$Groceries();
@@ -884,7 +911,7 @@ class VerifyToken$Mutation$VerifyToken$User
       _$VerifyToken$Mutation$VerifyToken$UserFromJson(json);
 
   @override
-  List<Object> get props => [id, publicName, email];
+  List<Object> get props => [id, publicName, email, groupId];
   Map<String, dynamic> toJson() =>
       _$VerifyToken$Mutation$VerifyToken$UserToJson(this);
 }
@@ -943,6 +970,51 @@ class Grocery$Query with EquatableMixin {
   @override
   List<Object> get props => [allNotInCart];
   Map<String, dynamic> toJson() => _$Grocery$QueryToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeleteGrocery$Mutation$DeleteGrocery$Grocery
+    with EquatableMixin, GroceryMixin {
+  DeleteGrocery$Mutation$DeleteGrocery$Grocery();
+
+  factory DeleteGrocery$Mutation$DeleteGrocery$Grocery.fromJson(
+          Map<String, dynamic> json) =>
+      _$DeleteGrocery$Mutation$DeleteGrocery$GroceryFromJson(json);
+
+  @override
+  List<Object> get props => [id, name, info, inCart, $$typename];
+  Map<String, dynamic> toJson() =>
+      _$DeleteGrocery$Mutation$DeleteGrocery$GroceryToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeleteGrocery$Mutation$DeleteGrocery with EquatableMixin {
+  DeleteGrocery$Mutation$DeleteGrocery();
+
+  factory DeleteGrocery$Mutation$DeleteGrocery.fromJson(
+          Map<String, dynamic> json) =>
+      _$DeleteGrocery$Mutation$DeleteGroceryFromJson(json);
+
+  DeleteGrocery$Mutation$DeleteGrocery$Grocery grocery;
+
+  @override
+  List<Object> get props => [grocery];
+  Map<String, dynamic> toJson() =>
+      _$DeleteGrocery$Mutation$DeleteGroceryToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeleteGrocery$Mutation with EquatableMixin {
+  DeleteGrocery$Mutation();
+
+  factory DeleteGrocery$Mutation.fromJson(Map<String, dynamic> json) =>
+      _$DeleteGrocery$MutationFromJson(json);
+
+  DeleteGrocery$Mutation$DeleteGrocery deleteGrocery;
+
+  @override
+  List<Object> get props => [deleteGrocery];
+  Map<String, dynamic> toJson() => _$DeleteGrocery$MutationToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -1066,77 +1138,6 @@ class Users$Query with EquatableMixin {
   @override
   List<Object> get props => [users];
   Map<String, dynamic> toJson() => _$Users$QueryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DoneTasks$Query$Done with EquatableMixin, SimpleTaskMixin {
-  DoneTasks$Query$Done();
-
-  factory DoneTasks$Query$Done.fromJson(Map<String, dynamic> json) =>
-      _$DoneTasks$Query$DoneFromJson(json);
-
-  @override
-  List<Object> get props => [id, name, periodEnd, state, user];
-  Map<String, dynamic> toJson() => _$DoneTasks$Query$DoneToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DoneTasks$Query with EquatableMixin {
-  DoneTasks$Query();
-
-  factory DoneTasks$Query.fromJson(Map<String, dynamic> json) =>
-      _$DoneTasks$QueryFromJson(json);
-
-  List<DoneTasks$Query$Done> done;
-
-  @override
-  List<Object> get props => [done];
-  Map<String, dynamic> toJson() => _$DoneTasks$QueryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DeleteGrocery$Mutation$DeleteGrocery$Grocery
-    with EquatableMixin, GroceryMixin {
-  DeleteGrocery$Mutation$DeleteGrocery$Grocery();
-
-  factory DeleteGrocery$Mutation$DeleteGrocery$Grocery.fromJson(
-          Map<String, dynamic> json) =>
-      _$DeleteGrocery$Mutation$DeleteGrocery$GroceryFromJson(json);
-
-  @override
-  List<Object> get props => [id, name, info, inCart, $$typename];
-  Map<String, dynamic> toJson() =>
-      _$DeleteGrocery$Mutation$DeleteGrocery$GroceryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DeleteGrocery$Mutation$DeleteGrocery with EquatableMixin {
-  DeleteGrocery$Mutation$DeleteGrocery();
-
-  factory DeleteGrocery$Mutation$DeleteGrocery.fromJson(
-          Map<String, dynamic> json) =>
-      _$DeleteGrocery$Mutation$DeleteGroceryFromJson(json);
-
-  DeleteGrocery$Mutation$DeleteGrocery$Grocery grocery;
-
-  @override
-  List<Object> get props => [grocery];
-  Map<String, dynamic> toJson() =>
-      _$DeleteGrocery$Mutation$DeleteGroceryToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DeleteGrocery$Mutation with EquatableMixin {
-  DeleteGrocery$Mutation();
-
-  factory DeleteGrocery$Mutation.fromJson(Map<String, dynamic> json) =>
-      _$DeleteGrocery$MutationFromJson(json);
-
-  DeleteGrocery$Mutation$DeleteGrocery deleteGrocery;
-
-  @override
-  List<Object> get props => [deleteGrocery];
-  Map<String, dynamic> toJson() => _$DeleteGrocery$MutationToJson(this);
 }
 
 enum CreditsCalc {
@@ -1917,6 +1918,12 @@ class TokenAuthMutation
               selectionSet: null),
           FieldNode(
               name: NameNode(value: 'email'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'groupId'),
               alias: null,
               arguments: [],
               directives: [],
@@ -2848,6 +2855,84 @@ class ErrorMutation extends GraphQLQuery<Error$Mutation, ErrorArguments> {
       Error$Mutation.fromJson(json);
 }
 
+class DoneTasksQuery extends GraphQLQuery<DoneTasks$Query, JsonSerializable> {
+  DoneTasksQuery();
+
+  @override
+  final DocumentNode document = DocumentNode(definitions: [
+    OperationDefinitionNode(
+        type: OperationType.query,
+        name: NameNode(value: 'doneTasks'),
+        variableDefinitions: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'done'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FragmentSpreadNode(
+                    name: NameNode(value: 'simpleTask'), directives: [])
+              ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'simpleTask'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'TaskType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'name'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'periodEnd'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'state'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'user'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FieldNode(
+                    name: NameNode(value: 'publicName'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: null)
+              ]))
+        ]))
+  ]);
+
+  @override
+  final String operationName = 'doneTasks';
+
+  @override
+  List<Object> get props => [document, operationName];
+  @override
+  DoneTasks$Query parse(Map<String, dynamic> json) =>
+      DoneTasks$Query.fromJson(json);
+}
+
 @JsonSerializable(explicitToJson: true)
 class UpdateGroceriesArguments extends JsonSerializable with EquatableMixin {
   UpdateGroceriesArguments({@required this.input});
@@ -3040,6 +3125,12 @@ class VerifyTokenMutation
               alias: null,
               arguments: [],
               directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'groupId'),
+              alias: null,
+              arguments: [],
+              directives: [],
               selectionSet: null)
         ]))
   ]);
@@ -3126,6 +3217,114 @@ class GroceryQuery extends GraphQLQuery<Grocery$Query, JsonSerializable> {
   @override
   Grocery$Query parse(Map<String, dynamic> json) =>
       Grocery$Query.fromJson(json);
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeleteGroceryArguments extends JsonSerializable with EquatableMixin {
+  DeleteGroceryArguments({@required this.id});
+
+  @override
+  factory DeleteGroceryArguments.fromJson(Map<String, dynamic> json) =>
+      _$DeleteGroceryArgumentsFromJson(json);
+
+  final String id;
+
+  @override
+  List<Object> get props => [id];
+  @override
+  Map<String, dynamic> toJson() => _$DeleteGroceryArgumentsToJson(this);
+}
+
+class DeleteGroceryMutation
+    extends GraphQLQuery<DeleteGrocery$Mutation, DeleteGroceryArguments> {
+  DeleteGroceryMutation({this.variables});
+
+  @override
+  final DocumentNode document = DocumentNode(definitions: [
+    OperationDefinitionNode(
+        type: OperationType.mutation,
+        name: NameNode(value: 'deleteGrocery'),
+        variableDefinitions: [
+          VariableDefinitionNode(
+              variable: VariableNode(name: NameNode(value: 'id')),
+              type: NamedTypeNode(name: NameNode(value: 'ID'), isNonNull: true),
+              defaultValue: DefaultValueNode(value: null),
+              directives: [])
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'deleteGrocery'),
+              alias: null,
+              arguments: [
+                ArgumentNode(
+                    name: NameNode(value: 'id'),
+                    value: VariableNode(name: NameNode(value: 'id')))
+              ],
+              directives: [],
+              selectionSet: SelectionSetNode(selections: [
+                FieldNode(
+                    name: NameNode(value: 'grocery'),
+                    alias: null,
+                    arguments: [],
+                    directives: [],
+                    selectionSet: SelectionSetNode(selections: [
+                      FragmentSpreadNode(
+                          name: NameNode(value: 'grocery'), directives: [])
+                    ]))
+              ]))
+        ])),
+    FragmentDefinitionNode(
+        name: NameNode(value: 'grocery'),
+        typeCondition: TypeConditionNode(
+            on: NamedTypeNode(
+                name: NameNode(value: 'GroceryType'), isNonNull: false)),
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+              name: NameNode(value: 'id'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'name'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'info'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: 'inCart'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null),
+          FieldNode(
+              name: NameNode(value: '__typename'),
+              alias: null,
+              arguments: [],
+              directives: [],
+              selectionSet: null)
+        ]))
+  ]);
+
+  @override
+  final String operationName = 'deleteGrocery';
+
+  @override
+  final DeleteGroceryArguments variables;
+
+  @override
+  List<Object> get props => [document, operationName, variables];
+  @override
+  DeleteGrocery$Mutation parse(Map<String, dynamic> json) =>
+      DeleteGrocery$Mutation.fromJson(json);
 }
 
 class UnassignedTasksQuery
@@ -3463,190 +3662,4 @@ class UsersQuery extends GraphQLQuery<Users$Query, JsonSerializable> {
   List<Object> get props => [document, operationName];
   @override
   Users$Query parse(Map<String, dynamic> json) => Users$Query.fromJson(json);
-}
-
-class DoneTasksQuery extends GraphQLQuery<DoneTasks$Query, JsonSerializable> {
-  DoneTasksQuery();
-
-  @override
-  final DocumentNode document = DocumentNode(definitions: [
-    OperationDefinitionNode(
-        type: OperationType.query,
-        name: NameNode(value: 'doneTasks'),
-        variableDefinitions: [],
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'done'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FragmentSpreadNode(
-                    name: NameNode(value: 'simpleTask'), directives: [])
-              ]))
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'simpleTask'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'TaskType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'id'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'name'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'periodEnd'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'state'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'user'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FieldNode(
-                    name: NameNode(value: 'publicName'),
-                    alias: null,
-                    arguments: [],
-                    directives: [],
-                    selectionSet: null)
-              ]))
-        ]))
-  ]);
-
-  @override
-  final String operationName = 'doneTasks';
-
-  @override
-  List<Object> get props => [document, operationName];
-  @override
-  DoneTasks$Query parse(Map<String, dynamic> json) =>
-      DoneTasks$Query.fromJson(json);
-}
-
-@JsonSerializable(explicitToJson: true)
-class DeleteGroceryArguments extends JsonSerializable with EquatableMixin {
-  DeleteGroceryArguments({@required this.id});
-
-  @override
-  factory DeleteGroceryArguments.fromJson(Map<String, dynamic> json) =>
-      _$DeleteGroceryArgumentsFromJson(json);
-
-  final String id;
-
-  @override
-  List<Object> get props => [id];
-  @override
-  Map<String, dynamic> toJson() => _$DeleteGroceryArgumentsToJson(this);
-}
-
-class DeleteGroceryMutation
-    extends GraphQLQuery<DeleteGrocery$Mutation, DeleteGroceryArguments> {
-  DeleteGroceryMutation({this.variables});
-
-  @override
-  final DocumentNode document = DocumentNode(definitions: [
-    OperationDefinitionNode(
-        type: OperationType.mutation,
-        name: NameNode(value: 'deleteGrocery'),
-        variableDefinitions: [
-          VariableDefinitionNode(
-              variable: VariableNode(name: NameNode(value: 'id')),
-              type: NamedTypeNode(name: NameNode(value: 'ID'), isNonNull: true),
-              defaultValue: DefaultValueNode(value: null),
-              directives: [])
-        ],
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'deleteGrocery'),
-              alias: null,
-              arguments: [
-                ArgumentNode(
-                    name: NameNode(value: 'id'),
-                    value: VariableNode(name: NameNode(value: 'id')))
-              ],
-              directives: [],
-              selectionSet: SelectionSetNode(selections: [
-                FieldNode(
-                    name: NameNode(value: 'grocery'),
-                    alias: null,
-                    arguments: [],
-                    directives: [],
-                    selectionSet: SelectionSetNode(selections: [
-                      FragmentSpreadNode(
-                          name: NameNode(value: 'grocery'), directives: [])
-                    ]))
-              ]))
-        ])),
-    FragmentDefinitionNode(
-        name: NameNode(value: 'grocery'),
-        typeCondition: TypeConditionNode(
-            on: NamedTypeNode(
-                name: NameNode(value: 'GroceryType'), isNonNull: false)),
-        directives: [],
-        selectionSet: SelectionSetNode(selections: [
-          FieldNode(
-              name: NameNode(value: 'id'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'name'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'info'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: 'inCart'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null),
-          FieldNode(
-              name: NameNode(value: '__typename'),
-              alias: null,
-              arguments: [],
-              directives: [],
-              selectionSet: null)
-        ]))
-  ]);
-
-  @override
-  final String operationName = 'deleteGrocery';
-
-  @override
-  final DeleteGroceryArguments variables;
-
-  @override
-  List<Object> get props => [document, operationName, variables];
-  @override
-  DeleteGrocery$Mutation parse(Map<String, dynamic> json) =>
-      DeleteGrocery$Mutation.fromJson(json);
 }

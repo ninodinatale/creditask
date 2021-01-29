@@ -34,6 +34,7 @@ enum CreditsCalc {
 
 type CurrentUserType {
   id: ID!
+  groupId: ID!
   email: String!
   publicName: String!
 }
@@ -100,6 +101,7 @@ type ObtainJSONWebToken {
 }
 
 type Query {
+  notify: String
   allNotInCart: [GroceryType!]!
   allInCart: [GroceryType!]!
   taskChanges(taskId: ID!): [TaskChangeType!]!

@@ -8,6 +8,7 @@ from django.utils.timezone import utc
 from creditask.models import Task, User, Approval, TaskState, TaskChange, \
     ApprovalState, ChangeableTaskProperty, CreditsCalc
 from creditask.validators import MinLenValidator
+from .push_notification_service import notify_group
 
 
 def get_task_by_id(task_id: int) -> Task:
@@ -71,6 +72,22 @@ def save_task(current_user: User, **kwargs) -> Task:
                                                     **kwargs)
 
         merge_values(task_to_update, current_user, **kwargs).save()
+
+        # TODO test
+        # TODO change this after merge_values has been split up
+        notify_group(
+            current_user_id=current_user.id,
+            group_id=current_user.group_id,
+            title=f'"Aufgabe" aktualisiert',
+            body=f'{current_user.public_name} hat die Aufgabe '
+                 f'"{task_to_update.name}" aktualisiert.',
+            payload=dict(
+                id=task_to_update.id,
+                state=task_to_update.state,
+                user=dict(id=task_to_update.user.id)
+                if task_to_update.user is not None else None
+            ))
+        # TODO test end
         return task_to_update
     else:
         # new task
@@ -118,6 +135,24 @@ def save_task(current_user: User, **kwargs) -> Task:
             Approval.objects.create(state=ApprovalState.NONE,
                                     task=task_to_save,
                                     user=user)
+
+        # TODO test
+        assignment_text = '. (Keine Zuweisung)' if task_to_save.user is None \
+            else f' und {task_to_save.user.public_name} zugewiesen.'
+        notify_group(
+            current_user_id=current_user.id,
+            group_id=current_user.group_id,
+            title=f'Neue Aufgabe',
+            body=f'{task_to_save.created_by.public_name} hat die Aufgabe '
+                 f'"{task_to_save.name}" erstellt{assignment_text}',
+            payload=dict(
+                id=task_to_save.id,
+                state=task_to_save.state.value,
+                user=dict(id=task_to_save.user.id)
+                if task_to_save.user is not None else None
+            ),
+        )
+        # TODO test end
         return task_to_save
 
 

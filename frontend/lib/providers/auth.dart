@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:creditask/graphql/api.dart';
 import 'package:creditask/providers/graphql.dart';
 import 'package:creditask/utils/jwt.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -19,6 +20,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    FirebaseMessaging.instance.unsubscribeFromTopic('user_${_currentUser.id}');
+    FirebaseMessaging.instance.unsubscribeFromTopic('group_${_currentUser.groupId}');
     _currentUser = null;
     _jwt = null;
     await deleteJwt();

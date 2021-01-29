@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
+from .base import BaseModel
 from .group import Group
 
 
@@ -38,7 +39,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     email = models.EmailField(unique=True, max_length=128)
     public_name: str = models.CharField(max_length=30)
     group: Group = models.ForeignKey(Group, null=True,

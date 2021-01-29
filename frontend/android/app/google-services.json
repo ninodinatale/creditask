@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "747267246615",
+    "firebase_url": "https://creditask-be464.firebaseio.com",
+    "project_id": "creditask-be464",
+    "storage_bucket": "creditask-be464.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747267246615:android:f02a887afcae8c31e72a52",
+        "android_client_info": {
+          "package_name": "io.dinatale.creditask"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747267246615-0e0jmja4v2qnrb44mnqd59s6rrjo539o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr1UZoQYkI8acoDoCdevJ4H3PgkAYTbNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747267246615-0e0jmja4v2qnrb44mnqd59s6rrjo539o.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "747267246615-l881dreqs3isfa6gkfsn416v17t9meq3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.dinatale.creditask"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

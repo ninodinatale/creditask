@@ -2,6 +2,7 @@ fragment currentUser on CurrentUserType {
     id
     publicName
     email
+    groupId
 }
 
 fragment simpleUser on UserType {

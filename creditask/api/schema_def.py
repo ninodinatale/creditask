@@ -5,12 +5,12 @@ import graphql_jwt
 
 from creditask.models import User, ApprovalState, TaskState, Approval, \
     Task, TaskChange, CreditsCalc, Grocery, Error
-from creditask.services import save_approval, \
-    get_todo_tasks_by_user_email, get_task_by_id, \
+from creditask.services import save_approval, get_todo_tasks_by_user_email, \
+    get_task_by_id, \
     get_to_approve_tasks_of_user, save_task, get_users, \
     get_other_users, get_task_changes_by_task_id, get_task_changes_by_task, \
-    get_task_approvals_by_task, \
-    get_unassigned_tasks, get_all_todo_tasks, get_all_not_in_cart, save_grocery, \
+    get_task_approvals_by_task, get_unassigned_tasks, get_all_todo_tasks, \
+    get_all_not_in_cart, save_grocery, \
     get_all_in_cart, save_error, get_done_tasks, delete_grocery
 from .scalars import custom_string, custom_float
 
@@ -27,6 +27,7 @@ class UserType(graphene_django.DjangoObjectType):
 
 class CurrentUserType(graphene.ObjectType):
     id = graphene.NonNull(graphene.ID)
+    group_id = graphene.NonNull(graphene.ID)
     email = graphene.NonNull(graphene.String)
     public_name = graphene.NonNull(graphene.String)
 
@@ -437,7 +438,8 @@ class Verify(graphene.Mutation, graphene.ObjectType):
         payload = graphql_jwt.utils.get_payload(token, info.context)
         return cls(user=User(id=payload.get('id'),
                              email=payload.get('email'),
-                             public_name=payload.get('publicName')))
+                             public_name=payload.get('publicName'),
+                             group_id=payload.get('groupId')))
 
     @staticmethod
     def resolve_user(parent: 'Verify', info: graphql.ResolveInfo):

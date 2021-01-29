@@ -15,12 +15,26 @@ import '../../../graphql/api.dart';
 import '../../_shared/error_screen.dart';
 
 class TasksToDoScreen extends StatefulWidget {
+  final Function(State owner) onTaskChangesSeen;
+
+  const TasksToDoScreen({Key key, @required this.onTaskChangesSeen}) : super(key: key);
+
   @override
-  _TasksToDoScreenState createState() => _TasksToDoScreenState();
+  _TasksToDoScreenState createState() => _TasksToDoScreenState(onTaskChangesSeen);
 }
 
 class _TasksToDoScreenState extends State<TasksToDoScreen> {
   Request _request;
+  final Function(State owner) onTaskChangesSeen;
+
+  _TasksToDoScreenState(this.onTaskChangesSeen);
+
+
+  @override
+  void dispose() {
+    onTaskChangesSeen(this);
+    super.dispose();
+  }
 
   List<Widget> getListTilesFor(List<UsersTodoTasks$Query$TodoTasksOfUser> tasks,
       String title, bool overdue, ThemeData theme) {
