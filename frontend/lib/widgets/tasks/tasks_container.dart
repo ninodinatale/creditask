@@ -25,7 +25,6 @@ class _TasksContainerState extends State<TasksContainer> {
   int _newToDoTasks = 0;
   int _newToApproveTasks = 0;
   int _newNotAssignedTasks = 0;
-  int _newOtherTasks = 0;
 
   StreamSubscription _sub;
 
@@ -50,25 +49,16 @@ class _TasksContainerState extends State<TasksContainer> {
     if (data['current_user_id'] != _authProvider.currentUser.id) {
       Map<String, dynamic> taskMap = json.decode(data['payload']);
       if (taskMap.containsKey('user') && taskMap['user'] != null) {
-        if (taskMap['user']['id'] == _authProvider.currentUser.id) {
-          if (taskMap['state'] !=
-              transformTaskStateString(TaskState.done.toString())) {
+        if (taskMap['user']['id'].toString() == _authProvider.currentUser.id) {
+          if (taskMap['state'] != getTaskStateJsonValueByTaskState(TaskState.done)) {
             setState(() {
               _newToDoTasks++;
-            });
-          } else {
-            setState(() {
-              _newOtherTasks++;
             });
           }
         } else {
           if (taskMap['state'] == TaskState.toApprove) {
             setState(() {
               _newToApproveTasks++;
-            });
-          } else {
-            setState(() {
-              _newOtherTasks++;
             });
           }
         }
@@ -179,17 +169,6 @@ class _TasksContainerState extends State<TasksContainer> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text('Andere', style: textStyle),
-                      if (_newOtherTasks > 0) Text(' ', style: textStyle),
-                      if (_newOtherTasks > 0)
-                        Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()..scale(0.6),
-                          child: Chip(
-                            label: Text(_newOtherTasks.toString(),
-                                style: chipTextStyle),
-                            backgroundColor: theme.colorScheme.onPrimary,
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -216,11 +195,7 @@ class _TasksContainerState extends State<TasksContainer> {
                   _newNotAssignedTasks = 0;
                 }),
               ),
-              OtherTasksScreen(
-                onTaskChangesSeen: _onTaskChangesSeen(() {
-                  _newOtherTasks = 0;
-                }),
-              ),
+              OtherTasksScreen(),
               CreditsScreen(),
             ],
           ),

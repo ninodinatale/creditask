@@ -17,6 +17,11 @@ String transformApprovalState(String approvalStateString) {
   }
 }
 
+String getTaskStateJsonValueByTaskState(TaskState taskState) {
+  final str = taskState.toString();
+  return str.substring(str.indexOf('.')).constantCase;
+}
+
 String transformTaskStateString(String taskStateStr) {
   return transformTaskState(TaskState.values.firstWhere((element) =>
       element.toString() ==

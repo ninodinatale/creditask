@@ -5,28 +5,20 @@ import 'package:flutter/material.dart';
 import 'all_to_do/all_to_do.dart';
 
 class OtherTasksScreen extends StatefulWidget {
-  final Function(State owner) onTaskChangesSeen;
 
-  const OtherTasksScreen({Key key, @required this.onTaskChangesSeen})
+  const OtherTasksScreen({Key key})
       : super(key: key);
 
   @override
   _OtherTasksScreenState createState() =>
-      _OtherTasksScreenState(onTaskChangesSeen);
+      _OtherTasksScreenState();
 }
 
 class _OtherTasksScreenState extends State<OtherTasksScreen> {
-  final Function(State owner) onTaskChangesSeen;
   final List<String> _dropdownValues = ['Alle offenen', 'Alle gemachten'];
   int _currentIndex = 0;
 
-  _OtherTasksScreenState(this.onTaskChangesSeen);
-
-  @override
-  void dispose() {
-    onTaskChangesSeen(this);
-    super.dispose();
-  }
+  _OtherTasksScreenState();
 
   @override
   Widget build(BuildContext context) {

@@ -78,7 +78,7 @@ def save_task(current_user: User, **kwargs) -> Task:
         notify_group(
             current_user_id=current_user.id,
             group_id=current_user.group_id,
-            title=f'"Aufgabe" aktualisiert',
+            title=f'Aufgabe "{task_to_update.name}" aktualisiert',
             body=f'{current_user.public_name} hat die Aufgabe '
                  f'"{task_to_update.name}" aktualisiert.',
             payload=dict(
